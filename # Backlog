@@ -1,0 +1,39 @@
+# Backlog
+
+## 🆕 Neu (diese Woche)
+
+- [] Personen oder events können nicht zwischen bestehenden Personen oder evbents gezogen werden. Dass soll möglich gemacht werden indem beim hoch runter ziehen elemente auch zwischen bestehende element möglich sind. Versuche das so zu bauen dass die integritiet einzlenen personen n ereignisse nie kaputt sein kann. Bsp eine Perso hat ein eingetragenes event. Dann ist in der gleichen zeile noch drei weiter personen was dazu führen kann das zwishcen dem Event und dem Namen eine leere zeile ist und der rahmen unnötig lang  ist
+- [] Bitte zeige beim Hoover den titel des ereignisses und des Events
+
+
+## 📋 Geplant
+- [ ]
+
+## ✅ Erledigt
+- [x] Ereignis-Layout: Rahmen nur so breit wie der Personen-/Event-Balken; Ereignisse überschreiten ihn nie (Stufen: normal → kleinere Schrift → nur Markierung mit Hover-Tooltip)
+- [x] zommen und skrollen auf dem Trackpad führen beide dazu dass in dem Tool herausgezoomt wird. Ich möchte dass auf dem mac  die geste des zoomens auch als geste des zoomens verstande wird. Zwei finger links rechts soll ddie Timeline nach links rechts verschieben und zwei finger hoch runter soll die timeline nach oben und untern verschieben
+- [x] Zeitpunkt-Ereignisse: lange Labels kappen (max-width + Ellipsis) statt Kasten verlängern, wie bei Personen
+- [x] Zeitpunkt-Ereignisse: SVG-Pfeil-Marker auf dem Datum (ragt heraus) statt schwachem Balken
+- [x] Zeitpunkt-Ereignisse klappen bei Überlauf der Lebenszeit nach links (Rahmen bleibt bündig)
+- [x] Unterkategorien im Dialog als geordnete Chips (erste = primär · Farbe, per ▲▼ umsortierbar) + Live-Farbfeld
+- [x] Zeitpunkt-Ereignisse: linke Kante = Startdatum (align:'left') mit Kanten-Marker, statt mittig
+- [x] Filterabhängige Einfärbung: `getEntryColor()` mit Prioritätskette (primäre/sekundäre Unterkategorie → Kategorie → Fallback)
+- [x] Rahmen bündig um den Eintrag (kein Überstand links/rechts, vertikal zentriert)
+- [x] Grauen Trennbalken über der ersten Personen-Zeile entfernt
+- [x] Weiße Endkappen an Zeitraum-Ereignissen entfernt (clean)
+- [x] Enddatum-Option „läuft bis heute" (Ende reicht bis zur Gegenwart)
+- [x] Beschriftungen mittig + eckigere Formen; rote „Jetzt"-Linie entfernt
+- [x] Deutlich weiter rauszoomen (zoomMax ~100.000 Jahre)
+- [x] Ereignisse verhalten sich wie Personen: Sub-Ereignisse innerhalb eines Rahmens (Ereignis als Container)
+- [x] Dropdown „Gehört zu": Ereignisse mit Sub-Ereignissen anreichern (Person oder Ereignis als Eltern)
+- [x] „Gehört zu"-Dropdown übersichtlicher: nach Kategorie gruppiert, alphabetisch sortiert (Person=Nachname, Ereignis=Titel)
+- [x] Farben auch für Unterkategorien einzeln festlegbar
+- [x] Bug: Ereignisse ohne Unterkategorie wurden beim Unterkategorie-Filter immer angezeigt
+- [x] Heller Balken über der ersten Ereignis-Reihe entfernt
+- [x] „Personen"-Beschriftung + dickerer Trennstrich zwischen Ereignissen und Personen
+- [x] Event mit Start **und** Ende: beide Seiten eckig; nur Start: rechte Seite rund + subtiler vertikaler Strich rechts
+- [x] Quellen-Maske kontextuell je Art (Buch / Paper / Artikel / Webseite / Sonstiges) mit passenden Feldern
+- [x] Autoren: Vor- und Nachname getrennt
+- [x] Quellen-Auswahl als Dropdown, sortiert nach Autor-Nachnamen
+- [x] Quellen-Anzeige im Format „Nachname, Vorname – Titel"
+- [x] Datum: Jahr Pflicht, Monat und Tag optional
