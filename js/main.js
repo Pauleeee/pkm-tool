@@ -23,6 +23,7 @@ init();
 async function init() {
   const loaded = await store.load();
   data = normalize(loaded || model.seedData());
+  const repaired = enforceLaneIntegrity();
   detailPanel = document.getElementById('detail-panel');
 
   timelineView = new TimelineView(document.getElementById('timeline'), {
@@ -44,7 +45,7 @@ async function init() {
   filterBar.setData(data);
   render();
   timelineView.fit();
-  if (!loaded) persist();
+  if (!loaded || repaired) persist();
 }
 
 // ---------- Rendern & Speichern ----------
@@ -143,6 +144,27 @@ function fitLane(item) {
     if (!list.filter((p) => (p.lane || 0) === lane).some((p) => overlaps(p, item))) return lane;
   }
   return (lanes.length ? lanes[lanes.length - 1] + 1 : 0);
+}
+
+// Zeilen-Integrität herstellen (beim Laden/Import): zeitlich überlappende Einträge
+// dürfen sich keine Zeile teilen — Überlapper wandern in eigene Zwischenzeilen.
+function enforceLaneIntegrity() {
+  let changed = false;
+  for (const list of [model.persons(data), model.worldEvents(data)]) {
+    const lanes = [...new Set(list.map((p) => p.lane || 0))].sort((a, b) => a - b);
+    for (const lane of lanes) {
+      const inLane = list.filter((p) => (p.lane || 0) === lane)
+        .sort((a, b) => +model.toDate(a.start, 'start') - +model.toDate(b.start, 'start'));
+      const kept = [], moved = [];
+      for (const p of inLane) (kept.some((k) => overlaps(k, p)) ? moved : kept).push(p);
+      moved.forEach((p, i) => { p.lane = lane + (i + 1) / (moved.length + 1); });
+      if (moved.length) changed = true;
+    }
+    const before = list.map((p) => p.lane);
+    normalizeLanes(list);
+    if (!changed) changed = list.some((p, i) => p.lane !== before[i]);
+  }
+  return changed;
 }
 
 // Zeilen-Werte einer Liste auf 0..N normalisieren.
@@ -271,7 +293,7 @@ function wireToolbar() {
   document.getElementById('btn-import').addEventListener('click', () => fileInput.click());
   fileInput.addEventListener('change', async () => {
     const file = fileInput.files[0]; if (!file) return;
-    try { data = normalize(await importJson(file)); selectedItemId = null; refreshAll(); timelineView.fit(); }
+    try { data = normalize(await importJson(file)); enforceLaneIntegrity(); selectedItemId = null; refreshAll(); timelineView.fit(); }
     catch (err) { alert('Datei konnte nicht gelesen werden: ' + err.message); }
     fileInput.value = '';
   });

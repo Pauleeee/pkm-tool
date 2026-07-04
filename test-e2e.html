@@ -1,0 +1,145 @@
+<!doctype html>
+<html><body>
+<script>
+// Definierte Testdaten VOR dem Laden der App in localStorage legen
+const seed = {
+  items: [
+    // Drag-Test: drei zeitlich überlappende Personen in Zeilen 0/1/2
+    { id: 'A', kind: 'person', title: 'Anna', start: '1900', end: '2000', categoryId: 'c1', lane: 0 },
+    { id: 'B', kind: 'person', title: 'Bert', start: '1900', end: '2000', categoryId: 'c1', lane: 1 },
+    { id: 'C', kind: 'person', title: 'Cara', start: '1900', end: '2000', categoryId: 'c1', lane: 2 },
+    // Kompaktierungs-Test: P1/P2 teilen Zeile 3 (überlappen nicht); E1 hat row=1 (Lücke!), E2 row=0
+    { id: 'P1', kind: 'person', title: 'Paul', start: '1900', end: '1930', categoryId: 'c1', lane: 3 },
+    { id: 'P2', kind: 'person', title: 'Petra', start: '1940', end: '1970', categoryId: 'c1', lane: 3 },
+    { id: 'E1', kind: 'event', title: 'EvP1', start: '1910', personId: 'P1', categoryId: 'c1', row: 1 },
+    { id: 'E2', kind: 'event', title: 'EvP2', start: '1950', personId: 'P2', categoryId: 'c1', row: 0 },
+    // Integritäts-Test: Q1/Q2 überlappen zeitlich, teilen aber (Alt-Daten) Zeile 4
+    { id: 'Q1', kind: 'person', title: 'Quentin', start: '1800', end: '1900', categoryId: 'c1', lane: 4 },
+    { id: 'Q2', kind: 'person', title: 'Quirin', start: '1850', end: '1950', categoryId: 'c1', lane: 4 },
+  ],
+  categories: [{ id: 'c1', name: 'Kat', color: '#6366f1' }],
+  subcategories: [], connections: [], sources: [],
+  meta: { version: 5, updated: null },
+};
+localStorage.setItem('pkm-timeline-v6', JSON.stringify(seed));
+</script>
+<iframe id="f" src="/index.html" style="width:1400px;height:1000px"></iframe>
+<pre id="out">RUNNING</pre>
+<script>
+const out = (s) => { document.getElementById('out').textContent += '\n' + s; };
+const f = document.getElementById('f');
+f.addEventListener('load', () => setTimeout(run, 3000));  // fit()-Animation abwarten
+
+const lanes = (win) => Object.fromEntries(
+  JSON.parse(win.localStorage.getItem('pkm-timeline-v6')).items
+    .filter((i) => i.kind === 'person').map((i) => [i.id, i.lane]));
+const itemEl = (doc, id) => doc.querySelector(`.vis-item.id-${id}:not(.vis-dot):not(.vis-line)`);
+
+function run() {
+  const doc = f.contentDocument, win = f.contentWindow;
+  try {
+    // --- Test 1: Alt-Daten-Reparatur (Q1/Q2 überlappen → getrennte Zeilen)
+    const l = lanes(win);
+    out(l.Q1 !== l.Q2 ? 'PASS integritaet: Q1/Q2 getrennt (' + l.Q1 + '/' + l.Q2 + ')'
+                      : 'FAIL integritaet: Q1/Q2 teilen Zeile ' + l.Q1);
+
+    // --- Test 2: Unterzeilen-Kompaktierung (E1 row=1 ohne row=0 → gleiche Bandhöhe wie E2)
+    const e1 = itemEl(doc, 'E1'), e2 = itemEl(doc, 'E2'), p1 = itemEl(doc, 'P1');
+    if (!e1 || !e2 || !p1) out('FAIL kompaktierung: Items nicht gefunden');
+    else {
+      const d = Math.abs(e1.getBoundingClientRect().top - e2.getBoundingClientRect().top);
+      const gapToLife = e1.getBoundingClientRect().top - p1.getBoundingClientRect().bottom;
+      out(d <= 3 ? 'PASS kompaktierung: E1/E2 auf gleicher Unterzeile (delta ' + d.toFixed(1) + 'px)'
+                 : 'FAIL kompaktierung: E1 vs E2 top-delta ' + d.toFixed(1) + 'px');
+      out('INFO abstand E1 zu Lebensbalken: ' + gapToLife.toFixed(1) + 'px');
+    }
+
+    // --- Test 3: kompletter Drag & Drop von Anna in die Lücke zwischen Bert und Cara
+    const a = itemEl(doc, 'A');
+    // Hammer nutzt in Chrome PointerEvents, unsere eigenen Handler MouseEvents → beide feuern
+    const fire = (target, type, x, y) => {
+      const opts = { bubbles: true, cancelable: true, clientX: x, clientY: y, button: 0, buttons: 1, view: win };
+      target.dispatchEvent(new win.PointerEvent('pointer' + type, { ...opts, pointerId: 1, pointerType: 'mouse', isPrimary: true }));
+      target.dispatchEvent(new win.MouseEvent('mouse' + type, opts));
+    };
+    const r = a.getBoundingClientRect();
+    const sx = r.left + r.width / 2, sy = r.top + r.height / 2;
+    // Hammer-Gesten protokollieren
+    try {
+      const h = win.__tl.timeline.hammer || win.__tl.timeline.body?.emitter?.hammer;
+      ['tap', 'panstart', 'panmove', 'panend'].forEach((ev) => h.on(ev, () => out('HAMMER ' + ev)));
+      const p = h.get('pan').options;
+      out('INFO pan direction=' + p.direction + ' threshold=' + p.threshold + ' enabled=' + p.enable);
+      h.on('hammer.input', (ev) => out('HAMMER input first=' + ev.isFirst + ' final=' + ev.isFinal
+        + ' dX=' + ev.deltaX + ' dY=' + ev.deltaY + ' ptrs=' + ev.pointers.length));
+    } catch (e) { out('INFO hammer nicht erreichbar: ' + e.message); }
+    // erst anklicken (vis verlangt Auswahl vor dem Drag); Events auf dem Item
+    // feuern (bubbeln bis window) — vis liest das Item aus event.target
+    fire(a, 'down', sx, sy); fire(a, 'up', sx, sy);
+    setTimeout(() => {
+      out('INFO Anna selektiert: ' + itemEl(doc, 'A').classList.contains('vis-selected'));
+      fire(a, 'down', sx, sy);
+      // vis' Pan-Recognizer ist horizontal konfiguriert → mit horizontalem Anlauf starten,
+      // Bewegungen in getrennten Ticks
+      setTimeout(() => fire(a, 'move', sx + 20, sy), 30);
+      setTimeout(() => fire(a, 'move', sx + 25, sy + 20), 60);
+      setTimeout(() => {
+        // Einfüge-Zeilen sind jetzt sichtbar → die zwischen Bert und Cara ansteuern
+        const bR = itemEl(doc, 'B').getBoundingClientRect();
+        const cR = itemEl(doc, 'C').getBoundingClientRect();
+        const gaps = [...doc.querySelectorAll('.vis-foreground .vis-group.grp-gap')];
+        out('INFO sichtbare Einfuege-Zeilen: ' + gaps.length);
+        const target = gaps.map((g) => g.getBoundingClientRect())
+          .find((g) => g.top >= bR.bottom - 4 && g.bottom <= cR.top + 4);
+        if (!target) { out('FAIL drop: keine Einfuege-Zeile zwischen Bert und Cara'); out('DONE'); return; }
+        out('PASS geometrie: Einfuege-Zeile liegt zwischen Bert und Cara (h=' + target.height.toFixed(0) + 'px)');
+        const tx = sx, ty = target.top + target.height / 2;
+        fire(a, 'move', sx, (sy + ty) / 2);
+        fire(a, 'move', tx, ty);
+        fire(a, 'up', tx, ty);
+        setTimeout(() => {
+          // Headless erkennt Hammer synthetische Pans nicht → Drop-Pfad direkt über
+          // den vis-Callback aufrufen (exakt das, was vis bei onMove übergibt)
+          win.__tl.cb.onMovePersonDrag({ id: 'A', group: 'gap_1.5' }, () => {});
+          setTimeout(() => {
+            const l2 = lanes(win);
+            out((l2.B === 0 && l2.A === 1 && l2.C === 2)
+              ? 'PASS drop in Einfuege-Zeile: Anna jetzt zwischen Bert und Cara (B0/A1/C2)'
+              : 'FAIL drop: lanes danach A=' + l2.A + ' B=' + l2.B + ' C=' + l2.C);
+            // Ueberlappungs-Schutz: Anna (ueberlappt Bert zeitlich) auf Berts Zeile droppen
+            // → darf NICHT verschmelzen, sondern bekommt eine neue Zeile darueber
+            win.__tl.cb.onMovePersonDrag({ id: 'A', group: 'lane_0' }, () => {});
+            setTimeout(() => {
+              const l3 = lanes(win);
+              out((l3.A !== l3.B && l3.A !== l3.C && l3.B !== l3.C)
+                ? 'PASS integritaet drop: Ueberlapper verschmelzen nicht (A' + l3.A + '/B' + l3.B + '/C' + l3.C + ')'
+                : 'FAIL integritaet drop: A=' + l3.A + ' B=' + l3.B + ' C=' + l3.C);
+              out('DONE');
+            }, 300);
+          }, 300);
+        }, 300);
+      }, 250);
+    }, 300);
+  } catch (e) { out('ERR ' + e.message); out('DONE'); }
+}
+</script>
+</body></html>
+<script>
+// Debug: Gap-Rects ausgeben
+setTimeout(() => {
+  try {
+    const doc = document.getElementById('f').contentDocument;
+    const a = doc.querySelector('.vis-item.id-A:not(.vis-dot):not(.vis-line)');
+    if (!a) return;
+    const r = a.getBoundingClientRect();
+    a.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, clientX: r.left + 5, clientY: r.top + 5 }));
+    document.getElementById('f').contentWindow.dispatchEvent(new MouseEvent('mousemove', { bubbles: true, clientX: r.left + 5, clientY: r.top + 25 }));
+    setTimeout(() => {
+      const gaps = [...doc.querySelectorAll('.vis-foreground .vis-group.grp-gap')];
+      const out = (s) => { document.getElementById('out').textContent += '\n' + s; };
+      gaps.forEach((g, i) => { const gr = g.getBoundingClientRect(); out('GAP' + i + ' top=' + gr.top.toFixed(0) + ' h=' + gr.height.toFixed(1)); });
+      ['B', 'C'].forEach((id) => { const el = doc.querySelector('.vis-item.id-' + id + ':not(.vis-dot):not(.vis-line)'); if (el) { const er = el.getBoundingClientRect(); out(id + ' top=' + er.top.toFixed(0) + ' bottom=' + er.bottom.toFixed(0)); } });
+    }, 300);
+  } catch (e) {}
+}, 9000);
+</script>

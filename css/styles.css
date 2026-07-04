@@ -140,9 +140,16 @@ body { display: flex; flex-direction: column; }
   background:
     repeating-linear-gradient(90deg, var(--accent) 0 8px, transparent 8px 16px)
     center / 100% 2px no-repeat,
-    rgba(90, 120, 255, .05);
+    rgba(99, 102, 241, .06);
 }
 .vis-label.grp-gap .vis-inner { padding: 0; min-width: 34px; }
+/* Platzhalter-Item: gibt der Gap-Zeile ihre Höhe (leere vis-Gruppen wären 0px hoch),
+   bleibt aber unsichtbar und nicht klickbar */
+.vis-item.pkm-gap-spacer {
+  height: 10px; background: transparent; border: none;
+  box-shadow: none; pointer-events: none;
+}
+.vis-item.pkm-gap-spacer .vis-item-content { padding: 0; font-size: 0; }
 
 /* Lebensspanne-Balken: Name (+ Jahre) direkt im Balken */
 .vis-item.pkm-life { border-radius: 5px; }

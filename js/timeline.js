@@ -61,6 +61,7 @@ export class TimelineView {
 
     this._bindWheel();
     this._bindGapDrag();
+    window.__tl = this;  // DEBUG
   }
 
   // Beim vertikalen Ziehen (Person / Welt-Ereignis) dünne „Einfüge-Zeilen"
@@ -93,25 +94,41 @@ export class TimelineView {
 
   // Gap-Gruppen-ID trägt die Ziel-Halb-Lane direkt im Namen (gap_<x> / egap_<x>),
   // x liegt strikt zwischen den (ganzzahligen) Lane-Werten der Nachbarzeilen.
+  // WICHTIG: leere Gruppen bekommen von vis Höhe 0 → jede Gap-Gruppe braucht ein
+  // unsichtbares Platzhalter-Item (pkm-gap-spacer), damit die Zeile sichtbar/treffbar ist.
   _showGaps(area) {
     if (this._gapsArea === area) return;
     this._hideGaps();
-    const groups = [];
+    const w = this.timeline.getWindow();
+    const span = w.end - w.start;
+    const s = new Date(w.start.getTime() - 2 * span), e = new Date(w.end.getTime() + 2 * span);
+    const groups = [], spacers = [];
     const mk = (vals, prefix, orderBase, cls) => {
       if (!vals.length) return;
       const xs = [vals[0] - 0.5];
       for (let i = 1; i <= vals.length; i++) xs.push(vals[i - 1] + 0.5);
-      for (const x of xs) groups.push({
-        id: prefix + x, order: orderBase + x, className: cls, content: '', subgroupStack: false,
-      });
+      for (const x of xs) {
+        const id = prefix + x;
+        groups.push({ id, order: orderBase + x, className: cls, content: '', subgroupStack: false });
+        spacers.push({
+          id: 'gapspacer_' + id, group: id, start: s, end: e, type: 'range',
+          content: '', className: 'pkm-gap-spacer', editable: false, selectable: false,
+        });
+      }
     };
     if (area === 'person') mk(this._laneVals || [], 'gap_', 0, 'grp-gap');
     else mk(this._eLaneVals || [], 'egap_', -100000, 'grp-gap');
-    if (groups.length) { this.groupsDS.add(groups); this._gapsArea = area; }
+    if (groups.length) {
+      this.groupsDS.add(groups);
+      this.itemsDS.add(spacers);
+      this._gapsArea = area;
+    }
   }
 
   _hideGaps() {
     if (!this._gapsArea) return;
+    const itemIds = this.itemsDS.getIds().filter((id) => String(id).startsWith('gapspacer_'));
+    if (itemIds.length) this.itemsDS.remove(itemIds);
     const ids = this.groupsDS.getIds().filter((id) => /^e?gap_/.test(String(id)));
     if (ids.length) this.groupsDS.remove(ids);
     this._gapsArea = null;
