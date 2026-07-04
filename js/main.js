@@ -22,7 +22,7 @@ init();
 
 async function init() {
   const loaded = await store.load();
-  data = normalize(loaded || model.seedData());
+  data = normalize(loaded || (await loadDefaultData()));
   const repaired = enforceLaneIntegrity();
   detailPanel = document.getElementById('detail-panel');
 
@@ -46,6 +46,19 @@ async function init() {
   render();
   timelineView.fit();
   if (!loaded || repaired) persist();
+}
+
+// Default-Daten: erst data/sample.json versuchen, sonst eingebaute Seed-Daten
+// (Fallback z. B. bei file://-Aufruf ohne Server).
+async function loadDefaultData() {
+  try {
+    const res = await fetch('data/sample.json', { cache: 'no-cache' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    console.warn('data/sample.json nicht ladbar, nutze Seed-Daten:', err);
+    return model.seedData();
+  }
 }
 
 // ---------- Rendern & Speichern ----------
