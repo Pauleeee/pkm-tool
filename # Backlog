@@ -2,6 +2,14 @@
 
 ## 🆕 Neu (diese Woche)
 
+- [ ] A1 Suche: Suchfeld in der Filterleiste (Titel/Notiz/Quelle), Trefferliste, Klick/Enter springt zum Eintrag; ausgefilterte Treffer ausgegraut
+- [ ] A2 Filter: „Zurücksetzen"-Button + Zähler „X / Y sichtbar" in der Filterleiste
+- [ ] A3 Undo: Snapshot vor jeder Lösch-Aktion (Eintrag/Verbindung/Kategorie/Quelle/Import), Toast mit „Rückgängig", Cmd/Ctrl+Z; Bugfix: Kategorie-Löschen bereinigt auch subcategoryIds
+- [ ] A4 Modals: Inline-Fehlertext statt alert(), Enter speichert
+- [ ] A5 Tastatur-Shortcuts: n = neuer Eintrag, f = Einpassen, / = Suche
+- [ ] A6 Hilfe-Dialog (?-Button): Legende, Gesten, Filter-Semantik, Shortcuts; Wording vereinheitlicht, toter era-Code raus
+- [ ] B1 Mehrere Quellen pro Eintrag (refs: Quelle + Seiten + Zitat), Migration von sourceId, Detailpanel/Filter/Tooltip angepasst
+- [ ] B2 Markdown-light im Notizfeld (fett/kursiv/Code/Links/Listen), gerendert im Detailpanel
 
 ## 📋 Geplant
 - [ ]
