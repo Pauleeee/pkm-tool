@@ -77,10 +77,22 @@ function isTyping(t) { return !!t && (t.tagName === 'INPUT' || t.tagName === 'TE
 
 function wireShortcuts() {
   document.addEventListener('keydown', (e) => {
+    if (modalOpen() || isTyping(e.target)) return;
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z') {
-      if (modalOpen() || isTyping(e.target)) return;
       e.preventDefault();
       undo();
+      return;
+    }
+    if (e.metaKey || e.ctrlKey || e.altKey) return;   // Browser-Shortcuts nicht kapern
+    if (e.key === 'n') {
+      e.preventDefault();
+      ui.openItemModal(data, null, { onSave: upsertItem, onDelete: deleteItem });
+    } else if (e.key === 'f') {
+      e.preventDefault();
+      timelineView.fit();
+    } else if (e.key === '/') {
+      e.preventDefault();
+      filterBar.focusSearch();
     }
   });
 }
