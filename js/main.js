@@ -1,12 +1,12 @@
 // Bootstrap & Steuerung: hält den App-Zustand, verdrahtet Toolbar, Timeline,
 // Overlay (Verbindungen), Filter und Modals; speichert nach jeder Änderung.
 
-import { LocalStorageStore, exportJson, importJson } from './store.js?v=17';
-import * as model from './model.js?v=17';
-import { TimelineView } from './timeline.js?v=17';
-import { OverlayLayer } from './connections.js?v=17';
-import { FilterBar } from './filters.js?v=17';
-import * as ui from './ui.js?v=17';
+import { LocalStorageStore, exportJson, importJson } from './store.js?v=18';
+import * as model from './model.js?v=18';
+import { TimelineView } from './timeline.js?v=18';
+import { OverlayLayer } from './connections.js?v=18';
+import { FilterBar } from './filters.js?v=18';
+import * as ui from './ui.js?v=18';
 
 const store = new LocalStorageStore();
 
@@ -114,10 +114,13 @@ function editItem(id) { ui.openItemModal(data, model.byId(data.items, realId(id)
 function upsertItem(values) {
   const existing = values.id ? model.byId(data.items, values.id) : null;
   if (existing) {
+    const parentChanged = values.personId !== undefined && values.personId !== existing.personId;
     Object.assign(existing, values);
+    if (parentChanged && existing.kind === 'event' && existing.personId) existing.row = fitRow(existing);
   } else {
     const item = model.makeItem(values);
     if (item.kind === 'person' || (item.kind === 'event' && !item.personId)) item.lane = fitLane(item);
+    else if (item.kind === 'event' && item.personId) item.row = fitRow(item);
     data.items.push(item);
     selectedItemId = item.id;
   }
@@ -147,6 +150,19 @@ function overlaps(a, b) {
 // Würde `item` in Zeile `lane` einen Geschwister-Eintrag zeitlich überschneiden?
 function laneClash(item, lane) {
   return laneSiblings(item).some((s) => s.id !== item.id && (s.lane || 0) === lane && overlaps(s, item));
+}
+
+// Freie Unterzeile im Container für ein Kind-Ereignis finden (keine zeitliche
+// Überschneidung mit Geschwister-Ereignissen), sonst neue. Nötig, weil vis mit
+// stack:false nicht mehr selbst stapelt — Überlapper in derselben Unterzeile
+// würden übereinander gezeichnet.
+function fitRow(item) {
+  const sibs = data.items.filter((e) => e.kind === 'event' && e.personId === item.personId && e.id !== item.id);
+  const rows = [...new Set(sibs.map((e) => e.row || 0))].sort((a, b) => a - b);
+  for (const r of rows) {
+    if (!sibs.filter((e) => (e.row || 0) === r).some((e) => overlaps(e, item))) return r;
+  }
+  return rows.length ? rows[rows.length - 1] + 1 : 0;
 }
 
 // Freie Zeile für einen neuen Eintrag finden (keine zeitliche Überschneidung), sonst neue.

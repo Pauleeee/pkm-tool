@@ -7,7 +7,7 @@
 //      wählt eine Layout-Stufe: normal → kleinere Schrift → nur Markierung
 //      (Tooltip zeigt das Ereignis), jeweils links- oder rechtsbündig am Datum.
 
-import { persons, worldEvents, eventsOf, getEntryColor, rgba } from './model.js?v=17';
+import { persons, worldEvents, eventsOf, getEntryColor, rgba } from './model.js?v=18';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 

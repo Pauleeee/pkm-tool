@@ -3,7 +3,7 @@
 // Ausblenden versteckt die zugehörigen Einträge (eine ausgeblendete Person
 // versteckt auch ihre Ereignisse).
 
-import { subcatColor, sortedSources, sourceLabel } from './model.js?v=17';
+import { subcatColor, sortedSources, sourceLabel } from './model.js?v=18';
 
 export class FilterBar {
   constructor(el, cb) {

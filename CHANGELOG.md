@@ -3,6 +3,30 @@
 Entwicklungs-Protokoll der Zeitleiste-App (rekonstruiert aus der Entwicklungs-Session,
 neueste Änderungen oben). Datumsangaben grob; die App ist noch in aktiver Entwicklung.
 
+## Drag & Drop repariert, Zeilen-Integrität, Tooltip mit Datum (2026-07-05)
+- **Drag & Drop funktioniert jetzt wirklich** — drei Ursachen behoben:
+  1. vis startet einen Item-Drag nur auf **vorher selektierten** Items → Ziehen ging erst nach
+     einem Extra-Klick. Jetzt `itemsAlwaysDraggable: { item: true }` → anfassen und ziehen.
+  2. Die Einfüge-Zeilen (`_bindGapDrag`) hörten auf **Maus-Events** — vis/Hammer ruft aber auf
+     `pointerdown` `preventDefault` auf, wodurch die Kompatibilitäts-Mausevents während eines
+     Drags nie feuern. Umgestellt auf **Pointer-Events** (`pointerdown/-move/-up/-cancel`).
+  3. **vis-Stacking abgeschaltet** (`stack:false`): vis stapelte Lebensbalken derselben Zeile
+     schon bei Pixel-Nähe (`margin.item.horizontal` zählt als Kollision) und mit
+     Konvergenz-Fehlern (Subgruppen-Offsets blieben auf veralteten Höhen hängen) → Personen
+     einer Zeile landeten auf zwei Ebenen, mit **leerer Zwischenzeile** zwischen Name und
+     Ereignis und unnötig hohem Rahmen. Der `nostack`-Pfad ist deterministisch: jede Subgruppe
+     (Lebensbalken / Unterzeile) ist genau eine Ebene.
+- **Integrität statt vis-Automatik:** Überlappungsfreiheit ist jetzt komplett zeitbasiert in
+  eigener Hand — Zeilen über `fitLane`/`laneClash`/`enforceLaneIntegrity` (wie gehabt), NEU
+  `fitRow` in main.js: neue Kind-Ereignisse (und Kinder, deren Eltern-Container wechselt)
+  bekommen automatisch die erste freie **Unterzeile** ohne zeitliche Überschneidung.
+- **Tooltip:** Ereignis-Tooltips zeigen jetzt zusätzlich das **Datum** (`fmtDate`, bei
+  Zeiträumen „Start – Ende", `now` → „heute"); Titel/Container/Beschreibung/Quelle wie gehabt.
+- Verifiziert per Headless-Chrome-Test: keine Leer-Zeilen mehr (Abstand Name→Ereignis 10px bei
+  4 Personen in einer Zeile), Einfüge-Zeilen erscheinen beim Ziehen, Drop auf Gap = neue Zeile,
+  Drop auf Zeile mit Zeit-Clash = automatische Zwischenzeile, Beispieldaten ohne
+  Pixel-Überlappungen. Cache-Buster auf `?v=18`.
+
 ## Drag & Drop: Einträge zwischen bestehende Zeilen ziehen (2026-07-04)
 - Personen und Welt-Ereignisse konnten per Maus bisher nur in **bestehende** Zeilen gezogen
   werden. Jetzt erscheinen beim Drag-Start dünne **Einfüge-Zeilen** (gestrichelte Linie)

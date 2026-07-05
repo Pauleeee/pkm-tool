@@ -6,7 +6,7 @@
 //   ein-/ausgeklappt werden.
 // Zeitliche Änderungen NUR über den Bearbeiten-Dialog (kein Drag).
 
-import { byId, getEntryColor, readableText, rgba, persons, toDate } from './model.js?v=17';
+import { byId, getEntryColor, readableText, rgba, persons, toDate, fmtDate } from './model.js?v=18';
 
 const NO_FILTERS = { categories: [], subcategories: [] };
 
@@ -20,7 +20,13 @@ export class TimelineView {
     this.groupsDS = new vis.DataSet();
 
     const options = {
-      stack: true,
+      // KEIN vis-Stacking (stack:false → deterministischer nostack-Pfad): vis
+      // stapelte sonst Lebensbalken derselben Zeile schon bei Pixel-Nähe
+      // (margin.item.horizontal zählt als Kollision) und mit Konvergenz-Fehlern
+      // → leere Zwischenzeile zwischen Name und Ereignis, Rahmen unnötig hoch.
+      // Zeilen-Integrität sichern stattdessen fitLane/enforceLaneIntegrity
+      // (zeitbasiert, Zeile) und fitRow (Unterzeile je Container) in main.js.
+      stack: false,
       orientation: 'top',
       groupOrder: 'order',
       zoomMin: 1000 * 60 * 60 * 24 * 30,
@@ -33,6 +39,9 @@ export class TimelineView {
       showCurrentTime: false,       // keine rote „Jetzt"-Linie (historische Zeitleiste)
       // Nur vertikales Ziehen von Personen zwischen Zeilen; keine Zeit-Drags.
       editable: { updateTime: false, updateGroup: true, add: false, remove: false },
+      // Ziehen direkt beim Anfassen — OHNE das Item vorher per Klick zu
+      // selektieren (vis verlangt sonst `item.selected` für den Drag-Start).
+      itemsAlwaysDraggable: { item: true },
       onMove: (item, callback) => this.cb.onMovePersonDrag(item, callback),
       selectable: true,
       tooltip: { followMouse: true, overflowMethod: 'flip' },
@@ -69,8 +78,12 @@ export class TimelineView {
   // legt eine NEUE Zeile an dieser Position an (Halb-Lane, z. B. 1.5 →
   // normalizeLanes in main.js macht daraus wieder ganze Zahlen).
   _bindGapDrag() {
-    let pending = null;   // { area, x, y } nach mousedown auf ziehbarem Item
-    this.container.addEventListener('mousedown', (e) => {
+    let pending = null;   // { area, x, y } nach pointerdown auf ziehbarem Item
+    // WICHTIG: Pointer- statt Maus-Events. vis/Hammer ruft auf pointerdown
+    // preventDefault auf → die Kompatibilitäts-Mausevents (mousedown/mousemove/
+    // mouseup) feuern während eines Drags NIE — mit Maus-Events erschienen die
+    // Einfüge-Zeilen daher beim echten Ziehen nicht.
+    this.container.addEventListener('pointerdown', (e) => {
       const el = e.target.closest && e.target.closest('.vis-item');
       if (!el || !this.data) return;
       const cls = [...el.classList].find((c) => c.startsWith('id-'));
@@ -80,16 +93,18 @@ export class TimelineView {
       if (it.kind === 'person') pending = { area: 'person', x: e.clientX, y: e.clientY };
       else if (it.kind === 'event' && !it.personId) pending = { area: 'world', x: e.clientX, y: e.clientY };
     });
-    window.addEventListener('mousemove', (e) => {
+    window.addEventListener('pointermove', (e) => {
       if (!pending || this._gapsArea) return;
       if (Math.abs(e.clientX - pending.x) + Math.abs(e.clientY - pending.y) < 5) return;
       this._showGaps(pending.area);
     });
-    window.addEventListener('mouseup', () => {
+    const end = () => {
       pending = null;
       // Nach dem Drop entfernen; bei erfolgreichem Move räumt render() ohnehin auf.
       setTimeout(() => this._hideGaps(), 0);
-    });
+    };
+    window.addEventListener('pointerup', end);
+    window.addEventListener('pointercancel', end);
   }
 
   // Gap-Gruppen-ID trägt die Ziel-Halb-Lane direkt im Namen (gap_<x> / egap_<x>),
@@ -323,6 +338,7 @@ export class TimelineView {
     // Titel immer dabei: gekappte Labels und Mini-Markierungen (pkm-ev-dot) zeigen
     // das Ereignis sonst nirgends im Volltext.
     const lines = [ev.title];
+    if (ev.start) lines.push(ev.end ? `${fmtDate(ev.start)} – ${fmtDate(ev.end)}` : fmtDate(ev.start));
     if (ev.personId) { const p = byId(data.items, ev.personId); if (p) lines.push(p.title); }
     if (ev.description) lines.push(ev.description);
     const src = ev.sourceId ? byId(data.sources, ev.sourceId) : null;

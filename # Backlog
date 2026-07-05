@@ -2,14 +2,13 @@
 
 ## 🆕 Neu (diese Woche)
 
-- [] Personen oder events können nicht zwischen bestehenden Personen oder evbents gezogen werden. Dass soll möglich gemacht werden indem beim hoch runter ziehen elemente auch zwischen bestehende element möglich sind. Versuche das so zu bauen dass die integritiet einzlenen personen n ereignisse nie kaputt sein kann. Bsp eine Perso hat ein eingetragenes event. Dann ist in der gleichen zeile noch drei weiter personen was dazu führen kann das zwishcen dem Event und dem Namen eine leere zeile ist und der rahmen unnötig lang  ist
-- [] Bitte zeige beim Hoover den titel des ereignisses und des Events
-
 
 ## 📋 Geplant
 - [ ]
 
 ## ✅ Erledigt
+- [x] Drag & Drop zwischen bestehende Zeilen repariert: Ziehen klappt jetzt ohne vorherigen Klick (`itemsAlwaysDraggable`), die Einfüge-Zeilen erscheinen wirklich (Pointer- statt Maus-Events) — Drop dazwischen legt eine neue Zeile an, Drop in eine bestehende Zeile sortiert ein (bei zeitlicher Überschneidung automatisch neue Zwischenzeile). Integrität: vis-Stacking abgeschaltet (`stack:false`) → nie mehr eine leere Zeile zwischen Name und Ereignis / unnötig hoher Rahmen, auch wenn sich mehrere Personen eine Zeile teilen; neue Kind-Ereignisse rutschen automatisch in eine freie Unterzeile (`fitRow`)
+- [x] Hover zeigt den Titel: Tooltip bei Ereignissen jetzt mit Titel + Datum (+ Container, Beschreibung, Quelle), bei Personen Titel + Lebensdaten
 - [x] Ereignis-Layout: Rahmen nur so breit wie der Personen-/Event-Balken; Ereignisse überschreiten ihn nie (Stufen: normal → kleinere Schrift → nur Markierung mit Hover-Tooltip)
 - [x] zommen und skrollen auf dem Trackpad führen beide dazu dass in dem Tool herausgezoomt wird. Ich möchte dass auf dem mac  die geste des zoomens auch als geste des zoomens verstande wird. Zwei finger links rechts soll ddie Timeline nach links rechts verschieben und zwei finger hoch runter soll die timeline nach oben und untern verschieben
 - [x] Zeitpunkt-Ereignisse: lange Labels kappen (max-width + Ellipsis) statt Kasten verlängern, wie bei Personen

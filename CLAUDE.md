@@ -43,13 +43,17 @@ statischen Webserver und ist für GitHub-Pages-Stil-Deployment gedacht.
     Datum) **und** eine Größen-Klasse — `pkm-ev-small` (kleinere Schrift) bzw. `pkm-ev-dot` (nur
     schmale Markierung, Ereignis im Hover-Tooltip). Der Titel steht immer im Tooltip (`_tooltip`).
     Datums-Marker = **SVG-Pfeil** aus connections.js.
-    **Personen** sind per Maus vertikal in andere Zeilen ziehbar
+    **Personen** sind per Maus vertikal in andere Zeilen ziehbar — **ohne vorherige Selektion**
+    (`itemsAlwaysDraggable:{item:true}`; vis verlangt sonst `item.selected` für den Drag-Start)
     (`editable.updateGroup`, `updateTime:false`; Ereignisse `editable:false`); `onMove` →
     `cb.onMovePersonDrag` setzt `person.lane`. Beim Drag-Start blendet `_bindGapDrag()` dünne
     **Einfüge-Zeilen** ein (Gap-Gruppen `gap_<x>`/`egap_<x>`, Klasse `grp-gap`, nur der Bereich
     des gezogenen Items): die ID trägt die Ziel-**Halb-Lane** (z. B. `1.5` = zwischen Zeile 1
     und 2) — Drop dorthin = **neue Zeile** (`handlePersonDrag` setzt den Bruchwert,
-    `normalizeLanes` normiert auf ganze Zahlen). Entfernt via render() bzw. mouseup-Fallback.
+    `normalizeLanes` normiert auf ganze Zahlen). Entfernt via render() bzw. pointerup-Fallback.
+    WICHTIG: `_bindGapDrag()` hört auf **Pointer-Events** (`pointerdown/-move/-up/-cancel`) —
+    vis/Hammer ruft auf `pointerdown` `preventDefault` auf, wodurch die Kompatibilitäts-
+    Mausevents (`mousedown`/`mousemove`/`mouseup`) während eines Drags NIE feuern.
     `render(data, visible, { showBands, collapsed })`: `collapsed` = Set von Person-IDs, deren
     Ereignisse ausgeblendet werden; `showBands` schaltet die Kontext-Schattierung.
   - `js/connections.js` — `OverlayLayer`: SVG-Overlay zeichnet (1) einen **Kasten je Container**
@@ -142,19 +146,26 @@ im **Detailpanel** (`ui.js`).
   ohne eigenes `position:relative` am Item (es ist ja schon absolut positioniert).
 - **Messen erst nach Animation:** `fit()` animiert ~500 ms. Positions-Checks per
   `getBoundingClientRect` brauchen ~2–3 s Wartezeit, sonst misst man Zwischenframes.
-- **Überlappende Einträge** stapeln vertikal über `subgroupStack:true` (sonst zeichnet vis sie
-  übereinander). Bei sehr weit herausgezoomter Ansicht sind Box-Labels zeit-breit → viel Overlap.
+- **⚠️ vis-Stacking ist AUS (`stack:false`):** vis stapelte Lebensbalken derselben Zeile schon
+  bei **Pixel-Nähe** (`margin.item.horizontal` zählt als Kollision) und mit Konvergenz-Fehlern
+  (Subgruppen-Offsets blieben auf veralteten Höhen hängen) → leere Zwischenzeile zwischen Name
+  und Ereignis, Rahmen unnötig hoch. Der `nostack`-Pfad ist deterministisch: jede Subgruppe
+  (`life`, `row_<n>`) ist genau **eine** Ebene. Überlappungsfreiheit ist deshalb **Datenfrage**
+  (zeitbasiert): Zeilen via `fitLane`/`laneClash`/`enforceLaneIntegrity`, Unterzeilen via
+  `fitRow` (neue Kind-Ereignisse bzw. Container-Wechsel → erste freie Unterzeile). Zwei
+  Einträge, die sich NUR pixelweise überlappen (z. B. Box-Labels weit herausgezoomt), zeichnet
+  vis übereinander — Nutzer sortiert per Drag bzw. ▲▼ um.
 - **Zeilen ("lanes"):** `item.lane` bestimmt die Zeile — für **Personen** (Bereich unten,
   `lane_<v>`) UND **Welt-Ereignisse** (Bereich oben, `elane_<v>`), getrennte Namespaces.
   Startwert via `assignLanes()`; danach **manuell** per Maus-Drag (`handlePersonDrag` parst
   `lane_`/`elane_` sowie die Einfüge-Zeilen `gap_`/`egap_` mit Halb-Lane-Wert → neue Zeile
   zwischen zwei bestehenden) oder ▲/▼ im Detailpanel (`movePerson` nutzt `laneSiblings` →
   `normalizeLanes(list)`). Neue Einträge via `fitLane()`. Personen-Ereignisse: `event.row`
-  (▲/▼ → `moveEvent`).
+  (▲/▼ → `moveEvent`); neue Kind-Ereignisse via `fitRow()` in die erste freie Unterzeile.
   `__events` (`order:-1e9`) bleibt oben. Überlappen sich Personen in einer Zeile, stapelt vis sie.
 - **Browser-Cache / `serve.py`:** `python3 -m http.server` lässt ES-Module aggressiv cachen →
   Änderungen wirken erst nach hartem Reload. `serve.py` schickt `Cache-Control: no-store`
-  (empfohlener Dev-Server). Modul-Imports tragen einmalig `?v=16`, um alten Cache zu umgehen;
+  (empfohlener Dev-Server). Modul-Imports tragen einmalig `?v=18`, um alten Cache zu umgehen;
   bei größeren Umbauten ggf. erhöhen (mit `serve.py` aber nicht nötig).
 - **Keine Zeit-Drags:** `editable:false`. Datum/Fachliches ausschließlich über den Bearbeiten-Dialog.
 - **Item↔DOM-Verknüpfung:** jedes vis-Item hat Klasse `id-<itemId>`; Person ist über ihren
