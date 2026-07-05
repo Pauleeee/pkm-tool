@@ -6,6 +6,23 @@ import {
   SOURCE_KINDS, authorName, sourceLabel, sortedSources, fmtDate,
 } from './model.js?v=19';
 
+// ---------- Toast (kurze Meldung unten, optional mit Aktion z. B. „Rückgängig") ----------
+let toastTimer = null;
+export function showToast(text, opts = {}) {
+  document.querySelectorAll('.toast').forEach((t) => t.remove());
+  const t = el('div', 'toast');
+  t.appendChild(elText('span', '', text));
+  if (opts.actionLabel) {
+    const b = el('button', 'toast-action');
+    b.type = 'button'; b.textContent = opts.actionLabel;
+    b.addEventListener('click', () => { t.remove(); if (opts.onAction) opts.onAction(); });
+    t.appendChild(b);
+  }
+  document.body.appendChild(t);
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.remove(), opts.duration || 6000);
+}
+
 // ---------- generisches Modal ----------
 export function openModal(buildContent) {
   const root = document.getElementById('modal-root');
@@ -204,10 +221,18 @@ export function openCategoryManager(data, cb) {
         const name = document.createElement('input'); name.type = 'text'; name.value = c.name; name.className = 'grow';
         name.addEventListener('change', () => { c.name = name.value.trim() || 'Kategorie'; cb.onChange(); });
         const del = linkBtn('löschen', 'danger', () => {
+          if (cb.onSnapshot) cb.onSnapshot();
+          // Kaskade: Unterkategorien der Kategorie entfernen und aus den
+          // subcategoryIds-Arrays aller Items bereinigen
+          const removedSubs = new Set((data.subcategories || []).filter((s) => s.categoryId === c.id).map((s) => s.id));
           data.categories = data.categories.filter((x) => x.id !== c.id);
           data.subcategories = (data.subcategories || []).filter((s) => s.categoryId !== c.id);
-          data.items.forEach((it) => { if (it.categoryId === c.id) { it.categoryId = null; it.subcategoryId = null; } });
+          data.items.forEach((it) => {
+            if (it.categoryId === c.id) it.categoryId = null;
+            if (it.subcategoryIds && it.subcategoryIds.length) it.subcategoryIds = it.subcategoryIds.filter((id) => !removedSubs.has(id));
+          });
           cb.onChange(); refresh();
+          showToast(`Kategorie „${c.name}" gelöscht — Cmd/Ctrl+Z (nach Schließen) macht rückgängig`);
         });
         li.appendChild(color); li.appendChild(name); li.appendChild(del);
         list.appendChild(li);
@@ -225,9 +250,11 @@ export function openCategoryManager(data, cb) {
           sn.addEventListener('change', () => { s.name = sn.value.trim() || 'Unterkategorie'; cb.onChange(); });
           r.appendChild(sn);
           r.appendChild(linkBtn('löschen', 'danger', () => {
+            if (cb.onSnapshot) cb.onSnapshot();
             data.subcategories = data.subcategories.filter((x) => x.id !== s.id);
             data.items.forEach((it) => { it.subcategoryIds = (it.subcategoryIds || []).filter((id) => id !== s.id); });
             cb.onChange(); refresh();
+            showToast(`Unterkategorie „${s.name}" gelöscht — Cmd/Ctrl+Z (nach Schließen) macht rückgängig`);
           }));
           subBox.appendChild(r);
         });
@@ -269,9 +296,11 @@ export function openSourceManager(data, cb) {
         li.appendChild(info);
         li.appendChild(linkBtn('bearbeiten', '', () => openSourceForm(data, s, cb, refresh)));
         li.appendChild(linkBtn('löschen', 'danger', () => {
+          if (cb.onSnapshot) cb.onSnapshot();
           data.sources = data.sources.filter((x) => x.id !== s.id);
           data.items.forEach((it) => { if (it.sourceId === s.id) it.sourceId = null; });
           cb.onChange(); refresh();
+          showToast(`Quelle „${s.title}" gelöscht — Cmd/Ctrl+Z (nach Schließen) macht rückgängig`);
         }));
         list.appendChild(li);
       });

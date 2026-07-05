@@ -332,6 +332,20 @@ a { color: var(--accent-ink); }
 .link-btn:hover { text-decoration: underline; }
 .link-btn.danger { color: #c0392b; }
 
+/* ---------- Toast ---------- */
+.toast {
+  position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 14px; z-index: 300;
+  background: #2b3340; color: #f2f4f8; font-size: 13.5px; font-weight: 550;
+  padding: 11px 16px; border-radius: 12px; box-shadow: var(--shadow);
+  max-width: min(560px, 90vw);
+}
+.toast-action {
+  font: inherit; font-weight: 700; color: #a5b4fc; background: none; border: none;
+  cursor: pointer; padding: 2px 4px; border-radius: 6px; white-space: nowrap;
+}
+.toast-action:hover { color: #c7d2fe; text-decoration: underline; }
+
 /* Scrollbars */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-thumb { background: #d4d8e2; border-radius: 8px; border: 2px solid transparent; background-clip: content-box; }

@@ -45,10 +45,44 @@ async function init() {
   });
 
   wireToolbar();
+  wireShortcuts();
   filterBar.setData(data);
   render();
   timelineView.fit();
   if (!loaded || repaired) persist();
+}
+
+// ---------- Undo (Snapshot vor destruktiven Aktionen) ----------
+const UNDO_MAX = 20;
+const undoStack = [];   // JSON-Snapshots des kompletten Datenstands
+
+function snapshot() {
+  undoStack.push(JSON.stringify(data));
+  if (undoStack.length > UNDO_MAX) undoStack.shift();
+}
+
+function undo() {
+  const prev = undoStack.pop();
+  if (!prev) { ui.showToast('Nichts rückgängig zu machen.'); return; }
+  data = normalize(JSON.parse(prev));
+  if (selectedItemId && !model.byId(data.items, selectedItemId)) selectedItemId = null;
+  refreshAll();
+  ui.showToast('Rückgängig gemacht.');
+}
+
+// Cmd/Ctrl+Z — nur wenn kein Modal offen ist und nicht getippt wird (dort hat
+// der Browser sein eigenes Text-Undo). Weitere Shortcuts: siehe wireShortcuts.
+function modalOpen() { return !!document.querySelector('.modal-backdrop'); }
+function isTyping(t) { return !!t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable); }
+
+function wireShortcuts() {
+  document.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z') {
+      if (modalOpen() || isTyping(e.target)) return;
+      e.preventDefault();
+      undo();
+    }
+  });
 }
 
 // Default-Daten: erst data/sample.json versuchen, sonst eingebaute Seed-Daten
@@ -143,11 +177,14 @@ function upsertItem(values) {
 }
 function deleteItem(id) {
   const it = model.byId(data.items, id);
+  if (!it) return;
+  snapshot();
   data.items = data.items.filter((i) => i.id !== id);
   data.connections = data.connections.filter((c) => c.fromId !== id && c.toId !== id);
-  if (it && it.kind === 'person') data.items.forEach((e) => { if (e.personId === id) e.personId = null; });
+  if (it.kind === 'person') data.items.forEach((e) => { if (e.personId === id) e.personId = null; });
   if (selectedItemId === id) selectedItemId = null;
   refreshAll();
+  ui.showToast(`Eintrag „${it.title}" gelöscht`, { actionLabel: 'Rückgängig', onAction: undo });
 }
 
 // ---------- Zeilen (Personen & Welt-Ereignisse) / Einklappen ----------
@@ -288,7 +325,12 @@ function upsertConnection(values) {
   if (existing) Object.assign(existing, values); else data.connections.push(model.makeConnection(values));
   render(); persist();
 }
-function deleteConnection(id) { data.connections = data.connections.filter((c) => c.id !== id); render(); persist(); }
+function deleteConnection(id) {
+  snapshot();
+  data.connections = data.connections.filter((c) => c.id !== id);
+  render(); persist();
+  ui.showToast('Verbindung gelöscht', { actionLabel: 'Rückgängig', onAction: undo });
+}
 
 // ---------- Linkmodus ----------
 function toggleLinkMode() { linkMode.active ? exitLinkMode() : enterLinkMode(); }
@@ -329,15 +371,21 @@ function wireToolbar() {
     render();
   });
   document.getElementById('btn-collapse').addEventListener('click', (e) => toggleCollapseAll(e.currentTarget));
-  document.getElementById('btn-categories').addEventListener('click', () => ui.openCategoryManager(data, { onChange: refreshAll }));
-  document.getElementById('btn-sources').addEventListener('click', () => ui.openSourceManager(data, { onChange: refreshAll }));
+  document.getElementById('btn-categories').addEventListener('click', () => ui.openCategoryManager(data, { onChange: refreshAll, onSnapshot: snapshot }));
+  document.getElementById('btn-sources').addEventListener('click', () => ui.openSourceManager(data, { onChange: refreshAll, onSnapshot: snapshot }));
   document.getElementById('btn-fit').addEventListener('click', () => timelineView.fit());
   document.getElementById('btn-export').addEventListener('click', () => exportJson(data));
   const fileInput = document.getElementById('import-file');
   document.getElementById('btn-import').addEventListener('click', () => fileInput.click());
   fileInput.addEventListener('change', async () => {
     const file = fileInput.files[0]; if (!file) return;
-    try { data = normalize(await importJson(file)); enforceLaneIntegrity(); selectedItemId = null; refreshAll(); timelineView.fit(); }
+    try {
+      const imported = normalize(await importJson(file));
+      snapshot();   // erst nach erfolgreichem Parsen — Import ist per Undo rückholbar
+      data = imported;
+      enforceLaneIntegrity(); selectedItemId = null; refreshAll(); timelineView.fit();
+      ui.showToast('Import erfolgreich', { actionLabel: 'Rückgängig', onAction: undo });
+    }
     catch (err) { alert('Datei konnte nicht gelesen werden: ' + err.message); }
     fileInput.value = '';
   });
