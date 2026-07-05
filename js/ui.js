@@ -150,28 +150,36 @@ export function openItemModal(data, item, cb) {
     };
     kind.input.addEventListener('change', sync); sync();
 
+    const err = el('div', 'form-error'); err.hidden = true;
+    const showErr = (msg) => { err.textContent = msg; err.hidden = false; };
+    const save = () => {
+      const k = kind.input.value;
+      const startVal = startF.getValue();
+      if (!startVal) {
+        showErr('Bitte mindestens das Jahr angeben.');
+        startF.wrap.querySelector('.dp-year').focus();
+        return;
+      }
+      cb.onSave({
+        id: item?.id, kind: k,
+        title: title.input.value.trim() || 'Ohne Titel',
+        start: startVal,
+        end: endF.getValue(),
+        categoryId: category.input.value || null,
+        subcategoryIds: selectedSubIds.filter((id) => subcatsOf(data, category.input.value).some((s) => s.id === id)),
+        personId: k === 'event' ? (owner.input.value || null) : null,
+        sourceId: source.input.value || null,
+        description: desc.input.value.trim(),
+      });
+      close();
+    };
+    frag.appendChild(err);
     frag.appendChild(actions({
       onDelete: isNew ? null : () => { cb.onDelete(item.id); close(); },
       onCancel: close,
-      onSave: () => {
-        const k = kind.input.value;
-        const startVal = startF.getValue();
-        if (!startVal) { alert('Bitte mindestens das Jahr angeben.'); return; }
-        cb.onSave({
-          id: item?.id, kind: k,
-          title: title.input.value.trim() || 'Ohne Titel',
-          start: startVal,
-          end: endF.getValue(),
-          categoryId: category.input.value || null,
-          subcategoryIds: selectedSubIds.filter((id) => subcatsOf(data, category.input.value).some((s) => s.id === id)),
-          personId: k === 'event' ? (owner.input.value || null) : null,
-          sourceId: source.input.value || null,
-          description: desc.input.value.trim(),
-        });
-        close();
-      },
+      submit: true,
     }));
-    frag.addEventListener('submit', (e) => e.preventDefault());
+    frag.addEventListener('submit', (e) => { e.preventDefault(); save(); });
     return frag;
   });
 }
@@ -190,16 +198,19 @@ export function openConnectionModal(data, conn, prefill, cb) {
       conn?.relation || 'verbunden');
     const labelF = textField('Notiz (optional)', conn?.label || '');
     frag.appendChild(from.wrap); frag.appendChild(to.wrap); frag.appendChild(relation.wrap); frag.appendChild(labelF.wrap);
+    const err = el('div', 'form-error'); err.hidden = true;
+    const save = () => {
+      if (from.input.value === to.input.value) { err.textContent = 'Von und Nach müssen verschieden sein.'; err.hidden = false; return; }
+      cb.onSave({ id: conn?.id, fromId: from.input.value, toId: to.input.value, relation: relation.input.value, label: labelF.input.value.trim() });
+      close();
+    };
+    frag.appendChild(err);
     frag.appendChild(actions({
       onDelete: isNew ? null : () => { cb.onDelete(conn.id); close(); },
       onCancel: close,
-      onSave: () => {
-        if (from.input.value === to.input.value) { alert('Von und Nach müssen verschieden sein.'); return; }
-        cb.onSave({ id: conn?.id, fromId: from.input.value, toId: to.input.value, relation: relation.input.value, label: labelF.input.value.trim() });
-        close();
-      },
+      submit: true,
     }));
-    frag.addEventListener('submit', (e) => e.preventDefault());
+    frag.addEventListener('submit', (e) => { e.preventDefault(); save(); });
     return frag;
   });
 }
@@ -352,7 +363,7 @@ function openSourceForm(data, s, cb, after) {
     };
     kind.input.addEventListener('change', renderDyn); renderDyn();
 
-    frag.appendChild(actions({ onCancel: close, onSave: () => {
+    const save = () => {
       s.kind = kind.input.value;
       s.title = title.input.value.trim() || 'Ohne Titel';
       s.authorLast = last.input.value.trim(); s.authorFirst = first.input.value.trim();
@@ -362,8 +373,9 @@ function openSourceForm(data, s, cb, after) {
       s.volume = volume.input.value.trim(); s.issue = issue.input.value.trim();
       s.url = url.input.value.trim(); s.accessed = accessed.input.value.trim();
       cb.onChange(); if (after) after(); close();
-    } }));
-    frag.addEventListener('submit', (e) => e.preventDefault());
+    };
+    frag.appendChild(actions({ onCancel: close, submit: true }));
+    frag.addEventListener('submit', (e) => { e.preventDefault(); save(); });
     return frag;
   });
 }
@@ -561,12 +573,20 @@ function parentOptions(data, excludeId) {
   });
   return groups;
 }
-function actions({ onDelete, onCancel, onSave }) {
+// submit:true → „Speichern" ist ein echter Submit-Button; das Formular ruft
+// die Speichern-Logik in seinem submit-Handler auf (damit speichert auch Enter).
+function actions({ onDelete, onCancel, onSave, submit }) {
   const bar = el('div', 'modal-actions');
   if (onDelete) bar.appendChild(btn('Löschen', 'btn-danger', onDelete));
   const right = el('div', 'right');
   right.appendChild(btn('Abbrechen', '', onCancel));
-  right.appendChild(btn('Speichern', 'btn-primary', onSave));
+  if (submit) {
+    const b = document.createElement('button');
+    b.type = 'submit'; b.className = 'btn btn-primary'; b.textContent = 'Speichern';
+    right.appendChild(b);
+  } else {
+    right.appendChild(btn('Speichern', 'btn-primary', onSave));
+  }
   bar.appendChild(right);
   return bar;
 }

@@ -315,6 +315,11 @@ a { color: var(--accent-ink); }
 .date-parts .dp-month { flex: 1; }
 .date-parts .dp-day { width: 76px; }
 .date-parts input:focus, .date-parts select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-weak); }
+.form-error {
+  color: #c0392b; background: #fdecea; border: 1px solid #f1c9c4;
+  border-radius: var(--radius-sm); padding: 8px 12px; font-size: 13px; font-weight: 550;
+  margin-top: 10px;
+}
 .modal-actions { display: flex; justify-content: space-between; gap: 8px; margin-top: 20px; }
 .modal-actions .right { display: flex; gap: 8px; margin-left: auto; }
 .btn-danger { color: #c0392b; border-color: #f1c9c4; background: #fff; }
