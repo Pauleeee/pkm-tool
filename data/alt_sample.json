@@ -13,7 +13,7 @@
       ],
       "personId": null,
       "order": 1,
-      "lane": 1,
+      "lane": 5,
       "row": 0,
       "sourceId": null,
       "description": "Begründer der klassischen Mechanik."
@@ -30,7 +30,7 @@
       ],
       "personId": null,
       "order": 2,
-      "lane": 1,
+      "lane": 0,
       "row": 0,
       "sourceId": null,
       "description": "Begründer der statistischen Mechanik."
@@ -47,7 +47,7 @@
       ],
       "personId": null,
       "order": 3,
-      "lane": 3,
+      "lane": 1,
       "row": 0,
       "sourceId": null,
       "description": "Begründer der Relativitätstheorie."
@@ -64,7 +64,7 @@
       ],
       "personId": null,
       "order": 4,
-      "lane": 8,
+      "lane": 6,
       "row": 0,
       "sourceId": null,
       "description": "32. Präsident der USA."
@@ -148,7 +148,7 @@
       ],
       "personId": null,
       "order": 0,
-      "lane": 1,
+      "lane": 0,
       "row": 0,
       "sourceId": null,
       "description": ""
@@ -163,7 +163,7 @@
       "subcategoryIds": [],
       "personId": null,
       "order": 0,
-      "lane": 2,
+      "lane": 1,
       "row": 0,
       "sourceId": null,
       "description": "Weltweite Influenza-Pandemie."
@@ -195,7 +195,7 @@
       ],
       "personId": null,
       "order": 0,
-      "lane": 2,
+      "lane": 1,
       "row": 0,
       "sourceId": null,
       "description": ""
@@ -212,7 +212,7 @@
       ],
       "personId": null,
       "order": 0,
-      "lane": 8,
+      "lane": 9,
       "row": 0,
       "sourceId": "src_mqzp3ahh_2",
       "description": ""
@@ -229,7 +229,7 @@
       ],
       "personId": null,
       "order": 0,
-      "lane": 2,
+      "lane": 1,
       "row": 0,
       "sourceId": null,
       "description": ""
@@ -246,7 +246,7 @@
       ],
       "personId": null,
       "order": 0,
-      "lane": 6,
+      "lane": 8,
       "row": 0,
       "sourceId": null,
       "description": ""
@@ -264,7 +264,7 @@
       ],
       "personId": null,
       "order": 0,
-      "lane": 5,
+      "lane": 3,
       "row": 0,
       "sourceId": null,
       "description": ""
@@ -318,7 +318,7 @@
       ],
       "personId": null,
       "order": 0,
-      "lane": 6,
+      "lane": 7,
       "row": 0,
       "sourceId": null,
       "description": ""
@@ -336,7 +336,7 @@
       ],
       "personId": null,
       "order": 0,
-      "lane": 4,
+      "lane": 2,
       "row": 0,
       "sourceId": null,
       "description": ""
@@ -351,7 +351,7 @@
       "subcategoryIds": [],
       "personId": null,
       "order": 0,
-      "lane": 7,
+      "lane": 8,
       "row": 0,
       "sourceId": null,
       "description": ""
@@ -383,7 +383,7 @@
       ],
       "personId": null,
       "order": 0,
-      "lane": 2,
+      "lane": 3,
       "row": 0,
       "sourceId": null,
       "description": ""
@@ -398,7 +398,7 @@
       "subcategoryIds": [],
       "personId": null,
       "order": 0,
-      "lane": 2,
+      "lane": 1,
       "row": 0,
       "sourceId": null,
       "description": ""
@@ -415,7 +415,7 @@
       ],
       "personId": null,
       "order": 0,
-      "lane": 1,
+      "lane": 0,
       "row": 0,
       "sourceId": null,
       "description": ""
@@ -432,7 +432,7 @@
       ],
       "personId": null,
       "order": 0,
-      "lane": 8,
+      "lane": 9,
       "row": 0,
       "sourceId": "src_mqzp3ahh_2",
       "description": "Der Sonnenkönig"
@@ -449,7 +449,7 @@
       ],
       "personId": null,
       "order": 0,
-      "lane": 9,
+      "lane": 10,
       "row": 0,
       "sourceId": null,
       "description": ""
@@ -466,7 +466,7 @@
       ],
       "personId": null,
       "order": 0,
-      "lane": 10,
+      "lane": 11,
       "row": 0,
       "sourceId": "src_mqzp3ahh_2",
       "description": ""
@@ -521,213 +521,6 @@
       "row": 1,
       "sourceId": null,
       "description": "Hat keine Interesse an den Regierungsgeschäften und hat sich von seinen Mätressen beeinflussen lassen. Konnte nie zur Größe von Ludwig XIV kommen"
-    },
-    {
-      "id": "it_mr7votcr_1",
-      "kind": "event",
-      "title": "Napoleon Kaiser",
-      "start": "1804-05-18",
-      "end": "1814-04-16",
-      "categoryId": "cat_mqzo3zj4_2",
-      "subcategoryIds": [
-        "sub_mqzo3zj4_9"
-      ],
-      "personId": "it_mqzobes0_1",
-      "order": 0,
-      "lane": 0,
-      "row": 0,
-      "sourceId": "src_mqzp3ahh_2",
-      "description": ""
-    },
-    {
-      "id": "it_mr7vr8fd_2",
-      "kind": "event",
-      "title": "100 Tage Herrschaft",
-      "start": "1815-03-20",
-      "end": "1815",
-      "categoryId": "cat_mqzo3zj4_2",
-      "subcategoryIds": [
-        "sub_mqzo3zj4_9"
-      ],
-      "personId": "it_mqzobes0_1",
-      "order": 0,
-      "lane": 0,
-      "row": 0,
-      "sourceId": null,
-      "description": "Regentschaft begin mit der Rückkehr aus dem Exil und endet mit der Niederlage von Waterlooo"
-    },
-    {
-      "id": "it_mr80qkky_3",
-      "kind": "person",
-      "title": "Heinrich VIII",
-      "start": "1491-06-28",
-      "end": "1547-01-28",
-      "categoryId": "cat_mqzo3zj4_2",
-      "subcategoryIds": [
-        "sub_mqzo3zj4_9"
-      ],
-      "personId": null,
-      "order": 0,
-      "lane": 8,
-      "row": 0,
-      "sourceId": "src_mqzp3ahh_2",
-      "description": ""
-    },
-    {
-      "id": "it_mr80s64s_4",
-      "kind": "event",
-      "title": "König von England",
-      "start": "1509",
-      "end": "1547",
-      "categoryId": "cat_mqzo3zj4_2",
-      "subcategoryIds": [
-        "sub_mqzo3zj4_9"
-      ],
-      "personId": "it_mr80qkky_3",
-      "order": 0,
-      "lane": 0,
-      "row": 0,
-      "sourceId": "src_mqzp3ahh_2",
-      "description": "Führt die Kirchenspaltung bei"
-    },
-    {
-      "id": "it_mr80u0ck_5",
-      "kind": "person",
-      "title": "Martin Luther",
-      "start": "1483-11-10",
-      "end": "1546-02-18",
-      "categoryId": "cat_mqzo3zj4_5",
-      "subcategoryIds": [],
-      "personId": null,
-      "order": 0,
-      "lane": 7,
-      "row": 0,
-      "sourceId": null,
-      "description": ""
-    },
-    {
-      "id": "it_mr85odni_1",
-      "kind": "person",
-      "title": "Giulio de’ Medici",
-      "start": "1478-05-56",
-      "end": "1534-09-25",
-      "categoryId": "cat_mqzo3zj4_5",
-      "subcategoryIds": [],
-      "personId": null,
-      "order": 0,
-      "lane": 5,
-      "row": 0,
-      "sourceId": "src_mqzp3ahh_2",
-      "description": "später Papst Clemens VII"
-    },
-    {
-      "id": "it_mr85pecb_2",
-      "kind": "event",
-      "title": "Clemens VII",
-      "start": "1523-11-15",
-      "end": "1534-09-25",
-      "categoryId": "cat_mqzo3zj4_5",
-      "subcategoryIds": [],
-      "personId": "it_mr85odni_1",
-      "order": 0,
-      "lane": 0,
-      "row": 1,
-      "sourceId": "src_mqzp3ahh_2",
-      "description": ""
-    },
-    {
-      "id": "it_mr85tt1t_3",
-      "kind": "event",
-      "title": "Erklärung der Gültigkeit der Ehe von Heinrich VII",
-      "start": "1534-05-23",
-      "end": null,
-      "categoryId": "cat_mqzo3zj4_5",
-      "subcategoryIds": [],
-      "personId": "it_mr85odni_1",
-      "order": 0,
-      "lane": 0,
-      "row": 0,
-      "sourceId": "src_mqzp3ahh_2",
-      "description": ""
-    },
-    {
-      "id": "it_mr85wpb4_5",
-      "kind": "event",
-      "title": "95 Thesen werden an die Schlosskirche in Wittenberg angeschlagen",
-      "start": "1517-10-31",
-      "end": null,
-      "categoryId": "cat_mqzo3zj4_1",
-      "subcategoryIds": [],
-      "personId": "it_mr80u0ck_5",
-      "order": 0,
-      "lane": 0,
-      "row": 0,
-      "sourceId": null,
-      "description": ""
-    },
-    {
-      "id": "it_mr86f1kg_6",
-      "kind": "person",
-      "title": "Giovanni de’ Medici",
-      "start": "1475-12-11",
-      "end": "1521-12-01",
-      "categoryId": "cat_mqzo3zj4_5",
-      "subcategoryIds": [],
-      "personId": null,
-      "order": 0,
-      "lane": 6,
-      "row": 0,
-      "sourceId": null,
-      "description": "Später Papst Leo X"
-    },
-    {
-      "id": "it_mr86gc3u_7",
-      "kind": "event",
-      "title": "Papst Leo X",
-      "start": "1513-03-11",
-      "end": "1521-12-01",
-      "categoryId": "cat_mqzo3zj4_1",
-      "subcategoryIds": [],
-      "personId": "it_mr86f1kg_6",
-      "order": 0,
-      "lane": 0,
-      "row": 0,
-      "sourceId": null,
-      "description": "Exkommuniziert Luther"
-    },
-    {
-      "id": "it_mr86lgqm_9",
-      "kind": "person",
-      "title": "Galileo Galilei",
-      "start": "1546-02-15",
-      "end": "1641-12-29",
-      "categoryId": "cat_mqzo3zj4_1",
-      "subcategoryIds": [
-        "sub_mqzo3zj4_6"
-      ],
-      "personId": null,
-      "order": 0,
-      "lane": 0,
-      "row": 0,
-      "sourceId": null,
-      "description": ""
-    },
-    {
-      "id": "it_mr86o8a7_a",
-      "kind": "person",
-      "title": "Johannes Kepler",
-      "start": "1572-01-06",
-      "end": "1630-11-15",
-      "categoryId": "cat_mqzo3zj4_1",
-      "subcategoryIds": [
-        "sub_mqzo3zj4_6"
-      ],
-      "personId": null,
-      "order": 0,
-      "lane": 1,
-      "row": 0,
-      "sourceId": null,
-      "description": ""
     }
   ],
   "categories": [
@@ -762,7 +555,7 @@
       "id": "sub_mqzo3zj4_6",
       "name": "Physik",
       "categoryId": "cat_mqzo3zj4_1",
-      "color": "#53d5fd"
+      "color": "#00c7fc"
     },
     {
       "id": "sub_mqzo3zj4_7",
@@ -796,20 +589,6 @@
       "toId": "it_mqzo3zj4_q",
       "label": "",
       "relation": "gerichtet an"
-    },
-    {
-      "id": "cn_mr85ua7e_4",
-      "fromId": "it_mr85tt1t_3",
-      "toId": "it_mr80s64s_4",
-      "label": "",
-      "relation": "verbunden"
-    },
-    {
-      "id": "cn_mr86ibcp_8",
-      "fromId": "it_mr86gc3u_7",
-      "toId": "it_mr80u0ck_5",
-      "label": "Exkommunikation",
-      "relation": "verbunden"
     }
   ],
   "sources": [
@@ -850,6 +629,6 @@
   ],
   "meta": {
     "version": 5,
-    "updated": "2026-07-05T19:32:25.739Z"
+    "updated": "2026-07-04T19:16:20.754Z"
   }
 }
