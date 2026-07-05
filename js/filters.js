@@ -131,7 +131,9 @@ export class FilterBar {
   _searchMatches(q) {
     if (!q || q.length < 2) return [];
     const d = this.data;
-    const srcLabel = (it) => { const s = it.sourceId ? byId(d.sources, it.sourceId) : null; return s ? sourceLabel(s) : ''; };
+    const srcLabel = (it) => (it.refs || [])
+      .map((r) => { const s = byId(d.sources, r.sourceId); return s ? sourceLabel(s) : ''; })
+      .filter(Boolean).join(' ');
     const scored = [];
     for (const it of d.items) {
       const title = (it.title || '').toLowerCase();
@@ -157,7 +159,7 @@ export class FilterBar {
 
   _itemPasses(it) {
     if (this.offCats.has(it.categoryId)) return false;
-    if (this.sourceFilter && it.sourceId !== this.sourceFilter) return false; // nur gewählte Quelle
+    if (!this._sourcePasses(it)) return false;
     // Unterkategorie-Filter: sobald welche ausgeblendet sind, zeige nur Ereignisse mit
     // mindestens einer sichtbaren Unterkategorie (Ereignisse OHNE Unterkategorie fallen weg).
     if (it.kind === 'event' && this.offSubs.size > 0) {
@@ -165,6 +167,19 @@ export class FilterBar {
       if (!subs.some((s) => !this.offSubs.has(s))) return false;
     }
     return true;
+  }
+
+  // Quellen-Filter: Treffer, wenn IRGENDEINE Referenz auf die gewählte Quelle
+  // zeigt. Container (Person/Welt-Ereignis) bleiben zusätzlich sichtbar, wenn
+  // eines ihrer Kind-Ereignisse die Quelle referenziert — sonst würde das
+  // passende Kind mit dem ausgeblendeten Container verschwinden.
+  _sourcePasses(it) {
+    if (!this.sourceFilter) return true;
+    if ((it.refs || []).some((r) => r.sourceId === this.sourceFilter)) return true;
+    if (it.kind === 'person' || !it.personId) {
+      return this.data.items.some((c) => c.personId === it.id && (c.refs || []).some((r) => r.sourceId === this.sourceFilter));
+    }
+    return false;
   }
 
   // Aktive Filter für die Einfärbung (getEntryColor). Unser Filtermodell ist

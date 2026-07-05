@@ -129,7 +129,54 @@ export function openItemModal(data, item, cb) {
     const owner = selectFieldGrouped('Gehört zu (Person oder Ereignis)',
       parentOptions(data, item?.id), item?.personId || '', ['', '🌍 Nichts – eigenständiges Ereignis']);
 
-    const source = selectField('Quelle', [['', '— keine —'], ...sortedSources(data).map((s) => [s.id, sourceLabel(s)])], item?.sourceId || '');
+    // Quellen-Referenzen: mehrere je Eintrag, mit Seiten + optionalem Zitat
+    let refs = (item?.refs || []).map((r) => ({ ...r }));
+    const refsWrap = el('div', 'field');
+    refsWrap.appendChild(elText('label', '', 'Quellen'));
+    const refsList = el('div', 'ref-list');
+    refsWrap.appendChild(refsList);
+    const addRef = el('button', 'sub-chip sub-add'); addRef.type = 'button'; addRef.textContent = '＋ Quelle';
+    addRef.addEventListener('click', () => {
+      const first = sortedSources(data)[0];
+      if (!first) return;
+      refs.push({ sourceId: first.id, pages: '', quote: '' });
+      renderRefs();
+    });
+    refsWrap.appendChild(addRef);
+    const renderRefs = () => {
+      refsList.innerHTML = '';
+      if (!data.sources.length) {
+        refsList.appendChild(elText('div', 'muted', 'Noch keine Quellen – im 📖-Manager anlegen.'));
+        addRef.style.display = 'none';
+        return;
+      }
+      if (!refs.length) refsList.appendChild(elText('div', 'muted', 'Keine Quelle verknüpft.'));
+      refs.forEach((r, idx) => {
+        const box = el('div', 'ref-box');
+        const row1 = el('div', 'ref-row');
+        const sel = document.createElement('select');
+        sortedSources(data).forEach((s) => {
+          const o = document.createElement('option'); o.value = s.id; o.textContent = sourceLabel(s);
+          if (s.id === r.sourceId) o.selected = true; sel.appendChild(o);
+        });
+        sel.addEventListener('change', () => { r.sourceId = sel.value; });
+        row1.appendChild(sel);
+        const rm = el('button', 'sub-mini'); rm.type = 'button'; rm.textContent = '✕'; rm.title = 'Quelle entfernen';
+        rm.addEventListener('click', () => { refs.splice(idx, 1); renderRefs(); });
+        row1.appendChild(rm);
+        box.appendChild(row1);
+        const row2 = el('div', 'ref-row');
+        const pages = document.createElement('input'); pages.type = 'text'; pages.placeholder = 'Seite(n), z. B. 12–14'; pages.value = r.pages || ''; pages.className = 'ref-pages';
+        pages.addEventListener('input', () => { r.pages = pages.value; });
+        const quote = document.createElement('input'); quote.type = 'text'; quote.placeholder = 'Zitat (optional)'; quote.value = r.quote || '';
+        quote.addEventListener('input', () => { r.quote = quote.value; });
+        row2.appendChild(pages); row2.appendChild(quote);
+        box.appendChild(row2);
+        refsList.appendChild(box);
+      });
+    };
+    renderRefs();
+
     const desc = textareaField('Notiz / Beschreibung', item?.description || '');
 
     frag.appendChild(kind.wrap);
@@ -139,7 +186,7 @@ export function openItemModal(data, item, cb) {
     frag.appendChild(subWrap);
     frag.appendChild(colorWrap);
     frag.appendChild(owner.wrap);
-    frag.appendChild(source.wrap);
+    frag.appendChild(refsWrap);
     frag.appendChild(desc.wrap);
 
     const sync = () => {
@@ -168,7 +215,7 @@ export function openItemModal(data, item, cb) {
         categoryId: category.input.value || null,
         subcategoryIds: selectedSubIds.filter((id) => subcatsOf(data, category.input.value).some((s) => s.id === id)),
         personId: k === 'event' ? (owner.input.value || null) : null,
-        sourceId: source.input.value || null,
+        refs: refs.filter((r) => r.sourceId).map((r) => ({ sourceId: r.sourceId, pages: (r.pages || '').trim(), quote: (r.quote || '').trim() })),
         description: desc.input.value.trim(),
       });
       close();
@@ -309,7 +356,7 @@ export function openSourceManager(data, cb) {
         li.appendChild(linkBtn('löschen', 'danger', () => {
           if (cb.onSnapshot) cb.onSnapshot();
           data.sources = data.sources.filter((x) => x.id !== s.id);
-          data.items.forEach((it) => { if (it.sourceId === s.id) it.sourceId = null; });
+          data.items.forEach((it) => { if (it.refs) it.refs = it.refs.filter((r) => r.sourceId !== s.id); });
           cb.onChange(); refresh();
           showToast(`Quelle „${s.title}" gelöscht — Cmd/Ctrl+Z (nach Schließen) macht rückgängig`);
         }));
@@ -414,25 +461,35 @@ export function renderDetail(panel, item, data, cb) {
 
   if (item.description) panel.appendChild(detailRow('Notiz', elText('div', '', item.description)));
 
-  const src = item.sourceId ? byId(data.sources, item.sourceId) : null;
-  if (src) {
-    const box = el('div');
-    box.appendChild(elText('div', '', sourceLabel(src)));  // Nachname, Vorname – Titel
-    // kontextuelle Detailzeile je nach Art
-    let parts = [src.kind, src.year];
-    if (src.kind === 'Buch') parts.push(src.publisher);
-    else if (src.kind === 'Paper') parts.push(src.journal, src.doi && ('DOI ' + src.doi), [src.volume, src.issue].filter(Boolean).join('/'));
-    else if (src.kind === 'Artikel') parts.push(src.journal);
-    const line = parts.filter(Boolean).join(' · ');
-    if (line) box.appendChild(elText('div', 'muted', line));
-    if (src.page) box.appendChild(elText('div', 'muted', 'S. ' + src.page));
-    if (src.isbn) box.appendChild(elText('div', 'muted', 'ISBN ' + src.isbn));
-    if (src.url) {
-      const a = document.createElement('a'); a.href = src.url; a.target = '_blank'; a.rel = 'noopener';
-      a.textContent = 'Link öffnen' + (src.accessed ? ` (abgerufen ${src.accessed})` : '');
-      box.appendChild(a);
-    }
-    panel.appendChild(detailRow('Quelle', box));
+  const refs = (item.refs || []).map((r) => ({ r, src: byId(data.sources, r.sourceId) })).filter((x) => x.src);
+  if (refs.length) {
+    const wrap = el('div');
+    refs.forEach(({ r, src }) => {
+      const box = el('div', 'ref-detail');
+      box.appendChild(elText('div', '', sourceLabel(src)));  // Nachname, Vorname – Titel
+      // kontextuelle Detailzeile je nach Art
+      let parts = [src.kind, src.year];
+      if (src.kind === 'Buch') parts.push(src.publisher);
+      else if (src.kind === 'Paper') parts.push(src.journal, src.doi && ('DOI ' + src.doi), [src.volume, src.issue].filter(Boolean).join('/'));
+      else if (src.kind === 'Artikel') parts.push(src.journal);
+      const line = parts.filter(Boolean).join(' · ');
+      if (line) box.appendChild(elText('div', 'muted', line));
+      const pages = r.pages || src.page;   // Seiten am Eintrag, sonst Fundstelle der Quelle
+      if (pages) box.appendChild(elText('div', 'muted', 'S. ' + pages));
+      if (src.isbn) box.appendChild(elText('div', 'muted', 'ISBN ' + src.isbn));
+      if (src.url) {
+        const a = document.createElement('a'); a.href = src.url; a.target = '_blank'; a.rel = 'noopener';
+        a.textContent = 'Link öffnen' + (src.accessed ? ` (abgerufen ${src.accessed})` : '');
+        box.appendChild(a);
+      }
+      if (r.quote) {
+        const q = el('blockquote', 'ref-quote');
+        q.textContent = `„${r.quote}"`;
+        box.appendChild(q);
+      }
+      wrap.appendChild(box);
+    });
+    panel.appendChild(detailRow(refs.length > 1 ? 'Quellen' : 'Quelle', wrap));
   }
 
   if (item.kind === 'person') {

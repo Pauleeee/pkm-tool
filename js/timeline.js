@@ -341,8 +341,12 @@ export class TimelineView {
     if (ev.start) lines.push(ev.end ? `${fmtDate(ev.start)} – ${fmtDate(ev.end)}` : fmtDate(ev.start));
     if (ev.personId) { const p = byId(data.items, ev.personId); if (p) lines.push(p.title); }
     if (ev.description) lines.push(ev.description);
-    const src = ev.sourceId ? byId(data.sources, ev.sourceId) : null;
-    if (src) lines.push('Quelle: ' + src.title);
+    const refs = ev.refs || [];
+    for (const r of refs.slice(0, 2)) {
+      const src = byId(data.sources, r.sourceId);
+      if (src) lines.push('Quelle: ' + src.title + (r.pages ? ', S. ' + r.pages : ''));
+    }
+    if (refs.length > 2) lines.push(`… ${refs.length - 2} weitere Quellen`);
     return lines.join('\n') || undefined;
   }
 

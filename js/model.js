@@ -50,7 +50,11 @@ export function makeItem(p = {}) {
     order: typeof p.order === 'number' ? p.order : 0,
     lane: typeof p.lane === 'number' ? p.lane : 0,   // person: vertikale Zeile
     row: typeof p.row === 'number' ? p.row : 0,      // event: Unterzeile in der Person
-    sourceId: p.sourceId || null,
+    // Quellen-Referenzen: MEHRERE je Eintrag, mit Seiten und optionalem Zitat.
+    // Migriert das Alt-Feld sourceId (einzeln) → refs[0].
+    refs: Array.isArray(p.refs)
+      ? p.refs.map((r) => ({ sourceId: r.sourceId || null, pages: r.pages || '', quote: r.quote || '' })).filter((r) => r.sourceId)
+      : (p.sourceId ? [{ sourceId: p.sourceId, pages: '', quote: '' }] : []),
     description: p.description || '',
   };
 }

@@ -298,6 +298,22 @@ a { color: var(--accent-ink); }
 }
 .sub-chip.sub-add:hover { color: var(--ink); border-color: var(--accent); background: var(--accent-weak); }
 
+/* Quellen-Referenzen im Eintrags-Dialog */
+.ref-list { display: flex; flex-direction: column; gap: 8px; margin: 4px 0 8px; }
+.ref-box { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; background: #fcfcfe; }
+.ref-row { display: flex; gap: 8px; align-items: center; }
+.ref-row + .ref-row { margin-top: 6px; }
+.ref-row select { flex: 1; min-width: 0; font: inherit; font-size: 13px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 7px; background: #fff; }
+.ref-row input { flex: 1; min-width: 0; font: inherit; font-size: 13px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 7px; background: #fff; }
+.ref-row .ref-pages { flex: 0 0 130px; }
+
+/* Quellen im Detailpanel */
+.ref-detail + .ref-detail { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); }
+.ref-quote {
+  margin: 6px 0 0; padding: 6px 10px; font-style: italic; color: var(--ink-soft);
+  border-left: 3px solid var(--accent); background: var(--accent-weak); border-radius: 0 8px 8px 0;
+}
+
 /* Live-Farbfeld */
 .color-preview { display: flex; align-items: center; gap: 9px; }
 .color-preview-swatch {
