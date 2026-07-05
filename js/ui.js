@@ -4,7 +4,7 @@ import {
   byId, persons, makeSource, makeCategory, makeSubcategory, itemColor, catName,
   subcatsOf, subcatName, subcatColor, getEntryColor, CATEGORY_PALETTE,
   SOURCE_KINDS, authorName, sourceLabel, sortedSources, fmtDate,
-} from './model.js?v=18';
+} from './model.js?v=19';
 
 // ---------- generisches Modal ----------
 export function openModal(buildContent) {

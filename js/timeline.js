@@ -6,7 +6,7 @@
 //   ein-/ausgeklappt werden.
 // Zeitliche Änderungen NUR über den Bearbeiten-Dialog (kein Drag).
 
-import { byId, getEntryColor, readableText, rgba, persons, toDate, fmtDate } from './model.js?v=18';
+import { byId, getEntryColor, readableText, rgba, persons, toDate, fmtDate } from './model.js?v=19';
 
 const NO_FILTERS = { categories: [], subcategories: [] };
 
@@ -348,6 +348,15 @@ export class TimelineView {
 
   setSelection(ids) { this.timeline.setSelection(ids); }
   fit() { this.timeline.fit(); }
+
+  // Zum Eintrag springen (Suche): zentrieren ohne Zoom-Änderung. false, wenn
+  // das Item gerade nicht gerendert ist (z. B. weggefiltert).
+  focusItem(id) {
+    if (!this.itemsDS.get(id)) return false;
+    this.timeline.setSelection([id]);
+    this.timeline.focus(id, { animation: true, zoom: false });
+    return true;
+  }
 
   // Layout der Kind-Zeitpunkte anwenden (vom Overlay nach Platz-Messung gesteuert):
   // `align` ('right' → Kasten wächst nach links, rechte Kante = Datum) und Größenstufe

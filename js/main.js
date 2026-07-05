@@ -1,12 +1,12 @@
 // Bootstrap & Steuerung: hält den App-Zustand, verdrahtet Toolbar, Timeline,
 // Overlay (Verbindungen), Filter und Modals; speichert nach jeder Änderung.
 
-import { LocalStorageStore, exportJson, importJson } from './store.js?v=18';
-import * as model from './model.js?v=18';
-import { TimelineView } from './timeline.js?v=18';
-import { OverlayLayer } from './connections.js?v=18';
-import { FilterBar } from './filters.js?v=18';
-import * as ui from './ui.js?v=18';
+import { LocalStorageStore, exportJson, importJson } from './store.js?v=19';
+import * as model from './model.js?v=19';
+import { TimelineView } from './timeline.js?v=19';
+import { OverlayLayer } from './connections.js?v=19';
+import { FilterBar } from './filters.js?v=19';
+import * as ui from './ui.js?v=19';
 
 const store = new LocalStorageStore();
 
@@ -39,7 +39,10 @@ async function init() {
     onConnClick: editConnection,
     onPointAlign: (map) => timelineView.applyPointAlign(map),
   });
-  filterBar = new FilterBar(document.getElementById('filter-bar'), { onChange: render });
+  filterBar = new FilterBar(document.getElementById('filter-bar'), {
+    onChange: render,
+    onSearchSelect: focusSearchResult,
+  });
 
   wireToolbar();
   filterBar.setData(data);
@@ -88,6 +91,18 @@ function handleSelect(ids) {
   renderDetail();
 }
 function selectItem(id) { selectedItemId = id; timelineView.setSelection([id]); renderDetail(); }
+
+// Suchtreffer: Eintrag selektieren, Detailpanel zeigen und Zeitleiste dorthin
+// scrollen. Kinder eingeklappter Container vorher aufklappen (sonst nicht im DOM);
+// weggefilterte Treffer werden nur selektiert (kein Auto-Entfiltern).
+function focusSearchResult(id) {
+  const it = model.byId(data.items, id);
+  if (!it) return;
+  if (it.personId && collapsed.has(it.personId)) collapsed.delete(it.personId);
+  selectedItemId = id;
+  render();
+  timelineView.focusItem(id);
+}
 
 function handleItemClick(props) {
   if (!linkMode.active || !props.item) return;
@@ -218,7 +233,7 @@ function movePerson(id, dir) {  // dir -1 = höher, +1 = tiefer
   it.lane = laneClash(it, target) ? target - dir * 0.5 : target;
   normalizeLanes(list);
   render(); persist();
-}
+} 
 
 function moveEvent(id, dir) {  // Unterzeile innerhalb der Person
   const e = model.byId(data.items, id);

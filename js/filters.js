@@ -1,25 +1,31 @@
-// Filter-/Legendenleiste: nach Kategorie (Farb-Legende), Unterkategorie (Chips)
-// und Quelle (Dropdown, sortiert nach Autor-Nachnamen).
+// Filter-/Legendenleiste: Suche, nach Kategorie (Farb-Legende), Unterkategorie
+// (Chips) und Quelle (Dropdown, sortiert nach Autor-Nachnamen).
 // Ausblenden versteckt die zugehörigen Einträge (eine ausgeblendete Person
 // versteckt auch ihre Ereignisse).
 
-import { subcatColor, sortedSources, sourceLabel } from './model.js?v=18';
+import { byId, subcatColor, sortedSources, sourceLabel } from './model.js?v=19';
 
 export class FilterBar {
   constructor(el, cb) {
     this.el = el;
-    this.cb = cb; // { onChange() }
+    this.cb = cb; // { onChange(), onSearchSelect(id) }
     this.data = null;
     this.offCats = new Set();
     this.offSubs = new Set();
     this.sourceFilter = '';   // '' = alle Quellen, sonst eine source-id
+    this.searchQuery = '';
   }
 
   setData(data) { this.data = data; this.render(); }
 
+  focusSearch() { const i = this.el.querySelector('.search-input'); if (i) { i.focus(); i.select(); } }
+
   render() {
     const d = this.data;
     this.el.innerHTML = '';
+
+    this.el.appendChild(this._searchBox());
+    this.el.appendChild(sep());
 
     if (d.categories.length) {
       this.el.appendChild(label('Kategorien'));
@@ -49,6 +55,77 @@ export class FilterBar {
       sel.addEventListener('change', () => { this.sourceFilter = sel.value; this.cb.onChange(); });
       this.el.appendChild(sel);
     }
+  }
+
+  // ---------- Suche ----------
+  // Sucht in Titel, Notiz und Quellen-Label; Trefferliste als Dropdown unterm
+  // Feld. Klick/Enter springt zum Eintrag (cb.onSearchSelect). Treffer, die
+  // gerade weggefiltert sind, erscheinen ausgegraut (kein Auto-Entfiltern).
+  _searchBox() {
+    const box = el('span', 'search-box');
+    const input = document.createElement('input');
+    input.type = 'search'; input.className = 'search-input';
+    input.placeholder = 'Suchen…  ( / )';
+    input.value = this.searchQuery;
+    const results = el('div', 'search-results');
+    results.hidden = true;
+    box.appendChild(input); box.appendChild(results);
+
+    const show = () => {
+      const q = input.value.trim().toLowerCase();
+      this.searchQuery = input.value;
+      results.innerHTML = '';
+      if (q.length < 2) { results.hidden = true; return; }
+      const hits = this._searchMatches(q);
+      if (!hits.length) {
+        const row = el('div', 'search-hit muted'); row.textContent = 'Keine Treffer';
+        results.appendChild(row);
+      } else {
+        const visible = this.visibleIds();
+        for (const it of hits) {
+          const row = el('div', 'search-hit' + (visible.has(it.id) ? '' : ' dim'));
+          const icon = it.kind === 'person' ? '👤' : '◆';
+          const year = it.start ? String(it.start).split('-')[0] : '';
+          row.appendChild(elText('span', 'hit-title', `${icon} ${it.title}`));
+          const meta = [year, visible.has(it.id) ? '' : 'ausgeblendet durch Filter'].filter(Boolean).join(' · ');
+          if (meta) row.appendChild(elText('span', 'hit-meta', meta));
+          // mousedown statt click: feuert vor dem blur des Suchfelds
+          row.addEventListener('mousedown', (e) => { e.preventDefault(); results.hidden = true; this.cb.onSearchSelect(it.id); });
+          results.appendChild(row);
+        }
+      }
+      results.hidden = false;
+    };
+    input.addEventListener('input', show);
+    input.addEventListener('focus', show);
+    input.addEventListener('blur', () => setTimeout(() => { results.hidden = true; }, 150));
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const first = this._searchMatches(input.value.trim().toLowerCase())[0];
+        if (first) { results.hidden = true; this.cb.onSearchSelect(first.id); }
+      } else if (e.key === 'Escape') {
+        input.value = ''; this.searchQuery = ''; results.hidden = true; input.blur();
+      }
+    });
+    return box;
+  }
+
+  _searchMatches(q) {
+    if (!q || q.length < 2) return [];
+    const d = this.data;
+    const srcLabel = (it) => { const s = it.sourceId ? byId(d.sources, it.sourceId) : null; return s ? sourceLabel(s) : ''; };
+    const scored = [];
+    for (const it of d.items) {
+      const title = (it.title || '').toLowerCase();
+      let score = -1;
+      if (title.startsWith(q)) score = 0;
+      else if (title.includes(q)) score = 1;
+      else if ((it.description || '').toLowerCase().includes(q)) score = 2;
+      else if (srcLabel(it).toLowerCase().includes(q)) score = 3;
+      if (score >= 0) scored.push([score, it]);
+    }
+    scored.sort((a, b) => a[0] - b[0] || (a[1].title || '').localeCompare(b[1].title || '', 'de'));
+    return scored.slice(0, 15).map(([, it]) => it);
   }
 
   _chip({ text, color, off, onToggle }) {
@@ -106,3 +183,5 @@ export class FilterBar {
 function toggle(set, key) { set.has(key) ? set.delete(key) : set.add(key); }
 function label(txt) { const s = document.createElement('span'); s.className = 'filter-section-label'; s.textContent = txt; return s; }
 function sep() { const s = document.createElement('span'); s.className = 'filter-sep'; return s; }
+function el(tag, cls) { const e = document.createElement(tag); if (cls) e.className = cls; return e; }
+function elText(tag, cls, txt) { const e = el(tag, cls); e.textContent = txt; return e; }
