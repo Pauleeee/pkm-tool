@@ -52,9 +52,27 @@ export class FilterBar {
       sel.className = 'filter-select';
       const opts = [['', '📖 Alle Quellen'], ...sortedSources(d).map((s) => [s.id, sourceLabel(s)])];
       opts.forEach(([v, t]) => { const o = document.createElement('option'); o.value = v; o.textContent = t; if (v === this.sourceFilter) o.selected = true; sel.appendChild(o); });
-      sel.addEventListener('change', () => { this.sourceFilter = sel.value; this.cb.onChange(); });
+      sel.addEventListener('change', () => { this.sourceFilter = sel.value; this.render(); this.cb.onChange(); });
       this.el.appendChild(sel);
     }
+
+    // Rechts: „Zurücksetzen" (nur bei aktivem Filter) + Zähler „X / Y sichtbar"
+    const meta = el('span', 'filter-meta');
+    if (this._anyFilterActive()) {
+      const reset = el('button', 'chip filter-reset');
+      reset.type = 'button'; reset.textContent = '✕ Zurücksetzen';
+      reset.addEventListener('click', () => {
+        this.offCats.clear(); this.offSubs.clear(); this.sourceFilter = '';
+        this.render(); this.cb.onChange();
+      });
+      meta.appendChild(reset);
+    }
+    meta.appendChild(elText('span', 'filter-count', `${this.visibleIds().size} / ${d.items.length} sichtbar`));
+    this.el.appendChild(meta);
+  }
+
+  _anyFilterActive() {
+    return this.offCats.size > 0 || this.offSubs.size > 0 || !!this.sourceFilter;
   }
 
   // ---------- Suche ----------

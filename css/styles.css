@@ -113,6 +113,12 @@ body { display: flex; flex-direction: column; }
 .search-hit.muted { cursor: default; color: var(--muted); }
 .search-hit.muted:hover { background: none; }
 
+/* Filter-Reset + Zähler (rechtsbündig in der Filterleiste) */
+.filter-meta { margin-left: auto; display: inline-flex; align-items: center; gap: 10px; }
+.filter-reset { font: inherit; border-color: #f1c9c4; color: #c0392b; }
+.filter-reset:hover { background: #fdecea; }
+.filter-count { font-size: 11px; color: var(--muted); font-weight: 600; white-space: nowrap; }
+
 /* ---------- Hint ---------- */
 .hint-bar {
   padding: 9px 18px; font-size: 13px; font-weight: 550;

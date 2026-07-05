@@ -10,7 +10,8 @@
       "Bash(echo \"exit=$?\")",
       "Bash(python3 -c \"print\\('hi'\\)\")",
       "Bash(/usr/bin/python3 -c \"print\\('hi'\\)\")",
-      "Bash(/usr/bin/python3 serve.py 8091)"
+      "Bash(/usr/bin/python3 serve.py 8091)",
+      "Bash(node a2.js)"
     ]
   }
 }
