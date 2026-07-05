@@ -469,7 +469,7 @@ export function renderDetail(panel, item, data, cb) {
 
   const act = el('div', 'detail-actions');
   act.appendChild(btn('✎ Bearbeiten', 'btn-primary', () => cb.onEdit(item.id)));
-  if (item.kind !== 'era') act.appendChild(btn('🔗 Verknüpfen', '', () => cb.onLinkFrom(item.id)));
+  act.appendChild(btn('🔗 Verknüpfen', '', () => cb.onLinkFrom(item.id)));
   if (item.kind === 'person') {
     const collapsed = cb.isCollapsed ? cb.isCollapsed(item.id) : false;
     act.appendChild(btn(collapsed ? '▸ Ereignisse zeigen' : '▾ Ereignisse einklappen', '', () => cb.onToggleCollapse(item.id)));
@@ -491,6 +491,52 @@ export function renderDetail(panel, item, data, cb) {
     mv.appendChild(btn('▼ tiefer', '', () => cb.onMoveEvent(item.id, 1)));
     panel.appendChild(mv);
   }
+}
+
+// ---------- Hilfe ----------
+// Statischer Inhalt (kein Nutzertext) → innerHTML ist hier unbedenklich.
+export function openHelp() {
+  openModal((close) => {
+    const frag = el('div', 'help');
+    frag.innerHTML = `
+      <h3>Hilfe &amp; Tastenkürzel</h3>
+      <h4>Grundlagen</h4>
+      <ul>
+        <li><strong>Klick</strong> auf einen Eintrag → Details rechts im Panel.</li>
+        <li><strong>Doppelklick auf eine freie Stelle</strong> → neues Ereignis an diesem Datum.</li>
+        <li><strong>Doppelklick auf Person/Container</strong> → Ereignisse ein-/ausklappen; auf ein Ereignis → bearbeiten.</li>
+        <li><strong>Ziehen</strong> (Person oder Welt-Ereignis, hoch/runter) → in andere Zeile verschieben. Beim Ziehen erscheinen <em>gestrichelte Einfüge-Zeilen</em>: Drop dorthin legt eine neue Zeile an. Feinsortierung auch per ▲▼ im Detailpanel.</li>
+      </ul>
+      <h4>Navigation (Trackpad/Maus)</h4>
+      <ul>
+        <li><strong>Pinch</strong> oder <strong>Cmd/Ctrl + Mausrad</strong> → zoomen (um den Cursor).</li>
+        <li><strong>Zwei Finger links/rechts</strong> → Zeitfenster verschieben; <strong>hoch/runter</strong> → Seite scrollen.</li>
+      </ul>
+      <h4>Toolbar</h4>
+      <ul>
+        <li><strong>🔗 Verknüpfen</strong> — zwei Einträge nacheinander anklicken → Verbindungspfeil mit Beziehung.</li>
+        <li><strong>↔ Verbindungen</strong> — Pfeile ein-/ausblenden · <strong>⊟ Einklappen</strong> — alle Container zu/auf · <strong>▒ Schattierung</strong> — Kontextbänder der Welt-Ereignisse.</li>
+      </ul>
+      <h4>Filter</h4>
+      <ul>
+        <li>Chips anklicken = Kategorie/Unterkategorie <em>ausblenden</em> (grau). <strong>Achtung:</strong> sobald Unterkategorien ausgeblendet sind, verschwinden auch Ereignisse <em>ohne</em> sichtbare Unterkategorie.</li>
+        <li>„✕ Zurücksetzen" stellt alles wieder her; der Zähler zeigt „sichtbar / gesamt".</li>
+      </ul>
+      <h4>Tastenkürzel</h4>
+      <table class="help-keys">
+        <tr><td><kbd>n</kbd></td><td>Neuer Eintrag</td></tr>
+        <tr><td><kbd>f</kbd></td><td>Alles einpassen</td></tr>
+        <tr><td><kbd>/</kbd></td><td>Suche fokussieren</td></tr>
+        <tr><td><kbd>Cmd/Ctrl</kbd>+<kbd>Z</kbd></td><td>Löschen/Import rückgängig</td></tr>
+        <tr><td><kbd>Enter</kbd></td><td>Dialog speichern</td></tr>
+        <tr><td><kbd>Esc</kbd></td><td>Dialog/Verknüpfungsmodus schließen</td></tr>
+      </table>`;
+    const bar = el('div', 'modal-actions');
+    const right = el('div', 'right'); right.appendChild(btn('Schließen', 'btn-primary', close));
+    bar.appendChild(right);
+    frag.appendChild(bar);
+    return frag;
+  });
 }
 
 // ---------- DOM-Helfer ----------

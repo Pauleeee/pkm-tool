@@ -386,6 +386,7 @@ function wireToolbar() {
   document.getElementById('btn-categories').addEventListener('click', () => ui.openCategoryManager(data, { onChange: refreshAll, onSnapshot: snapshot }));
   document.getElementById('btn-sources').addEventListener('click', () => ui.openSourceManager(data, { onChange: refreshAll, onSnapshot: snapshot }));
   document.getElementById('btn-fit').addEventListener('click', () => timelineView.fit());
+  document.getElementById('btn-help').addEventListener('click', () => ui.openHelp());
   document.getElementById('btn-export').addEventListener('click', () => exportJson(data));
   const fileInput = document.getElementById('import-file');
   document.getElementById('btn-import').addEventListener('click', () => fileInput.click());
