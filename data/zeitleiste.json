@@ -1,0 +1,1061 @@
+{
+  "items": [
+    {
+      "id": "it_mqzo3zj4_d",
+      "kind": "person",
+      "title": "Isaac Newton",
+      "start": "1643-01-04",
+      "end": "1727-03-31",
+      "categoryId": "cat_mqzo3zj4_1",
+      "subcategoryIds": [
+        "sub_mqzo3zj4_6",
+        "sub_mqzo3zj4_7"
+      ],
+      "personId": null,
+      "order": 1,
+      "lane": 2,
+      "row": 0,
+      "refs": [],
+      "description": "Begründer der klassischen Mechanik."
+    },
+    {
+      "id": "it_mqzo3zj4_e",
+      "kind": "person",
+      "title": "Ludwig Boltzmann",
+      "start": "1844-02-20",
+      "end": "1906-09-05",
+      "categoryId": "cat_mqzo3zj4_1",
+      "subcategoryIds": [
+        "sub_mqzo3zj4_6"
+      ],
+      "personId": null,
+      "order": 2,
+      "lane": 2,
+      "row": 0,
+      "refs": [],
+      "description": "Begründer der statistischen Mechanik."
+    },
+    {
+      "id": "it_mqzo3zj4_f",
+      "kind": "person",
+      "title": "Albert Einstein",
+      "start": "1879-03-14",
+      "end": "1955-04-18",
+      "categoryId": "cat_mqzo3zj4_1",
+      "subcategoryIds": [
+        "sub_mqzo3zj4_6"
+      ],
+      "personId": null,
+      "order": 3,
+      "lane": 1,
+      "row": 0,
+      "refs": [],
+      "description": "Begründer der Relativitätstheorie."
+    },
+    {
+      "id": "it_mqzo3zj4_g",
+      "kind": "person",
+      "title": "Franklin D. Roosevelt",
+      "start": "1882-01-30",
+      "end": "1945-04-12",
+      "categoryId": "cat_mqzo3zj4_2",
+      "subcategoryIds": [
+        "sub_mqzo3zj4_9"
+      ],
+      "personId": null,
+      "order": 4,
+      "lane": 8,
+      "row": 0,
+      "refs": [],
+      "description": "32. Präsident der USA."
+    },
+    {
+      "id": "it_mqzo3zj4_h",
+      "kind": "event",
+      "title": "Principia Mathematica",
+      "start": "1687-07-05",
+      "end": null,
+      "categoryId": "cat_mqzo3zj4_1",
+      "subcategoryIds": [
+        "sub_mqzo3zj4_7",
+        "sub_mqzo3zj4_6"
+      ],
+      "personId": "it_mqzo3zj4_d",
+      "order": 0,
+      "lane": 0,
+      "row": 3,
+      "refs": [],
+      "description": "Bewegungsgesetze und Gravitationsgesetz."
+    },
+    {
+      "id": "it_mqzo3zj4_n",
+      "kind": "event",
+      "title": "Nobelpreis",
+      "start": "1921-12-10",
+      "end": null,
+      "categoryId": "cat_mqzo3zj4_1",
+      "subcategoryIds": [
+        "sub_mqzo3zj4_6"
+      ],
+      "personId": "it_mqzo3zj4_f",
+      "order": 0,
+      "lane": 0,
+      "row": 4,
+      "refs": [],
+      "description": "Für den photoelektrischen Effekt."
+    },
+    {
+      "id": "it_mqzo3zj4_p",
+      "kind": "event",
+      "title": "Brief an Roosevelt",
+      "start": "1939-08-02",
+      "end": null,
+      "categoryId": "cat_mqzo3zj4_2",
+      "subcategoryIds": [],
+      "personId": "it_mqzo3zj4_f",
+      "order": 0,
+      "lane": 0,
+      "row": 4,
+      "refs": [],
+      "description": "Warnung vor deutschen Atomwaffen."
+    },
+    {
+      "id": "it_mqzo3zj4_q",
+      "kind": "event",
+      "title": "US-Präsidentschaft",
+      "start": "1933-03-04",
+      "end": "1945-04-12",
+      "categoryId": "cat_mqzo3zj4_2",
+      "subcategoryIds": [
+        "sub_mqzo3zj4_9"
+      ],
+      "personId": "it_mqzo3zj4_g",
+      "order": 0,
+      "lane": 0,
+      "row": 0,
+      "refs": [],
+      "description": "Vier Amtszeiten."
+    },
+    {
+      "id": "it_mqzo3zj4_s",
+      "kind": "event",
+      "title": "1. Weltkrieg",
+      "start": "1914-07-28",
+      "end": "1918-11-11",
+      "categoryId": "cat_mqzo3zj4_2",
+      "subcategoryIds": [
+        "sub_mqzo3zj4_8"
+      ],
+      "personId": null,
+      "order": 0,
+      "lane": 2,
+      "row": 0,
+      "refs": [],
+      "description": ""
+    },
+    {
+      "id": "it_mqzo3zj4_t",
+      "kind": "event",
+      "title": "Spanische Grippe",
+      "start": "1918-01-01",
+      "end": "1920-12-31",
+      "categoryId": "cat_mqzo3zj4_4",
+      "subcategoryIds": [],
+      "personId": null,
+      "order": 0,
+      "lane": 3,
+      "row": 0,
+      "refs": [],
+      "description": "Weltweite Influenza-Pandemie."
+    },
+    {
+      "id": "it_mqzo3zj4_u",
+      "kind": "event",
+      "title": "NS-Herrschaft",
+      "start": "1933-01-30",
+      "end": "1945-05-08",
+      "categoryId": "cat_mqzo3zj4_2",
+      "subcategoryIds": [],
+      "personId": null,
+      "order": 0,
+      "lane": 0,
+      "row": 0,
+      "refs": [],
+      "description": ""
+    },
+    {
+      "id": "it_mqzo3zj4_v",
+      "kind": "event",
+      "title": "2. Weltkrieg",
+      "start": "1939-09-01",
+      "end": "1945-09-02",
+      "categoryId": "cat_mqzo3zj4_2",
+      "subcategoryIds": [
+        "sub_mqzo3zj4_8"
+      ],
+      "personId": null,
+      "order": 0,
+      "lane": 3,
+      "row": 0,
+      "refs": [],
+      "description": ""
+    },
+    {
+      "id": "it_mqzobes0_1",
+      "kind": "person",
+      "title": "Napoleon Bonaparte",
+      "start": "1769-08-15",
+      "end": "1821-05-05",
+      "categoryId": "cat_mqzo3zj4_2",
+      "subcategoryIds": [
+        "sub_mqzo3zj4_9"
+      ],
+      "personId": null,
+      "order": 0,
+      "lane": 8,
+      "row": 0,
+      "refs": [
+        {
+          "sourceId": "src_mqzp3ahh_2",
+          "pages": "",
+          "quote": ""
+        }
+      ],
+      "description": ""
+    },
+    {
+      "id": "it_mqzpakp5_3",
+      "kind": "event",
+      "title": "Napoleonische Kriege",
+      "start": "1792-01-01",
+      "end": "1815-01-01",
+      "categoryId": "cat_mqzo3zj4_2",
+      "subcategoryIds": [
+        "sub_mqzo3zj4_8"
+      ],
+      "personId": null,
+      "order": 0,
+      "lane": 4,
+      "row": 0,
+      "refs": [],
+      "description": ""
+    },
+    {
+      "id": "it_mr14msgt_4",
+      "kind": "person",
+      "title": "Jakob Bernoulli",
+      "start": "1655-01-06",
+      "end": "1705-08-16",
+      "categoryId": "cat_mqzo3zj4_1",
+      "subcategoryIds": [
+        "sub_mqzo3zj4_7"
+      ],
+      "personId": null,
+      "order": 0,
+      "lane": 4,
+      "row": 0,
+      "refs": [],
+      "description": ""
+    },
+    {
+      "id": "it_mr14q3bu_6",
+      "kind": "person",
+      "title": "Thomas Bayes",
+      "start": "1701",
+      "end": "1761-04-1761",
+      "categoryId": "cat_mqzo3zj4_1",
+      "subcategoryIds": [
+        "sub_mqzo3zj4_7",
+        "sub_mr14n3hw_5"
+      ],
+      "personId": null,
+      "order": 0,
+      "lane": 5,
+      "row": 0,
+      "refs": [],
+      "description": ""
+    },
+    {
+      "id": "it_mr14sywo_7",
+      "kind": "person",
+      "title": "Carl Friedrich Gauß",
+      "start": "1777-04-30",
+      "end": "1855-02-23",
+      "categoryId": "cat_mqzo3zj4_1",
+      "subcategoryIds": [
+        "sub_mqzo3zj4_7",
+        "sub_mr14n3hw_5"
+      ],
+      "personId": null,
+      "order": 0,
+      "lane": 5,
+      "row": 0,
+      "refs": [],
+      "description": ""
+    },
+    {
+      "id": "it_mr14vtij_8",
+      "kind": "person",
+      "title": "Pierre-Simon Laplace",
+      "start": "1749-03-23",
+      "end": "1827-03-18",
+      "categoryId": "cat_mqzo3zj4_1",
+      "subcategoryIds": [
+        "sub_mqzo3zj4_7",
+        "sub_mr14n3hw_5"
+      ],
+      "personId": null,
+      "order": 0,
+      "lane": 4,
+      "row": 0,
+      "refs": [],
+      "description": ""
+    },
+    {
+      "id": "it_mr14xkqw_9",
+      "kind": "person",
+      "title": "Francis Galton",
+      "start": "1822-02-16",
+      "end": "1911-01-17",
+      "categoryId": "cat_mqzo3zj4_1",
+      "subcategoryIds": [
+        "sub_mqzo3zj4_7",
+        "sub_mr14n3hw_5"
+      ],
+      "personId": null,
+      "order": 0,
+      "lane": 6,
+      "row": 0,
+      "refs": [],
+      "description": ""
+    },
+    {
+      "id": "it_mr14zet9_a",
+      "kind": "person",
+      "title": "Edward Lorenz",
+      "start": "1917-05-23",
+      "end": "2008-04-16",
+      "categoryId": "cat_mqzo3zj4_1",
+      "subcategoryIds": [
+        "sub_mqzo3zj4_7",
+        "sub_mr14n3hw_5"
+      ],
+      "personId": null,
+      "order": 0,
+      "lane": 4,
+      "row": 0,
+      "refs": [],
+      "description": ""
+    },
+    {
+      "id": "it_mr2ax778_2",
+      "kind": "person",
+      "title": "Johannes Gutenberg",
+      "start": "1400",
+      "end": "1468",
+      "categoryId": "cat_mqzo3zj4_5",
+      "subcategoryIds": [],
+      "personId": null,
+      "order": 0,
+      "lane": 7,
+      "row": 0,
+      "refs": [],
+      "description": ""
+    },
+    {
+      "id": "it_mr2ayopj_3",
+      "kind": "event",
+      "title": "Erfindung Buchdruck",
+      "start": "1450",
+      "end": null,
+      "categoryId": "cat_mqzo3zj4_5",
+      "subcategoryIds": [],
+      "personId": "it_mr2ax778_2",
+      "order": 0,
+      "lane": 0,
+      "row": 0,
+      "refs": [],
+      "description": ""
+    },
+    {
+      "id": "it_mr2dhxhy_5",
+      "kind": "person",
+      "title": "Erwin Schrödinger",
+      "start": "1887-08-12",
+      "end": "1961-01-04",
+      "categoryId": "cat_mqzo3zj4_1",
+      "subcategoryIds": [
+        "sub_mqzo3zj4_6"
+      ],
+      "personId": null,
+      "order": 0,
+      "lane": 3,
+      "row": 0,
+      "refs": [],
+      "description": ""
+    },
+    {
+      "id": "it_mr2e12t2_1",
+      "kind": "event",
+      "title": "CORONA - Pandemie",
+      "start": "2019-12",
+      "end": "2023-05",
+      "categoryId": "cat_mqzo3zj4_4",
+      "subcategoryIds": [],
+      "personId": null,
+      "order": 0,
+      "lane": 3,
+      "row": 0,
+      "refs": [],
+      "description": ""
+    },
+    {
+      "id": "it_mr2e6uys_2",
+      "kind": "event",
+      "title": "Russischer Überfall auf die Ukraine",
+      "start": "2022-02-22",
+      "end": "now",
+      "categoryId": "cat_mqzo3zj4_2",
+      "subcategoryIds": [
+        "sub_mqzo3zj4_8"
+      ],
+      "personId": null,
+      "order": 0,
+      "lane": 2,
+      "row": 0,
+      "refs": [],
+      "description": ""
+    },
+    {
+      "id": "it_mr6f1bl8_1",
+      "kind": "person",
+      "title": "Ludwig XIV",
+      "start": "1638-09-05",
+      "end": "1715-09-01",
+      "categoryId": "cat_mqzo3zj4_2",
+      "subcategoryIds": [
+        "sub_mqzo3zj4_9"
+      ],
+      "personId": null,
+      "order": 0,
+      "lane": 8,
+      "row": 0,
+      "refs": [
+        {
+          "sourceId": "src_mqzp3ahh_2",
+          "pages": "",
+          "quote": ""
+        }
+      ],
+      "description": "Der Sonnenkönig"
+    },
+    {
+      "id": "it_mr6f3ci9_2",
+      "kind": "person",
+      "title": "Ludwig XV",
+      "start": "1710-02-15",
+      "end": "1774-05-10",
+      "categoryId": "cat_mqzo3zj4_2",
+      "subcategoryIds": [
+        "sub_mqzo3zj4_9"
+      ],
+      "personId": null,
+      "order": 0,
+      "lane": 10,
+      "row": 0,
+      "refs": [],
+      "description": ""
+    },
+    {
+      "id": "it_mr6f6j1v_3",
+      "kind": "person",
+      "title": "Ludwig XVI",
+      "start": "1754-08-23",
+      "end": "1793-01-21",
+      "categoryId": "cat_mqzo3zj4_2",
+      "subcategoryIds": [
+        "sub_mqzo3zj4_9"
+      ],
+      "personId": null,
+      "order": 0,
+      "lane": 9,
+      "row": 0,
+      "refs": [
+        {
+          "sourceId": "src_mqzp3ahh_2",
+          "pages": "",
+          "quote": ""
+        }
+      ],
+      "description": ""
+    },
+    {
+      "id": "it_mr6f9i37_4",
+      "kind": "event",
+      "title": "König von Frankreich",
+      "start": "1774-05-10",
+      "end": "1792-09-21",
+      "categoryId": "cat_mqzo3zj4_2",
+      "subcategoryIds": [
+        "sub_mqzo3zj4_9"
+      ],
+      "personId": "it_mr6f6j1v_3",
+      "order": 0,
+      "lane": 0,
+      "row": 0,
+      "refs": [
+        {
+          "sourceId": "src_mqzp3ahh_2",
+          "pages": "",
+          "quote": ""
+        }
+      ],
+      "description": ""
+    },
+    {
+      "id": "it_mr6fcm0t_5",
+      "kind": "event",
+      "title": "König von Frankreich",
+      "start": "1643-05-14",
+      "end": "1715-09-01",
+      "categoryId": "cat_mqzo3zj4_2",
+      "subcategoryIds": [
+        "sub_mqzo3zj4_9"
+      ],
+      "personId": "it_mr6f1bl8_1",
+      "order": 0,
+      "lane": 0,
+      "row": 0,
+      "refs": [
+        {
+          "sourceId": "src_mqzp3ahh_2",
+          "pages": "",
+          "quote": ""
+        }
+      ],
+      "description": ""
+    },
+    {
+      "id": "it_mr6fgnlk_6",
+      "kind": "event",
+      "title": "König von Frankreich",
+      "start": "1715-09-01",
+      "end": "1774-02-10",
+      "categoryId": "cat_mqzo3zj4_2",
+      "subcategoryIds": [
+        "sub_mqzo3zj4_9"
+      ],
+      "personId": "it_mr6f3ci9_2",
+      "order": 0,
+      "lane": 0,
+      "row": 1,
+      "refs": [],
+      "description": "Hat keine Interesse an den Regierungsgeschäften und hat sich von seinen Mätressen beeinflussen lassen. Konnte nie zur Größe von Ludwig XIV kommen"
+    },
+    {
+      "id": "it_mr7votcr_1",
+      "kind": "event",
+      "title": "Napoleon Kaiser",
+      "start": "1804-05-18",
+      "end": "1814-04-16",
+      "categoryId": "cat_mqzo3zj4_2",
+      "subcategoryIds": [
+        "sub_mqzo3zj4_9"
+      ],
+      "personId": "it_mqzobes0_1",
+      "order": 0,
+      "lane": 0,
+      "row": 0,
+      "refs": [
+        {
+          "sourceId": "src_mqzp3ahh_2",
+          "pages": "",
+          "quote": ""
+        }
+      ],
+      "description": ""
+    },
+    {
+      "id": "it_mr7vr8fd_2",
+      "kind": "event",
+      "title": "100 Tage Herrschaft",
+      "start": "1815-03-20",
+      "end": "1815",
+      "categoryId": "cat_mqzo3zj4_2",
+      "subcategoryIds": [
+        "sub_mqzo3zj4_9"
+      ],
+      "personId": "it_mqzobes0_1",
+      "order": 0,
+      "lane": 0,
+      "row": 0,
+      "refs": [],
+      "description": "Regentschaft begin mit der Rückkehr aus dem Exil und endet mit der Niederlage von Waterlooo"
+    },
+    {
+      "id": "it_mr80qkky_3",
+      "kind": "person",
+      "title": "Heinrich VIII",
+      "start": "1491-06-28",
+      "end": "1547-01-28",
+      "categoryId": "cat_mqzo3zj4_2",
+      "subcategoryIds": [
+        "sub_mqzo3zj4_9"
+      ],
+      "personId": null,
+      "order": 0,
+      "lane": 5,
+      "row": 0,
+      "refs": [
+        {
+          "sourceId": "src_mqzp3ahh_2",
+          "pages": "",
+          "quote": ""
+        }
+      ],
+      "description": ""
+    },
+    {
+      "id": "it_mr80s64s_4",
+      "kind": "event",
+      "title": "König von England",
+      "start": "1509",
+      "end": "1547",
+      "categoryId": "cat_mqzo3zj4_2",
+      "subcategoryIds": [
+        "sub_mqzo3zj4_9"
+      ],
+      "personId": "it_mr80qkky_3",
+      "order": 0,
+      "lane": 0,
+      "row": 0,
+      "refs": [
+        {
+          "sourceId": "src_mqzp3ahh_2",
+          "pages": "",
+          "quote": ""
+        }
+      ],
+      "description": "Führt die Kirchenspaltung bei"
+    },
+    {
+      "id": "it_mr80u0ck_5",
+      "kind": "person",
+      "title": "Martin Luther",
+      "start": "1483-11-10",
+      "end": "1546-02-18",
+      "categoryId": "cat_mqzo3zj4_5",
+      "subcategoryIds": [],
+      "personId": null,
+      "order": 0,
+      "lane": 8,
+      "row": 0,
+      "refs": [],
+      "description": ""
+    },
+    {
+      "id": "it_mr85odni_1",
+      "kind": "person",
+      "title": "Giulio de’ Medici",
+      "start": "1478-05-56",
+      "end": "1534-09-25",
+      "categoryId": "cat_mqzo3zj4_5",
+      "subcategoryIds": [],
+      "personId": null,
+      "order": 0,
+      "lane": 4,
+      "row": 0,
+      "refs": [
+        {
+          "sourceId": "src_mqzp3ahh_2",
+          "pages": "",
+          "quote": ""
+        }
+      ],
+      "description": "später Papst Clemens VII"
+    },
+    {
+      "id": "it_mr85pecb_2",
+      "kind": "event",
+      "title": "Clemens VII",
+      "start": "1523-11-15",
+      "end": "1534-09-25",
+      "categoryId": "cat_mqzo3zj4_5",
+      "subcategoryIds": [],
+      "personId": "it_mr85odni_1",
+      "order": 0,
+      "lane": 0,
+      "row": 1,
+      "refs": [
+        {
+          "sourceId": "src_mqzp3ahh_2",
+          "pages": "",
+          "quote": ""
+        }
+      ],
+      "description": ""
+    },
+    {
+      "id": "it_mr85tt1t_3",
+      "kind": "event",
+      "title": "Erklärung der Gültigkeit der Ehe von Heinrich VII",
+      "start": "1534-05-23",
+      "end": null,
+      "categoryId": "cat_mqzo3zj4_5",
+      "subcategoryIds": [],
+      "personId": "it_mr85odni_1",
+      "order": 0,
+      "lane": 0,
+      "row": 0,
+      "refs": [
+        {
+          "sourceId": "src_mqzp3ahh_2",
+          "pages": "",
+          "quote": ""
+        }
+      ],
+      "description": ""
+    },
+    {
+      "id": "it_mr85wpb4_5",
+      "kind": "event",
+      "title": "95 Thesen werden an die Schlosskirche in Wittenberg angeschlagen",
+      "start": "1517-10-31",
+      "end": null,
+      "categoryId": "cat_mqzo3zj4_1",
+      "subcategoryIds": [],
+      "personId": "it_mr80u0ck_5",
+      "order": 0,
+      "lane": 0,
+      "row": 0,
+      "refs": [],
+      "description": ""
+    },
+    {
+      "id": "it_mr86f1kg_6",
+      "kind": "person",
+      "title": "Giovanni de’ Medici",
+      "start": "1475-12-11",
+      "end": "1521-12-01",
+      "categoryId": "cat_mqzo3zj4_5",
+      "subcategoryIds": [],
+      "personId": null,
+      "order": 0,
+      "lane": 6,
+      "row": 0,
+      "refs": [],
+      "description": "Später Papst Leo X"
+    },
+    {
+      "id": "it_mr86gc3u_7",
+      "kind": "event",
+      "title": "Papst Leo X",
+      "start": "1513-03-11",
+      "end": "1521-12-01",
+      "categoryId": "cat_mqzo3zj4_1",
+      "subcategoryIds": [],
+      "personId": "it_mr86f1kg_6",
+      "order": 0,
+      "lane": 0,
+      "row": 0,
+      "refs": [],
+      "description": "Exkommuniziert Luther"
+    },
+    {
+      "id": "it_mr86lgqm_9",
+      "kind": "person",
+      "title": "Galileo Galilei",
+      "start": "1546-02-15",
+      "end": "1641-12-29",
+      "categoryId": "cat_mqzo3zj4_1",
+      "subcategoryIds": [
+        "sub_mqzo3zj4_6"
+      ],
+      "personId": null,
+      "order": 0,
+      "lane": 1,
+      "row": 0,
+      "refs": [],
+      "description": ""
+    },
+    {
+      "id": "it_mr86o8a7_a",
+      "kind": "person",
+      "title": "Johannes Kepler",
+      "start": "1572-01-06",
+      "end": "1630-11-15",
+      "categoryId": "cat_mqzo3zj4_1",
+      "subcategoryIds": [
+        "sub_mqzo3zj4_6"
+      ],
+      "personId": null,
+      "order": 0,
+      "lane": 3,
+      "row": 0,
+      "refs": [],
+      "description": ""
+    },
+    {
+      "id": "it_mr89szfj_1",
+      "kind": "person",
+      "title": "Leonardo da Vinci",
+      "start": "1452-04-15",
+      "end": "1519-05-02",
+      "categoryId": "cat_mqzo3zj4_3",
+      "subcategoryIds": [],
+      "personId": null,
+      "order": 0,
+      "lane": 0,
+      "row": 0,
+      "refs": [
+        {
+          "sourceId": "src_mr07qa1k_1",
+          "pages": "",
+          "quote": ""
+        }
+      ],
+      "description": "- Davinci war Autodidakt und war zu schlecht um auf die Uni zu gehen\n- Er hat nachweislich viele Dinge nicht zu Ende gebracht weil er getrieben war neue Sachen zu erlernen"
+    },
+    {
+      "id": "it_mr89v4db_2",
+      "kind": "event",
+      "title": "Flusslandschaft",
+      "start": "1473-08-05",
+      "end": null,
+      "categoryId": "cat_mqzo3zj4_3",
+      "subcategoryIds": [],
+      "personId": "it_mr89szfj_1",
+      "order": 0,
+      "lane": 0,
+      "row": 0,
+      "refs": [
+        {
+          "sourceId": "src_mr07qa1k_1",
+          "pages": "",
+          "quote": ""
+        }
+      ],
+      "description": "Erstes dokumentiertes Bild da Vincies"
+    },
+    {
+      "id": "it_mr89ygmz_3",
+      "kind": "event",
+      "title": "Renaissance",
+      "start": "1500",
+      "end": "1600",
+      "categoryId": "cat_mqzo3zj4_5",
+      "subcategoryIds": [],
+      "personId": null,
+      "order": 0,
+      "lane": 1,
+      "row": 0,
+      "refs": [],
+      "description": ""
+    },
+    {
+      "id": "it_mr89zx06_4",
+      "kind": "event",
+      "title": "Mittelalter",
+      "start": "500",
+      "end": "1500",
+      "categoryId": "cat_mqzo3zj4_5",
+      "subcategoryIds": [],
+      "personId": null,
+      "order": 0,
+      "lane": 2,
+      "row": 0,
+      "refs": [],
+      "description": ""
+    },
+    {
+      "id": "it_mr8a16xu_5",
+      "kind": "event",
+      "title": "Barock",
+      "start": "1600",
+      "end": "1720",
+      "categoryId": "cat_mqzo3zj4_1",
+      "subcategoryIds": [],
+      "personId": null,
+      "order": 0,
+      "lane": 2,
+      "row": 0,
+      "refs": [],
+      "description": ""
+    },
+    {
+      "id": "it_mr8a3fsg_7",
+      "kind": "event",
+      "title": "Aufklärung",
+      "start": "1720",
+      "end": "1800",
+      "categoryId": "cat_mqzo3zj4_5",
+      "subcategoryIds": [],
+      "personId": null,
+      "order": 0,
+      "lane": 1,
+      "row": 0,
+      "refs": [],
+      "description": ""
+    },
+    {
+      "id": "it_mr9qe7w0_1",
+      "kind": "event",
+      "title": "Das letzte Abendmahl wird erstellt",
+      "start": "1495",
+      "end": "1497",
+      "categoryId": "cat_mqzo3zj4_3",
+      "subcategoryIds": [],
+      "personId": "it_mr89szfj_1",
+      "order": 0,
+      "lane": 0,
+      "row": 1,
+      "refs": [
+        {
+          "sourceId": "src_mr07qa1k_1",
+          "pages": "",
+          "quote": ""
+        }
+      ],
+      "description": "in Mailand  Refektorium des Dominikanerklosters Santa Maria delle Grazie in Mailand. Eckold Matthias beschreibt in seinem Buch das Da Vinci in der Zeit eigentlich Hausmeister"
+    },
+    {
+      "id": "it_mr9qjrjq_2",
+      "kind": "person",
+      "title": "Nikolaus Kopernikus",
+      "start": "1473-02-19",
+      "end": "1543-05-24",
+      "categoryId": "cat_mqzo3zj4_1",
+      "subcategoryIds": [
+        "sub_mqzo3zj4_6"
+      ],
+      "personId": null,
+      "order": 0,
+      "lane": 2,
+      "row": 0,
+      "refs": [],
+      "description": ""
+    }
+  ],
+  "categories": [
+    {
+      "id": "cat_mqzo3zj4_1",
+      "name": "Wissenschaft",
+      "color": "#6366f1"
+    },
+    {
+      "id": "cat_mqzo3zj4_2",
+      "name": "Politik",
+      "color": "#ef4444"
+    },
+    {
+      "id": "cat_mqzo3zj4_3",
+      "name": "Kunst",
+      "color": "#f59e0b"
+    },
+    {
+      "id": "cat_mqzo3zj4_4",
+      "name": "Natur",
+      "color": "#10b981"
+    },
+    {
+      "id": "cat_mqzo3zj4_5",
+      "name": "Gesellschaft",
+      "color": "#8b5cf6"
+    }
+  ],
+  "subcategories": [
+    {
+      "id": "sub_mqzo3zj4_6",
+      "name": "Physik",
+      "categoryId": "cat_mqzo3zj4_1",
+      "color": "#53d5fd"
+    },
+    {
+      "id": "sub_mqzo3zj4_7",
+      "name": "Mathematik",
+      "categoryId": "cat_mqzo3zj4_1",
+      "color": "#006d8f"
+    },
+    {
+      "id": "sub_mqzo3zj4_8",
+      "name": "Krieg",
+      "categoryId": "cat_mqzo3zj4_2",
+      "color": null
+    },
+    {
+      "id": "sub_mqzo3zj4_9",
+      "name": "Regierung",
+      "categoryId": "cat_mqzo3zj4_2",
+      "color": null
+    },
+    {
+      "id": "sub_mr14n3hw_5",
+      "name": "Statistik",
+      "categoryId": "cat_mqzo3zj4_1",
+      "color": null
+    }
+  ],
+  "connections": [
+    {
+      "id": "cn_mqzo3zj4_11",
+      "fromId": "it_mqzo3zj4_p",
+      "toId": "it_mqzo3zj4_q",
+      "label": "",
+      "relation": "gerichtet an"
+    },
+    {
+      "id": "cn_mr85ua7e_4",
+      "fromId": "it_mr85tt1t_3",
+      "toId": "it_mr80s64s_4",
+      "label": "",
+      "relation": "verbunden"
+    },
+    {
+      "id": "cn_mr86ibcp_8",
+      "fromId": "it_mr86gc3u_7",
+      "toId": "it_mr80u0ck_5",
+      "label": "Exkommunikation",
+      "relation": "verbunden"
+    }
+  ],
+  "sources": [
+    {
+      "id": "src_mqzp3ahh_2",
+      "title": "Power",
+      "authorFirst": "Robert",
+      "authorLast": "Green",
+      "kind": "Buch",
+      "year": "1998",
+      "page": "533",
+      "publisher": "Hansen",
+      "isbn": "",
+      "journal": "",
+      "doi": "",
+      "volume": "",
+      "issue": "",
+      "url": "",
+      "accessed": ""
+    },
+    {
+      "id": "src_mr07qa1k_1",
+      "title": "Leonardos Erbe",
+      "authorFirst": "Matthias",
+      "authorLast": "Eckoldt",
+      "kind": "Buch",
+      "year": "2019",
+      "page": "",
+      "publisher": "Penguin Verlag",
+      "isbn": "978-3-323-10328-8",
+      "journal": "",
+      "doi": "",
+      "volume": "",
+      "issue": "",
+      "url": "",
+      "accessed": ""
+    }
+  ],
+  "meta": {
+    "version": 5,
+    "updated": "2026-07-08T21:01:38.166Z"
+  }
+}
