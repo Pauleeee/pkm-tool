@@ -178,6 +178,7 @@ export function openItemModal(data, item, cb) {
     renderRefs();
 
     const desc = textareaField('Notiz / Beschreibung', item?.description || '');
+    desc.wrap.appendChild(elText('div', 'md-hint', 'Formatierung: **fett** · *kursiv* · `code` · [Link](https://…) · „- " Liste'));
 
     frag.appendChild(kind.wrap);
     frag.appendChild(title.wrap);
@@ -459,7 +460,11 @@ export function renderDetail(panel, item, data, cb) {
     if (wrap.childNodes.length) panel.appendChild(detailRow('Unterkategorien', wrap));
   }
 
-  if (item.description) panel.appendChild(detailRow('Notiz', elText('div', '', item.description)));
+  if (item.description) {
+    const note = el('div', 'md');
+    note.innerHTML = mdLite(item.description);
+    panel.appendChild(detailRow('Notiz', note));
+  }
 
   const refs = (item.refs || []).map((r) => ({ r, src: byId(data.sources, r.sourceId) })).filter((x) => x.src);
   if (refs.length) {
@@ -548,6 +553,33 @@ export function renderDetail(panel, item, data, cb) {
     mv.appendChild(btn('▼ tiefer', '', () => cb.onMoveEvent(item.id, 1)));
     panel.appendChild(mv);
   }
+}
+
+// ---------- Markdown-light ----------
+// Mini-Renderer für Notizen (nur Detailpanel): **fett**, *kursiv*, `code`,
+// [Text](http…-Link), "- "-Listen, Zeilenumbrüche. Erst wird ALLES escaped,
+// dann werden die Muster ersetzt → kein HTML/Script aus Nutzertext.
+export function mdLite(text) {
+  let s = String(text)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  s = s.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+  s = s.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
+  s = s.replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, '$1<em>$2</em>');
+  s = s.replace(/`([^`\n]+)`/g, '<code>$1</code>');
+
+  const out = [];
+  let list = null;   // offene <ul>-Zeilen sammeln
+  for (const line of s.split('\n')) {
+    if (/^\s*-\s+/.test(line)) {
+      (list = list || []).push('<li>' + line.replace(/^\s*-\s+/, '') + '</li>');
+    } else {
+      if (list) { out.push('<ul>' + list.join('') + '</ul>'); list = null; }
+      out.push(line);
+    }
+  }
+  if (list) out.push('<ul>' + list.join('') + '</ul>');
+  // Normale Zeilen mit <br> verbinden; vor/nach Listen keinen extra Umbruch
+  return out.map((seg, i) => (seg.startsWith('<ul>') || i === out.length - 1 ? seg : seg + '<br>')).join('');
 }
 
 // ---------- Hilfe ----------

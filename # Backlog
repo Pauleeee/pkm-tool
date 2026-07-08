@@ -9,7 +9,7 @@
 - [x] A5 Tastatur-Shortcuts: n = neuer Eintrag, f = Einpassen, / = Suche
 - [x] A6 Hilfe-Dialog (?-Button): Legende, Gesten, Filter-Semantik, Shortcuts; Wording vereinheitlicht, toter era-Code raus
 - [x] B1 Mehrere Quellen pro Eintrag (refs: Quelle + Seiten + Zitat), Migration von sourceId, Detailpanel/Filter/Tooltip angepasst
-- [ ] B2 Markdown-light im Notizfeld (fett/kursiv/Code/Links/Listen), gerendert im Detailpanel
+- [x] B2 Markdown-light im Notizfeld (fett/kursiv/Code/Links/Listen), gerendert im Detailpanel
 
 ## 📋 Geplant
 - [ ]
