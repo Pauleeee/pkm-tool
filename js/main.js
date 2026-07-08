@@ -1,12 +1,12 @@
 // Bootstrap & Steuerung: hält den App-Zustand, verdrahtet Toolbar, Timeline,
 // Overlay (Verbindungen), Filter und Modals; speichert nach jeder Änderung.
 
-import { LocalStorageStore, exportJson, importJson } from './store.js?v=19';
-import * as model from './model.js?v=19';
-import { TimelineView } from './timeline.js?v=19';
-import { OverlayLayer } from './connections.js?v=19';
-import { FilterBar } from './filters.js?v=19';
-import * as ui from './ui.js?v=19';
+import { LocalStorageStore, exportJson, importJson } from './store.js?v=20';
+import * as model from './model.js?v=20';
+import { TimelineView } from './timeline.js?v=20';
+import { OverlayLayer } from './connections.js?v=20';
+import { FilterBar } from './filters.js?v=20';
+import * as ui from './ui.js?v=20';
 
 const store = new LocalStorageStore();
 

@@ -139,6 +139,14 @@ im **Detailpanel** (`ui.js`).
 
 ## Konventionen & Stolperfallen
 
+- **Design „Bronze & Papier"** (Referenz: `design_handoff_zeitleiste/`): alle Farbtokens als
+  oklch-Werte in `css/styles.css` (`--accent`, `--accent-soft`, `--accent-ink`, `--surface(-2)`,
+  `--line`, `--ink(-soft)`, `--muted` …), Radius bewusst fast eckig (`--radius: 1px` überall),
+  Schriften **Source Serif 4** (Brand-Titel, Detail-`h2`, Modal-`h3`, `--font-serif`) +
+  **Manrope** (Rest, `--font`) via Google Fonts in `index.html`. Übergänge bewusst instant
+  (keine Transitions). Die Rail-Labels „◆ Ereignisse" / „● Personen" sind **gedrehte
+  vis-Gruppenlabels** (`writing-mode:vertical-rl` + `rotate(180deg)` auf `.grp-events`/`.grp-lane
+  .vis-inner`; Text nur in der jeweils ersten Zeile, `overflow:visible` nötig).
 - **⚠️ NIE `position` auf `.vis-item` setzen!** vis positioniert Items mit `position:absolute`
   + `transform`. Ein `position:relative`-Override (z. B. als Anker für ein `::after`) reißt die
   Items aus dem absoluten Layout → sie fließen horizontal nacheinander (jedes weitere wird nach
@@ -165,7 +173,7 @@ im **Detailpanel** (`ui.js`).
   `__events` (`order:-1e9`) bleibt oben. Überlappen sich Personen in einer Zeile, stapelt vis sie.
 - **Browser-Cache / `serve.py`:** `python3 -m http.server` lässt ES-Module aggressiv cachen →
   Änderungen wirken erst nach hartem Reload. `serve.py` schickt `Cache-Control: no-store`
-  (empfohlener Dev-Server). Modul-Imports tragen einmalig `?v=18`, um alten Cache zu umgehen;
+  (empfohlener Dev-Server). Modul-Imports tragen einmalig `?v=20`, um alten Cache zu umgehen;
   bei größeren Umbauten ggf. erhöhen (mit `serve.py` aber nicht nötig).
 - **Keine Zeit-Drags:** `editable:false`. Datum/Fachliches ausschließlich über den Bearbeiten-Dialog.
 - **Item↔DOM-Verknüpfung:** jedes vis-Item hat Klasse `id-<itemId>`; Person ist über ihren
@@ -188,17 +196,20 @@ im **Detailpanel** (`ui.js`).
   der Container-Zeit liegt, ragt die Mini-Markierung heraus (Datenfrage, kein Layout-Bug). Da vis
   überlappende Einträge stapelt, liegen die Rects verschiedener Zeilen ohnehin vertikal getrennt
   → keine Rahmen-Überlappung.
-- **Ereignis-Formen (eckig):** Zeitpunkt = `pkm-ev-point` (`border-radius:4px`, per-Item
+- **Ereignis-Formen (eckig):** Zeitpunkt = `pkm-ev-point` (`border-radius:1px`, per-Item
   `align:'left'` → linke Kante = Startdatum; bei Platznot Stufen `align:'right'` /
   `pkm-ev-small` (10px Schrift, max-width 130px) / `pkm-ev-dot` (6px-Markierung, Text versteckt,
   Ereignis im Tooltip) — **die CSS-Werte dieser Klassen MÜSSEN zu `MEASURE`/`DOT_W` in
-  connections.js passen**, sonst stimmt die Platz-Messung nicht mehr; Datums-Marker ist ein
+  connections.js passen**, sonst stimmt die Platz-Messung nicht mehr (Normalstufe seit dem
+  Redesign: 11px Schrift, padX 18, max-width 150px); Datums-Marker ist ein
   **SVG-Pfeil im Overlay** (`_drawArrows`, `.pkm-ev-marker`), **kein** CSS-Pseudo-Element mehr;
   lange Labels **verlängern den Kasten nicht**, sondern werden gekappt —
-  `.pkm-ev-point .vis-item-content { max-width:160px; overflow:hidden; text-overflow:ellipsis }`
+  `.pkm-ev-point .vis-item-content { max-width:150px; overflow:hidden; text-overflow:ellipsis }`
   (Volltext im Tooltip, analog zu den Personen-Balken)), Zeitraum = `pkm-ev-range`
-  (`border-radius:3px`, **ohne** weiße Endkappen — clean; Beschriftung mittig via globalem
+  (`border-radius:1px`, **ohne** weiße Endkappen — clean; Beschriftung mittig via globalem
   `align:'center'`; Label gekappt auf `max-width:100%`, ragt nicht über den Balken).
+  Oberste Ebene (Welt-Ereignis/Container) trägt zusätzlich `pkm-top` → größerer Chip
+  (12.5px/700); Kind-Ereignisse bleiben 11px/600 (nur die werden vom Overlay vermessen).
   WICHTIG: an `.vis-item.pkm-event` **kein** `position:relative`/`transform`-Override (vis
   positioniert per `transform: translate` — Umklappen daher über vis-`align`, nicht per CSS).
 - **Overlay-Größe:** SVG hat ohne explizite Größe nur 300×150; `draw()` setzt jedes Mal

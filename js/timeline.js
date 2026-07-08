@@ -6,7 +6,7 @@
 //   ein-/ausgeklappt werden.
 // Zeitliche Änderungen NUR über den Bearbeiten-Dialog (kein Drag).
 
-import { byId, getEntryColor, readableText, rgba, persons, toDate, fmtDate } from './model.js?v=19';
+import { byId, getEntryColor, readableText, rgba, persons, toDate, fmtDate } from './model.js?v=20';
 
 const NO_FILTERS = { categories: [], subcategories: [] };
 
@@ -239,11 +239,11 @@ export class TimelineView {
     const eVals = eLaneVals.length ? eLaneVals : [0];
     eVals.forEach((v, i) => groups.push({
       id: 'elane_' + v, order: -100000 + v, className: 'grp-events' + (i === 0 ? ' grp-first' : ''),
-      content: i === 0 ? 'Ereignisse' : '', subgroupStack: true, subgroupOrder: subOrder,
+      content: i === 0 ? '◆ Ereignisse' : '', subgroupStack: true, subgroupOrder: subOrder,
     }));
     laneVals.forEach((v, i) => groups.push({
       id: 'lane_' + v, order: v, className: 'grp-lane',
-      content: i === 0 ? 'Personen' : '', subgroupStack: true, subgroupOrder: subOrder,
+      content: i === 0 ? '● Personen' : '', subgroupStack: true, subgroupOrder: subOrder,
     }));
     this.groupsDS.clear();
     this.groupsDS.add(groups);
@@ -284,7 +284,7 @@ export class TimelineView {
       end: toDate(p.end || p.start, 'end'),
       type: 'range',
       className: `pkm-item pkm-life id-${p.id}`,
-      style: `background:${rgba(col, 0.16)}; color:${'#33405a'}; border:1px solid ${rgba(col, 0.55)};`,
+      style: `background:${rgba(col, 0.16)}; color:oklch(30% 0.02 265); border:1px solid ${col};`,
       // Hover: Titel immer zeigen (Label im Balken kann gekappt sein), plus Beschreibung
       title: [`${p.title} · ${years}`, p.description].filter(Boolean).join('\n'),
       editable: { updateTime: false, updateGroup: true, remove: false }, // Person vertikal ziehbar
@@ -312,8 +312,9 @@ export class TimelineView {
       // Zeitpunkt: linke Kante = Startdatum (überschreibt globales align:'center');
       // Zeitraum: undefined → globales align:'center'.
       align: isRange ? undefined : 'left',
-      // Zeitraum (Start+Ende) vs. Zeitpunkt → unterschiedliche Form (CSS)
-      className: `pkm-item pkm-event ${isRange ? 'pkm-ev-range' : 'pkm-ev-point'} id-${ev.id}`,
+      // Zeitraum (Start+Ende) vs. Zeitpunkt → unterschiedliche Form (CSS);
+      // pkm-top = oberste Ebene (Welt-Ereignis/Container) → größerer Chip
+      className: `pkm-item pkm-event ${isRange ? 'pkm-ev-range' : 'pkm-ev-point'}${isTop ? ' pkm-top' : ''} id-${ev.id}`,
       style: `background:${col}; border-color:${rgba(col, 0)}; color:${fg};`,
       title: this._tooltip(ev, data),
       // Welt-Ereignisse (oberste Ebene) vertikal ziehbar; Kind-Ereignisse über ▲▼

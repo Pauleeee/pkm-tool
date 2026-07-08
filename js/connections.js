@@ -7,15 +7,15 @@
 //      wählt eine Layout-Stufe: normal → kleinere Schrift → nur Markierung
 //      (Tooltip zeigt das Ereignis), jeweils links- oder rechtsbündig am Datum.
 
-import { persons, worldEvents, eventsOf, getEntryColor, rgba } from './model.js?v=19';
+import { persons, worldEvents, eventsOf, getEntryColor, rgba } from './model.js?v=20';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
 // Muss zu den CSS-Regeln in styles.css passen (.pkm-ev-point / .pkm-ev-small):
 // font = Schriftgröße, padX = horizontales Padding gesamt, maxW = max-width des Kastens.
 const MEASURE = {
-  normal: { font: 12.5, padX: 22, maxW: 160 },
-  small:  { font: 10,   padX: 14, maxW: 130 },
+  normal: { font: 11, padX: 18, maxW: 150 },
+  small:  { font: 10, padX: 14, maxW: 130 },
 };
 const DOT_W = 8;   // Breite der Mini-Markierung (.pkm-ev-dot) inkl. Toleranz
 

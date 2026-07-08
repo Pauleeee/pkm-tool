@@ -3,7 +3,7 @@
 // Ausblenden versteckt die zugehörigen Einträge (eine ausgeblendete Person
 // versteckt auch ihre Ereignisse).
 
-import { byId, subcatColor, sortedSources, sourceLabel } from './model.js?v=19';
+import { byId, subcatColor, sortedSources, sourceLabel } from './model.js?v=20';
 
 export class FilterBar {
   constructor(el, cb) {
@@ -67,7 +67,7 @@ export class FilterBar {
       });
       meta.appendChild(reset);
     }
-    meta.appendChild(elText('span', 'filter-count', `${this.visibleIds().size} / ${d.items.length} sichtbar`));
+    meta.appendChild(elText('span', 'filter-count', `${this.visibleIds().size} sichtbar / ${d.items.length} gesamt`));
     this.el.appendChild(meta);
   }
 

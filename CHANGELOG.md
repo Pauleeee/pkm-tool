@@ -3,6 +3,26 @@
 Entwicklungs-Protokoll der Zeitleiste-App (rekonstruiert aus der Entwicklungs-Session,
 neueste Änderungen oben). Datumsangaben grob; die App ist noch in aktiver Entwicklung.
 
+## Redesign „Bronze & Papier" nach Design-Handoff (2026-07-08)
+- **Neues visuelles System** gemäß `design_handoff_zeitleiste/README.md` umgesetzt —
+  komplettes Re-Theming, keine Funktionsänderungen:
+  - oklch-Farbtokens (Papier-Töne, Bronze-Akzent), Radius fast eckig (`--radius: 1px` überall),
+    neue Schatten; Übergänge bewusst instant (Transitions entfernt).
+  - Schriften: **Source Serif 4** (Brand-Titel, Detail-Titel, Modal-Überschriften) +
+    **Manrope** (alles andere) via Google Fonts.
+  - Header/Filterleiste mit den Design-Maßen (16px 28px bzw. 12px 28px), Logo-Kachel 36px,
+    quadratischer „?"-Button (`.btn-icon`), Chips eckig, aus = Opacity 0.4.
+  - Zähler-Format jetzt „N sichtbar / M gesamt".
+  - Rail-Labels „◆ Ereignisse" / „● Personen" als **gedrehte** vis-Gruppenlabels in Akzentfarbe.
+  - Detailpanel 360px/24px, Leerzustand mit ◷-Glyphe, Zitat-Blockquote in Akzent-Soft (Serif).
+  - Ereignis-Chips: Kinder 11px/600 (MEASURE in connections.js synchron angepasst:
+    font 11 / padX 18 / maxW 150), oberste Ebene neu mit Klasse `pkm-top` → 12.5px/700;
+    Lebensbalken mit voller Kategorie-Kontur und Tinte `oklch(30% 0.02 265)`.
+- **Nicht übernommen** (bewusst): die Länder-Gruppierung aus dem Prototyp — das Datenmodell
+  hat kein `country`-Feld, und die Gruppierung würde mit dem manuellen Zeilen-Drag
+  (`lane`-Konzept) kollidieren. Bei Bedarf als eigenes Feature nachziehen.
+- Cache-Buster auf `?v=20`.
+
 ## Drag & Drop repariert, Zeilen-Integrität, Tooltip mit Datum (2026-07-05)
 - **Drag & Drop funktioniert jetzt wirklich** — drei Ursachen behoben:
   1. vis startet einen Item-Drag nur auf **vorher selektierten** Items → Ziehen ging erst nach

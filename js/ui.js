@@ -4,7 +4,7 @@ import {
   byId, persons, makeSource, makeCategory, makeSubcategory, itemColor, catName,
   subcatsOf, subcatName, subcatColor, getEntryColor, CATEGORY_PALETTE,
   SOURCE_KINDS, authorName, sourceLabel, sortedSources, fmtDate,
-} from './model.js?v=19';
+} from './model.js?v=20';
 
 // ---------- Toast (kurze Meldung unten, optional mit Aktion z. B. „Rückgängig") ----------
 let toastTimer = null;
@@ -432,7 +432,8 @@ function openSourceForm(data, s, cb, after) {
 export function renderDetail(panel, item, data, cb) {
   panel.innerHTML = '';
   if (!item) {
-    panel.innerHTML = '<div class="detail-empty"><p>Klicke einen Eintrag an, um Details zu sehen.</p>' +
+    panel.innerHTML = '<div class="detail-empty"><div class="detail-empty-glyph">◷</div>' +
+      '<p>Klicke einen Eintrag an,<br>um Details zu sehen.</p>' +
       '<p class="muted">Doppelklick auf eine freie Stelle legt ein neues Ereignis an.</p></div>';
     return;
   }

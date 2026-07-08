@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,500&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <style>
+    html, body { margin: 0; padding: 0; }
+    * { box-sizing: border-box; }
+    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar-thumb { background: oklch(85% 0.01 75); border-radius: 8px; border: 2px solid transparent; background-clip: content-box; }
+  </style>
+</helmet>
+
+<div style="{{ rootVars }}--surface:oklch(99% 0.003 75);--surface-2:oklch(95.3% 0.009 75);--line:oklch(89% 0.012 75);--ink:oklch(27% 0.015 265);--ink-soft:oklch(42% 0.015 265);--muted:oklch(58% 0.012 265);--science:oklch(56% 0.1 210);--science-soft:oklch(93% 0.03 210);--politics:oklch(54% 0.1 320);--politics-soft:oklch(93% 0.03 320);--nature:oklch(56% 0.09 150);--nature-soft:oklch(93% 0.03 150);--radius:1px;--radius-sm:1px;--shadow-sm:0 1px 2px oklch(20% 0.02 265 / 0.06), 0 1px 3px oklch(20% 0.02 265 / 0.05);--shadow:0 14px 34px oklch(20% 0.02 265 / 0.10), 0 2px 8px oklch(20% 0.02 265 / 0.06);font-family:'Manrope',system-ui,sans-serif;color:var(--ink);background:var(--bg);height:100vh;overflow:hidden;display:flex;flex-direction:column;">
+
+  <!-- Header -->
+  <header style="display:flex;align-items:center;gap:20px;padding:16px 28px;background:oklch(99% 0.003 75 / 0.85);backdrop-filter:saturate(160%) blur(12px);border-bottom:1px solid var(--line);flex-wrap:wrap;">
+    <div style="display:flex;align-items:center;gap:12px;white-space:nowrap;">
+      <div style="width:36px;height:36px;display:grid;place-items:center;border-radius:1px;font-size:18px;color:var(--surface);background:var(--accent);box-shadow:var(--shadow-sm);font-family:'Source Serif 4',serif;">◷</div>
+      <div style="display:flex;flex-direction:column;line-height:1.1;">
+        <span style="font-family:'Source Serif 4',serif;font-weight:600;font-size:19px;letter-spacing:-0.01em;">Zeitleiste</span>
+        <span style="font-size:11px;color:var(--muted);letter-spacing:.04em;">Buchnotizen</span>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+      <button style="font:inherit;font-size:13px;font-weight:600;padding:9px 16px;border:none;border-radius:1px;background:var(--accent);color:var(--surface);cursor:pointer;box-shadow:0 2px 10px oklch(46% 0.1 55 / 0.35);white-space:nowrap;flex:none;" onClick="{{ openAddModal }}">＋ Eintrag</button>
+      <button style="font:inherit;font-size:13px;font-weight:600;padding:9px 15px;border:1px solid var(--line);border-radius:1px;background:var(--surface);color:var(--ink-soft);cursor:pointer;box-shadow:var(--shadow-sm);white-space:nowrap;flex:none;">🔗 Verknüpfen</button>
+      <button style="font:inherit;font-size:13px;font-weight:600;padding:9px 15px;border:1px solid {{ connBorder }};border-radius:1px;background:{{ connBg }};color:{{ connColor }};cursor:pointer;box-shadow:var(--shadow-sm);white-space:nowrap;flex:none;" onClick="{{ toggleConnections }}">↔ Verbindungen</button>
+      <button style="font:inherit;font-size:13px;font-weight:600;padding:9px 15px;border:1px solid {{ shadeBorder }};border-radius:1px;background:{{ shadeBg }};color:{{ shadeColor }};cursor:pointer;box-shadow:var(--shadow-sm);white-space:nowrap;flex:none;" onClick="{{ toggleShading }}">▒ Schattierung</button>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:8px;margin-left:auto;flex-wrap:wrap;">
+      <button style="font:inherit;font-size:13px;font-weight:600;padding:9px 15px;border:1px solid var(--line);border-radius:1px;background:var(--surface);color:var(--ink-soft);cursor:pointer;box-shadow:var(--shadow-sm);white-space:nowrap;flex:none;">🎨 Kategorien</button>
+      <button style="font:inherit;font-size:13px;font-weight:600;padding:9px 15px;border:1px solid var(--line);border-radius:1px;background:var(--surface);color:var(--ink-soft);cursor:pointer;box-shadow:var(--shadow-sm);white-space:nowrap;flex:none;">📖 Quellen</button>
+      <button style="font:inherit;font-size:13px;font-weight:600;padding:9px 15px;border:1px solid var(--line);border-radius:1px;background:var(--surface);color:var(--ink-soft);cursor:pointer;box-shadow:var(--shadow-sm);white-space:nowrap;flex:none;">⤢ Einpassen</button>
+      <button style="font:inherit;font-size:13px;font-weight:700;width:34px;height:34px;border:1px solid var(--line);border-radius:1px;background:var(--surface);color:var(--ink-soft);cursor:pointer;box-shadow:var(--shadow-sm);flex:none;" onClick="{{ openHelp }}">?</button>
+    </div>
+  </header>
+
+  <!-- Filter bar -->
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 28px;background:oklch(99% 0.003 75 / 0.55);border-bottom:1px solid var(--line);">
+    <span style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700;margin-right:2px;">Kategorien</span>
+    <sc-for list="{{ filters }}" as="f" hint-placeholder-count="3">
+      <span style="display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;padding:6px 13px;border:1px solid var(--line);border-radius:1px;background:var(--surface);color:var(--ink-soft);cursor:pointer;user-select:none;box-shadow:var(--shadow-sm);opacity:{{ f.opacity }};white-space:nowrap;" onClick="{{ f.onClick }}">
+        <span style="width:10px;height:10px;border-radius:50%;flex:none;background:{{ f.color }};"></span>
+        {{ f.name }}
+      </span>
+    </sc-for>
+    <span style="width:1px;height:16px;background:var(--line);margin:0 6px;"></span>
+    <span style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700;margin-right:2px;">Länder</span>
+    <sc-for list="{{ countryFilters }}" as="c" hint-placeholder-count="3">
+      <span style="display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;padding:6px 13px;border:1px solid var(--line);border-radius:1px;background:var(--surface);color:var(--ink-soft);cursor:pointer;user-select:none;box-shadow:var(--shadow-sm);opacity:{{ c.opacity }};white-space:nowrap;" onClick="{{ c.onClick }}">{{ c.name }}</span>
+    </sc-for>
+    <span style="margin-left:auto;font-size:11px;color:var(--muted);font-weight:600;white-space:nowrap;">7 sichtbar / 7 gesamt</span>
+  </div>
+
+  <!-- Main -->
+  <main style="flex:1;display:flex;min-height:0;">
+    <section style="position:relative;flex:1;min-width:0;padding:20px;overflow:auto;">
+      <div style="background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:auto;height:100%;">
+        <div style="display:flex;align-items:flex-start;">
+
+          <!-- Linke Leiste: Ereignisse / Personen / Länder-Buckets — bleibt beim horizontalen Scrollen stehen -->
+          <div style="position:sticky;left:0;top:0;z-index:4;flex:none;width:150px;background:var(--surface);border-right:1px solid var(--line);">
+            <div style="height:44px;background:oklch(99% 0.003 75);border-bottom:1px solid var(--line);"></div>
+            <div style="position:relative;height:512px;margin-top:16px;">
+              <div style="position:absolute;left:6px;top:16px;height:40px;width:18px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-ink);writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap;">◆ Ereignisse</div>
+              <div style="position:absolute;left:0;right:0;top:60px;height:1px;background:var(--line);"></div>
+              <div style="position:absolute;left:6px;top:70px;bottom:0;width:18px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-ink);writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap;">● Personen</div>
+
+              <!-- Länder-Buckets -->
+              <sc-for list="{{ countryGroups }}" as="g" hint-placeholder-count="3">
+                <div style="position:absolute;left:30px;top:{{ g.top }};width:112px;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);line-height:1.3;">{{ g.name }}</div>
+                <sc-if value="{{ g.showDivider }}" hint-placeholder-val="{{ false }}">
+                  <div style="position:absolute;left:0;right:0;top:{{ g.dividerTop }};height:1px;background:var(--line);"></div>
+                </sc-if>
+              </sc-for>
+            </div>
+          </div>
+
+          <!-- Zeitleisten-Inhalt -->
+          <div style="position:relative;flex:none;min-width:2620px;padding:0 40px 24px 0;">
+
+            <!-- Axis -->
+            <div style="position:relative;height:44px;background:oklch(99% 0.003 75);border-bottom:1px solid var(--line);">
+              <sc-for list="{{ ticks }}" as="t" hint-placeholder-count="13">
+                <div style="position:absolute;top:0;bottom:0;left:{{ t.left }};width:1px;background:var(--line);"></div>
+                <div style="position:absolute;top:12px;left:{{ t.labelLeft }};font-size:11px;font-weight:700;color:var(--muted);white-space:nowrap;">{{ t.label }}</div>
+              </sc-for>
+            </div>
+
+            <!-- Track -->
+            <div style="position:relative;height:512px;margin-top:16px;">
+
+              <!-- shading bands -->
+              <sc-if value="{{ shadingOn }}" hint-placeholder-val="{{ true }}">
+                <sc-for list="{{ worldEvents }}" as="w" hint-placeholder-count="2">
+                  <div style="position:absolute;top:0;bottom:0;left:{{ w.left }};width:{{ w.width }};background:{{ w.bandColor }};pointer-events:none;"></div>
+                </sc-for>
+              </sc-if>
+
+              <!-- connection arrows -->
+              <sc-if value="{{ connectionsOn }}" hint-placeholder-val="{{ true }}">
+                
+              </sc-if>
+
+              <sc-for list="{{ worldEvents }}" as="w" hint-placeholder-count="2">
+                <div style="position:absolute;top:16px;height:40px;left:{{ w.left }};width:{{ w.width }};display:flex;align-items:center;justify-content:center;text-align:center;border-radius:1px;background:{{ w.bg }};border:1px solid {{ w.border }};color:{{ w.text }};font-size:12.5px;font-weight:700;cursor:pointer;overflow:hidden;white-space:nowrap;padding:0 10px;box-shadow:var(--shadow-sm);" onClick="{{ w.onClick }}">{{ w.label }}</div>
+              </sc-for>
+
+              <!-- persons -->
+              <sc-for list="{{ personRows }}" as="p" hint-placeholder-count="4">
+                <!-- frame -->
+                <div style="position:absolute;top:{{ p.top }};left:{{ p.frameLeft }};width:{{ p.frameWidth }};height:{{ p.height }};border-radius:1px;background:{{ p.frameBg }};border:1.5px solid {{ p.frameBorder }};opacity:{{ p.dim }};"></div>
+
+                <!-- life bar -->
+                <div style="position:absolute;top:{{ p.lifeTop }};left:{{ p.frameLeft }};width:{{ p.frameWidth }};height:34px;border-radius:1px;background:{{ p.lifeBg }};border:1px solid {{ p.lifeBorder }};display:flex;align-items:center;padding:0 14px;font-size:12.5px;font-weight:700;color:{{ p.lifeText }};cursor:pointer;overflow:hidden;white-space:nowrap;opacity:{{ p.dim }};" onClick="{{ p.onClick }}">{{ p.name }} · {{ p.years }}</div>
+
+                <!-- sub events -->
+                <sc-for list="{{ p.events }}" as="ev" hint-placeholder-count="2">
+                  <div style="position:absolute;top:{{ p.eventsTop }};left:{{ ev.left }};width:{{ ev.width }};height:24px;border-radius:{{ ev.radius }};background:{{ ev.bg }};display:flex;align-items:center;justify-content:center;padding:0 9px;font-size:11px;font-weight:600;color:{{ ev.text }};cursor:pointer;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:150px;opacity:{{ p.dim }};" onClick="{{ ev.onClick }}">{{ ev.label }}</div>
+                </sc-for>
+              </sc-for>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Detail panel -->
+    <aside style="width:360px;flex:none;overflow-y:auto;background:var(--surface);border-left:1px solid var(--line);padding:24px;">
+      <sc-if value="{{ hasSelection }}" hint-placeholder-val="{{ false }}">
+        <div style="position:relative;padding-left:14px;margin-bottom:16px;">
+          <div style="position:absolute;left:0;top:2px;bottom:2px;width:4px;border-radius:1px;background:{{ selected.color }};"></div>
+          <h2 style="font-family:'Source Serif 4',serif;font-weight:600;font-size:20px;margin:0 0 4px;line-height:1.25;">{{ selected.title }}</h2>
+          <div style="font-size:12.5px;color:var(--muted);font-weight:600;">{{ selected.subtitle }}</div>
+        </div>
+
+        <div style="margin:14px 0;font-size:13.5px;line-height:1.5;">
+          <span style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;display:block;margin-bottom:5px;">Zeit</span>
+          {{ selected.when }}
+        </div>
+
+        <sc-if value="{{ selected.hasDescription }}" hint-placeholder-val="{{ false }}">
+          <div style="margin:14px 0;font-size:13.5px;line-height:1.55;">
+            <span style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;display:block;margin-bottom:5px;">Notiz</span>
+            {{ selected.description }}
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ selected.hasSource }}" hint-placeholder-val="{{ false }}">
+          <div style="margin:14px 0;font-size:13.5px;line-height:1.5;">
+            <span style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;display:block;margin-bottom:5px;">Quelle</span>
+            <div>{{ selected.sourceLabel }}</div>
+            <div style="color:var(--muted);font-size:12.5px;margin-top:2px;">{{ selected.sourceMeta }}</div>
+            <blockquote style="margin:8px 0 0;padding:8px 12px;font-style:italic;color:var(--ink-soft);border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0;font-size:13px;">„{{ selected.quote }}"</blockquote>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ selected.hasEvents }}" hint-placeholder-val="{{ false }}">
+          <div style="margin:14px 0;font-size:13.5px;">
+            <span style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;display:block;margin-bottom:5px;">Ereignisse</span>
+            <ul style="list-style:none;padding:0;margin:0;">
+              <sc-for list="{{ selected.events }}" as="e" hint-placeholder-count="2">
+                <li style="padding:7px 0;border-top:1px solid var(--line);font-size:13px;">
+                  <span style="display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;background:{{ e.color }};"></span>
+                  <span style="color:var(--muted);">{{ e.when }}: </span>
+                  <button style="background:none;border:none;color:var(--accent-ink);cursor:pointer;font:inherit;font-size:13px;font-weight:600;padding:0;" onClick="{{ e.onClick }}">{{ e.label }}</button>
+                </li>
+              </sc-for>
+            </ul>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ selected.hasConnections }}" hint-placeholder-val="{{ false }}">
+          <div style="margin:14px 0;font-size:13.5px;">
+            <span style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;display:block;margin-bottom:5px;">Verbindungen</span>
+            <ul style="list-style:none;padding:0;margin:0;">
+              <sc-for list="{{ selected.connections }}" as="c" hint-placeholder-count="1">
+                <li style="padding:7px 0;border-top:1px solid var(--line);font-size:13px;">
+                  <span style="color:var(--muted);">{{ c.rel }}: </span>
+                  <button style="background:none;border:none;color:var(--accent-ink);cursor:pointer;font:inherit;font-size:13px;font-weight:600;padding:0;" onClick="{{ c.onClick }}">{{ c.label }}</button>
+                </li>
+              </sc-for>
+            </ul>
+          </div>
+        </sc-if>
+
+        <div style="display:flex;gap:8px;margin-top:20px;flex-wrap:wrap;">
+          <button style="font:inherit;font-size:13px;font-weight:600;padding:8px 14px;border:none;border-radius:var(--radius-sm);background:var(--accent);color:var(--surface);cursor:pointer;box-shadow:var(--shadow-sm);white-space:nowrap;">✎ Bearbeiten</button>
+          <button style="font:inherit;font-size:13px;font-weight:600;padding:8px 14px;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--surface);color:var(--ink-soft);cursor:pointer;box-shadow:var(--shadow-sm);white-space:nowrap;">🔗 Verknüpfen</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ hasNoSelection }}" hint-placeholder-val="{{ true }}">
+        <div style="color:var(--muted);font-size:14px;line-height:1.6;padding-top:40px;text-align:center;">
+          <div style="font-size:30px;margin-bottom:10px;">◷</div>
+          <p>Klicke einen Eintrag an,<br>um Details zu sehen.</p>
+        </div>
+      </sc-if>
+    </aside>
+  </main>
+
+  <!-- Add-entry modal (demo) -->
+  <sc-if value="{{ modalOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;background:oklch(20% 0.02 265 / 0.42);backdrop-filter:blur(2px);display:flex;align-items:center;justify-content:center;z-index:100;" onClick="{{ closeModal }}">
+      <div style="background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);width:min(480px, 92vw);padding:26px;" onClick="{{ stopClick }}">
+        <h3 style="margin:0 0 18px;font-family:'Source Serif 4',serif;font-weight:600;font-size:19px;">Neuer Eintrag</h3>
+        <div style="margin-bottom:14px;">
+          <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700;margin-bottom:6px;">Art</label>
+          <div style="display:flex;gap:8px;">
+            <button style="flex:1;font:inherit;font-size:13.5px;font-weight:600;padding:10px;border:1.5px solid var(--accent);border-radius:var(--radius-sm);background:var(--accent-soft);color:var(--accent-ink);cursor:pointer;">◆ Ereignis</button>
+            <button style="flex:1;font:inherit;font-size:13.5px;font-weight:600;padding:10px;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--surface);color:var(--ink-soft);cursor:pointer;">👤 Person</button>
+          </div>
+        </div>
+        <div style="margin-bottom:14px;">
+          <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700;margin-bottom:6px;">Titel</label>
+          <input placeholder="z. B. Fall der Berliner Mauer" style="width:100%;font:inherit;font-size:14px;padding:10px 12px;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--surface-2);color:var(--ink);">
+        </div>
+        <div style="margin-bottom:14px;">
+          <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700;margin-bottom:6px;">Land</label>
+          <input placeholder="z. B. Deutschland" style="width:100%;font:inherit;font-size:14px;padding:10px 12px;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--surface-2);color:var(--ink);">
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:22px;">
+          <button style="font:inherit;font-size:13px;font-weight:600;padding:9px 16px;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--surface);color:var(--ink-soft);cursor:pointer;" onClick="{{ closeModal }}">Abbrechen</button>
+          <button style="font:inherit;font-size:13px;font-weight:600;padding:9px 16px;border:none;border-radius:var(--radius-sm);background:var(--accent);color:var(--surface);cursor:pointer;box-shadow:var(--shadow-sm);" onClick="{{ closeModal }}">Speichern</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- Help modal (demo) -->
+  <sc-if value="{{ helpOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;background:oklch(20% 0.02 265 / 0.42);backdrop-filter:blur(2px);display:flex;align-items:center;justify-content:center;z-index:100;" onClick="{{ closeHelp }}">
+      <div style="background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);width:min(420px, 92vw);padding:26px;" onClick="{{ stopClick }}">
+        <h3 style="margin:0 0 12px;font-family:'Source Serif 4',serif;font-weight:600;font-size:19px;">Bedienung</h3>
+        <ul style="margin:0;padding-left:18px;font-size:13.5px;line-height:1.7;color:var(--ink-soft);">
+          <li>Klick auf einen Eintrag → Details rechts.</li>
+          <li>Kategorie- und Länder-Chips oben → ein-/ausblenden.</li>
+          <li>Links am Rand gruppieren die Personen-Zeilen nach Land.</li>
+          <li>↔ Verbindungen / ▒ Schattierung → Ebenen umschalten.</li>
+        </ul>
+        <div style="display:flex;justify-content:flex-end;margin-top:20px;">
+          <button style="font:inherit;font-size:13px;font-weight:600;padding:9px 16px;border:none;border-radius:var(--radius-sm);background:var(--accent);color:var(--surface);cursor:pointer;" onClick="{{ closeHelp }}">Schließen</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;theme&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#8a5a35&quot;,&quot;options&quot;:[&quot;#8a5a35&quot;,&quot;#2f6b6e&quot;,&quot;#7a2331&quot;,&quot;#35633f&quot;,&quot;#c99a3e&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Design&quot;}}">
+const START_YEAR = 1700;
+const PX_PER_YEAR = 9;
+const yx = (y) => (y - START_YEAR) * PX_PER_YEAR;
+
+// Kuratierte Farbthemen (Akzent bestimmt Ton, Hintergrund folgt passend mit)
+const THEMES = {
+  '#8a5a35': { name: 'Bronze & Papier', bg: 'oklch(97.3% 0.006 75)',  accent: 'oklch(46% 0.1 55)',  accentSoft: 'oklch(93% 0.035 55)',  accentInk: 'oklch(38% 0.1 55)' },
+  '#2f6b6e': { name: 'Tiefes Petrol',   bg: 'oklch(97% 0.004 220)',  accent: 'oklch(42% 0.09 200)', accentSoft: 'oklch(92% 0.03 200)', accentInk: 'oklch(35% 0.09 200)' },
+  '#7a2331': { name: 'Bordeaux',        bg: 'oklch(97% 0.006 40)',   accent: 'oklch(40% 0.12 18)',  accentSoft: 'oklch(92% 0.035 18)', accentInk: 'oklch(33% 0.12 18)' },
+  '#35633f': { name: 'Waldgrün',        bg: 'oklch(97% 0.005 140)',  accent: 'oklch(42% 0.09 145)', accentSoft: 'oklch(92% 0.03 145)', accentInk: 'oklch(35% 0.09 145)' },
+  '#c99a3e': { name: 'Anthrazit & Gold', bg: 'oklch(96% 0.004 260)', accent: 'oklch(62% 0.11 85)',  accentSoft: 'oklch(93% 0.035 85)', accentInk: 'oklch(45% 0.1 85)' },
+};
+
+const CATS = {
+  nature:   { name: 'Naturforschung', color: 'oklch(56% 0.09 150)', soft: 'oklch(93% 0.03 150)' },
+  science:  { name: 'Wissenschaft',   color: 'oklch(56% 0.1 210)',  soft: 'oklch(93% 0.03 210)' },
+  politics: { name: 'Politik',        color: 'oklch(54% 0.1 320)',  soft: 'oklch(93% 0.03 320)' },
+};
+
+const PEOPLE = [
+  {
+    id: 'kant', name: 'Immanuel Kant', cat: 'science', country: 'Deutschland', birth: 1724, death: 1804,
+    quote: 'Habe Mut, dich deines eigenen Verstandes zu bedienen.',
+    source: 'Kant, Immanuel', sourceMeta: 'Beantwortung der Frage: Was ist Aufklärung? · 1784',
+    description: 'Königsberger Philosoph, Begründer des Kritizismus und der modernen Erkenntnistheorie.',
+    events: [
+      { id: 'kritik', label: 'Kritik der reinen Vernunft', start: 1781, type: 'point' },
+    ],
+  },
+  {
+    id: 'bismarck', name: 'Otto von Bismarck', cat: 'politics', country: 'Deutschland', birth: 1815, death: 1898,
+    quote: 'Die Politik ist die Lehre vom Möglichen.',
+    source: 'Bismarck, Otto von', sourceMeta: 'Gedanken und Erinnerungen · 1898',
+    description: 'Preußischer Staatsmann, führte die deutsche Reichseinigung 1871 herbei.',
+    events: [
+      { id: 'reichsgruendung', label: 'Deutsche Reichsgründung', start: 1871, type: 'point' },
+    ],
+  },
+  {
+    id: 'curie', name: 'Marie Curie', cat: 'science', country: 'Frankreich', birth: 1867, death: 1934,
+    quote: 'Man muss im Leben nichts fürchten, man muss nur alles verstehen.',
+    source: 'Curie, Marie', sourceMeta: 'Autobiographische Notizen · 1923',
+    description: 'Physikerin und Chemikerin, erste Person mit zwei Nobelpreisen in unterschiedlichen Fächern.',
+    events: [
+      { id: 'radium', label: 'Entdeckung des Radiums', start: 1898, type: 'point' },
+      { id: 'nobel1', label: 'Nobelpreis Physik', start: 1903, type: 'point' },
+    ],
+  },
+  {
+    id: 'darwin', name: 'Charles Darwin', cat: 'nature', country: 'Vereinigtes Königreich', birth: 1809, death: 1882,
+    quote: 'Es ist nicht die stärkste Spezies, die überlebt, sondern die anpassungsfähigste.',
+    source: 'Darwin, Charles', sourceMeta: 'Über die Entstehung der Arten · 1859',
+    description: 'Britischer Naturforscher, begründete die Evolutionstheorie durch natürliche Selektion.',
+    events: [
+      { id: 'beagle', label: 'Reise mit der Beagle', start: 1831, end: 1836, type: 'range' },
+      { id: 'origin', label: 'Über die Entstehung der Arten', start: 1859, type: 'point' },
+    ],
+  },
+];
+
+const WORLD_EVENTS = [
+  { id: 'industrial', label: 'Industrielle Revolution', start: 1760, end: 1840, description: 'Übergang von handwerklicher zu maschineller Produktion in Europa.' },
+  { id: 'kaiserreich', label: 'Deutsches Kaiserreich', start: 1871, end: 1918, description: 'Nationalstaat unter preußischer Führung, gegründet nach dem Deutsch-Französischen Krieg.' },
+];
+
+const CONNECTIONS = [
+  { from: 'reichsgruendung', to: 'kaiserreich', rel: 'führt zu' },
+];
+
+const ROW_HEIGHT = 88;
+const GROUP_GAP = 24;
+const PERSONS_TOP = 96;
+
+class Component extends DCLogic {
+  state = {
+    selectedId: null,
+    offCats: new Set(),
+    offCountries: new Set(),
+    connectionsOn: true,
+    shadingOn: true,
+    modalOpen: false,
+    helpOpen: false,
+  };
+
+  allItemsById() {
+    const map = {};
+    PEOPLE.forEach((p) => { map[p.id] = { ...p, kind: 'person' }; p.events.forEach((e) => { map[e.id] = { ...e, kind: 'event', personId: p.id, cat: p.cat }; }); });
+    WORLD_EVENTS.forEach((w) => { map[w.id] = { ...w, kind: 'world' }; });
+    return map;
+  }
+
+  selectItem(id) { this.setState({ selectedId: id }); }
+  toggleFilter(catId) {
+    this.setState((s) => {
+      const next = new Set(s.offCats);
+      if (next.has(catId)) next.delete(catId); else next.add(catId);
+      return { offCats: next };
+    });
+  }
+  toggleCountry(name) {
+    this.setState((s) => {
+      const next = new Set(s.offCountries);
+      if (next.has(name)) next.delete(name); else next.add(name);
+      return { offCountries: next };
+    });
+  }
+  toggleConnections() { this.setState((s) => ({ connectionsOn: !s.connectionsOn })); }
+  toggleShading() { this.setState((s) => ({ shadingOn: !s.shadingOn })); }
+  openAddModal() { this.setState({ modalOpen: true }); }
+  closeModal() { this.setState({ modalOpen: false }); }
+  openHelp() { this.setState({ helpOpen: true }); }
+  closeHelp() { this.setState({ helpOpen: false }); }
+  stopClick(e) { e.stopPropagation(); }
+
+  buildDetail(id) {
+    if (!id) return null;
+    const items = this.allItemsById();
+    const it = items[id];
+    if (!it) return null;
+    const cat = CATS[it.cat];
+
+    if (it.kind === 'person') {
+      const evs = it.events.map((e) => ({
+        id: e.id, label: e.label, color: cat.color,
+        when: e.end ? `${e.start}–${e.end}` : String(e.start),
+        onClick: () => this.selectItem(e.id),
+      }));
+      return {
+        title: it.name, subtitle: `Person · ${it.country} · ${cat.name}`, color: cat.color,
+        when: `${it.birth} – ${it.death}`,
+        hasDescription: !!it.description, description: it.description,
+        hasSource: false,
+        hasEvents: evs.length > 0, events: evs,
+        hasConnections: false, connections: [],
+      };
+    }
+    if (it.kind === 'event') {
+      const person = PEOPLE.find((p) => p.id === it.personId);
+      const conns = CONNECTIONS.filter((c) => c.from === id || c.to === id).map((c) => {
+        const otherId = c.from === id ? c.to : c.from;
+        const other = items[otherId];
+        return { rel: c.rel, label: other ? (other.label || other.name) : '?', onClick: () => this.selectItem(otherId) };
+      });
+      return {
+        title: it.label, subtitle: `Ereignis · ${person ? person.name : ''}`, color: cat.color,
+        when: it.end ? `${it.start} – ${it.end}` : String(it.start),
+        hasDescription: false,
+        hasSource: !!person, sourceLabel: person ? person.source : '', sourceMeta: person ? person.sourceMeta : '', quote: person ? person.quote : '',
+        hasEvents: false, events: [],
+        hasConnections: conns.length > 0, connections: conns,
+      };
+    }
+    if (it.kind === 'world') {
+      const conns = CONNECTIONS.filter((c) => c.from === id || c.to === id).map((c) => {
+        const otherId = c.from === id ? c.to : c.from;
+        const other = items[otherId];
+        return { rel: c.rel, label: other ? (other.label || other.name) : '?', onClick: () => this.selectItem(otherId) };
+      });
+      return {
+        title: it.label, subtitle: 'Welt-Ereignis', color: 'oklch(46% 0.1 55)',
+        when: `${it.start} – ${it.end}`,
+        hasDescription: !!it.description, description: it.description,
+        hasSource: false,
+        hasEvents: false, events: [],
+        hasConnections: conns.length > 0, connections: conns,
+      };
+    }
+    return null;
+  }
+
+  renderVals() {
+    const { selectedId, offCats, offCountries, connectionsOn, shadingOn, modalOpen, helpOpen } = this.state;
+
+    const ticks = [];
+    for (let y = START_YEAR; y <= 2000; y += 25) {
+      ticks.push({ label: String(y), left: yx(y) + 'px', labelLeft: (yx(y) + 6) + 'px' });
+    }
+
+    const filters = Object.entries(CATS).map(([id, c]) => ({
+      id, name: c.name, color: c.color,
+      opacity: offCats.has(id) ? 0.4 : 1,
+      onClick: () => this.toggleFilter(id),
+    }));
+
+    const countryNames = [...new Set(PEOPLE.map((p) => p.country))];
+    const countryFilters = countryNames.map((name) => ({
+      name, opacity: offCountries.has(name) ? 0.4 : 1,
+      onClick: () => this.toggleCountry(name),
+    }));
+
+    const worldEvents = WORLD_EVENTS.map((w) => {
+      const left = yx(w.start), width = yx(w.end) - yx(w.start);
+      return {
+        id: w.id, label: w.label, left: left + 'px', width: width + 'px',
+        bg: 'var(--surface-2)', border: 'var(--line)', text: 'var(--ink-soft)',
+        bandColor: 'oklch(46% 0.1 55 / 0.05)',
+        onClick: () => this.selectItem(w.id),
+      };
+    });
+
+    // Nach Land gruppieren (Länder bestimmen die Sortierung/Gruppierung der Zeilen)
+    const sorted = [...PEOPLE].sort((a, b) => {
+      if (a.country !== b.country) return a.country.localeCompare(b.country, 'de');
+      return a.birth - b.birth;
+    });
+
+    let cursor = PERSONS_TOP;
+    const countryGroups = [];
+    const personRows = [];
+    let lastCountry = null;
+
+    sorted.forEach((p) => {
+      const isNewGroup = p.country !== lastCountry;
+      if (isNewGroup) {
+        if (lastCountry !== null) cursor += GROUP_GAP;
+        countryGroups.push({ name: p.country, top: cursor + 'px', height: 0, _rawTop: cursor, dividerTop: (cursor - GROUP_GAP / 2) + 'px', showDivider: countryGroups.length > 0 });
+      }
+      const cat = CATS[p.cat];
+      const dim = (offCats.has(p.cat) || offCountries.has(p.country)) ? 0.35 : 1;
+      const left = yx(p.birth), width = yx(p.death) - yx(p.birth);
+      const events = p.events.map((e) => {
+        const isPoint = e.type === 'point';
+        const eleft = yx(e.start);
+        const ewidth = isPoint ? 0 : (yx(e.end) - yx(e.start));
+        return {
+          id: e.id,
+          label: e.label,
+          left: eleft + 'px',
+          width: (isPoint ? 'auto' : Math.max(ewidth, 30) + 'px'),
+          radius: '1px',
+          bg: cat.color,
+          text: 'var(--surface)',
+          onClick: () => this.selectItem(e.id),
+        };
+      });
+      personRows.push({
+        id: p.id, name: p.name, years: `${p.birth}–${p.death}`,
+        top: cursor + 'px', height: ROW_HEIGHT + 'px',
+        lifeTop: cursor + 'px',
+        eventsTop: (cursor + 50) + 'px',
+        frameLeft: left + 'px', frameWidth: width + 'px',
+        frameBg: cat.soft, frameBorder: cat.color,
+        lifeBg: cat.soft, lifeBorder: cat.color, lifeText: 'oklch(30% 0.02 265)',
+        dotColor: cat.color, dim,
+        onClick: () => this.selectItem(p.id),
+        events,
+      });
+      countryGroups[countryGroups.length - 1].height = (cursor + ROW_HEIGHT) - countryGroups[countryGroups.length - 1]._rawTop;
+      cursor += ROW_HEIGHT;
+      lastCountry = p.country;
+    });
+    countryGroups.forEach((g) => { g.height = g.height + 'px'; });
+
+    const trackHeight = cursor + 16;
+
+    const items = this.allItemsById();
+    const connections = connectionsOn ? CONNECTIONS.map((c) => {
+      const fromItem = items[c.from], toItem = items[c.to];
+      if (!fromItem || !toItem) return null;
+      const fx = yx(fromItem.start);
+      const fromPerson = personRows.find((p) => p.id === fromItem.personId);
+      const fy = fromPerson ? parseFloat(fromPerson.eventsTop) + 24 : 100;
+      const tx = yx(toItem.start);
+      const ty = 40;
+      const midY = (fy + ty) / 2;
+      return {
+        path: `M ${fx} ${fy} C ${fx} ${midY}, ${tx} ${midY}, ${tx} ${ty}`,
+        label: c.rel, labelX: (fx + tx) / 2 + 8, labelY: midY,
+      };
+    }).filter(Boolean) : [];
+
+    const detail = this.buildDetail(selectedId);
+    const theme = THEMES[this.props.theme] || THEMES['#8a5a35'];
+    const rootVars = `--bg:${theme.bg};--accent:${theme.accent};--accent-soft:${theme.accentSoft};--accent-ink:${theme.accentInk};`;
+
+    return {
+      rootVars,
+      ticks, filters, countryFilters, worldEvents, personRows, countryGroups, connections,
+      shadingOn, connectionsOn,
+      connBorder: connectionsOn ? 'transparent' : 'var(--line)',
+      connBg: connectionsOn ? 'var(--accent-soft)' : 'var(--surface)',
+      connColor: connectionsOn ? 'var(--accent-ink)' : 'var(--ink-soft)',
+      shadeBorder: shadingOn ? 'transparent' : 'var(--line)',
+      shadeBg: shadingOn ? 'var(--accent-soft)' : 'var(--surface)',
+      shadeColor: shadingOn ? 'var(--accent-ink)' : 'var(--ink-soft)',
+      hasSelection: !!detail,
+      hasNoSelection: !detail,
+      selected: detail || {},
+      modalOpen, helpOpen,
+      openAddModal: () => this.openAddModal(),
+      closeModal: () => this.closeModal(),
+      openHelp: () => this.openHelp(),
+      closeHelp: () => this.closeHelp(),
+      toggleConnections: () => this.toggleConnections(),
+      toggleShading: () => this.toggleShading(),
+      stopClick: (e) => this.stopClick(e),
+    };
+  }
+}
+</script>
+</body>
+</html>
