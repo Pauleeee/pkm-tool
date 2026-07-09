@@ -34,7 +34,7 @@ export class TimelineView {
       // Zoom macht der eigene Wheel-Handler (_bindWheel): Pinch/Cmd/Ctrl+Rad = Zoom,
       // zwei Finger horizontal = pannen, vertikal = nativ scrollen.
       zoomable: false,
-      margin: { item: { horizontal: 10, vertical: 10 }, axis: 18 },
+      margin: { item: { horizontal: 10, vertical: 10 }, axis: 2 },
       align: 'center',              // Beschriftung mittig im Balken/Kästchen
       showCurrentTime: false,       // keine rote „Jetzt"-Linie (historische Zeitleiste)
       // Nur vertikales Ziehen von Personen zwischen Zeilen; keine Zeit-Drags.
@@ -70,6 +70,12 @@ export class TimelineView {
 
     this._bindWheel();
     this._bindGapDrag();
+    // Erzwingt einen Redraw, sobald die Webfonts geladen sind: vis berechnet
+    // Zeilenhöhen beim ersten Paint ggf. noch mit Fallback-Font-Metriken, was
+    // hochstehende Chips (pkm-top) in den Achsen-Leerraum ragen lassen kann.
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => { this.timeline.redraw(); redraw(); });
+    }
     window.__tl = this;  // DEBUG
   }
 
