@@ -18,6 +18,39 @@ export const CATEGORY_PALETTE = [
 
 const NEUTRAL = '#94a3b8';
 
+// Feste Standard-Länderliste (Ort einer Person/eines Ereignisses, v1 = ein
+// Land pro Eintrag). Alphabetisch sortiert, deutsche Bezeichnungen.
+export const COUNTRIES = [
+  'Afghanistan', 'Ägypten', 'Albanien', 'Algerien', 'Andorra', 'Angola',
+  'Argentinien', 'Armenien', 'Aserbaidschan', 'Äthiopien', 'Australien',
+  'Bahrain', 'Bangladesch', 'Belgien', 'Benin', 'Bhutan', 'Bolivien',
+  'Bosnien und Herzegowina', 'Botswana', 'Brasilien', 'Brunei', 'Bulgarien',
+  'Burkina Faso', 'Burundi', 'Chile', 'China', 'Costa Rica', 'Dänemark',
+  'Deutschland', 'Dominikanische Republik', 'Ecuador', 'El Salvador',
+  'Elfenbeinküste', 'Estland', 'Finnland', 'Frankreich', 'Gabun', 'Gambia',
+  'Georgien', 'Ghana', 'Griechenland', 'Guatemala', 'Guinea', 'Haiti',
+  'Honduras', 'Indien', 'Indonesien', 'Irak', 'Iran', 'Irland', 'Island',
+  'Israel', 'Italien', 'Jamaika', 'Japan', 'Jemen', 'Jordanien',
+  'Kambodscha', 'Kamerun', 'Kanada', 'Kasachstan', 'Katar', 'Kenia',
+  'Kirgisistan', 'Kolumbien', 'Kongo', 'Korea (Nord)', 'Korea (Süd)',
+  'Kosovo', 'Kroatien', 'Kuba', 'Kuwait', 'Laos', 'Lettland', 'Libanon',
+  'Liberia', 'Libyen', 'Liechtenstein', 'Litauen', 'Luxemburg',
+  'Madagaskar', 'Malawi', 'Malaysia', 'Mali', 'Malta', 'Marokko',
+  'Mauretanien', 'Mazedonien', 'Mexiko', 'Moldau', 'Monaco', 'Mongolei',
+  'Montenegro', 'Mosambik', 'Myanmar', 'Namibia', 'Nepal', 'Neuseeland',
+  'Nicaragua', 'Niederlande', 'Niger', 'Nigeria', 'Norwegen', 'Osmanisches Reich',
+  'Österreich', 'Pakistan', 'Panama', 'Papua-Neuguinea', 'Paraguay', 'Peru',
+  'Philippinen', 'Polen', 'Portugal', 'Preußen', 'Ruanda', 'Rumänien',
+  'Russland', 'Sambia', 'Saudi-Arabien', 'Schweden', 'Schweiz', 'Senegal',
+  'Serbien', 'Simbabwe', 'Singapur', 'Slowakei', 'Slowenien', 'Somalia',
+  'Sowjetunion', 'Spanien', 'Sri Lanka', 'Sudan', 'Südafrika', 'Syrien',
+  'Tadschikistan', 'Taiwan', 'Tansania', 'Thailand', 'Togo', 'Tschad',
+  'Tschechien', 'Tunesien', 'Türkei', 'Turkmenistan', 'Uganda', 'Ukraine',
+  'Ungarn', 'Uruguay', 'USA', 'Usbekistan', 'Vatikanstadt', 'Venezuela',
+  'Vereinigte Arabische Emirate', 'Vereinigtes Königreich', 'Vietnam',
+  'Weißrussland', 'Zentralafrikanische Republik', 'Zypern',
+];
+
 // --- ID-Generierung ------------------------------------------------------
 let counter = 0;
 export function nextId(prefix = 'id') {
@@ -47,6 +80,7 @@ export function makeItem(p = {}) {
     // Mehrfachauswahl; migriert alten Einzelwert subcategoryId → subcategoryIds
     subcategoryIds: Array.isArray(p.subcategoryIds) ? p.subcategoryIds.slice() : (p.subcategoryId ? [p.subcategoryId] : []),
     personId: p.personId || null,          // nur event
+    land: p.land || null,                  // Ort: eines von COUNTRIES, oder null
     order: typeof p.order === 'number' ? p.order : 0,
     lane: typeof p.lane === 'number' ? p.lane : 0,   // person: vertikale Zeile
     row: typeof p.row === 'number' ? p.row : 0,      // event: Unterzeile in der Person
@@ -110,6 +144,13 @@ export function sourceLabel(src) {
 export function sortedSources(data) {
   return [...data.sources].sort((a, b) =>
     (a.authorLast || a.title).localeCompare(b.authorLast || b.title, 'de', { sensitivity: 'base' }));
+}
+
+// Länder, die tatsächlich mindestens einem Eintrag zugewiesen sind (für das
+// Filter-Dropdown — die volle COUNTRIES-Liste bleibt dem Formular vorbehalten).
+export function landsInUse(data) {
+  return [...new Set(data.items.map((it) => it.land).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b, 'de', { sensitivity: 'base' }));
 }
 
 export function makeConnection(p = {}) {

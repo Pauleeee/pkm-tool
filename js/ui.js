@@ -2,7 +2,7 @@
 
 import {
   byId, persons, makeSource, makeCategory, makeSubcategory, itemColor, catName,
-  subcatsOf, subcatName, subcatColor, getEntryColor, CATEGORY_PALETTE,
+  subcatsOf, subcatName, subcatColor, getEntryColor, CATEGORY_PALETTE, COUNTRIES,
   SOURCE_KINDS, authorName, sourceLabel, sortedSources, fmtDate,
 } from './model.js?v=20';
 
@@ -177,6 +177,8 @@ export function openItemModal(data, item, cb) {
     };
     renderRefs();
 
+    const land = selectField('Land', [['', '— kein Land —'], ...COUNTRIES.map((c) => [c, c])], item?.land || '');
+
     const desc = textareaField('Notiz / Beschreibung', item?.description || '');
     desc.wrap.appendChild(elText('div', 'md-hint', 'Formatierung: **fett** · *kursiv* · `code` · [Link](https://…) · „- " Liste'));
 
@@ -186,6 +188,7 @@ export function openItemModal(data, item, cb) {
     frag.appendChild(category.wrap);
     frag.appendChild(subWrap);
     frag.appendChild(colorWrap);
+    frag.appendChild(land.wrap);
     frag.appendChild(owner.wrap);
     frag.appendChild(refsWrap);
     frag.appendChild(desc.wrap);
@@ -216,6 +219,7 @@ export function openItemModal(data, item, cb) {
         categoryId: category.input.value || null,
         subcategoryIds: selectedSubIds.filter((id) => subcatsOf(data, category.input.value).some((s) => s.id === id)),
         personId: k === 'event' ? (owner.input.value || null) : null,
+        land: land.input.value || null,
         refs: refs.filter((r) => r.sourceId).map((r) => ({ sourceId: r.sourceId, pages: (r.pages || '').trim(), quote: (r.quote || '').trim() })),
         description: desc.input.value.trim(),
       });
@@ -447,6 +451,10 @@ export function renderDetail(panel, item, data, cb) {
 
   const when = item.end ? `${fmt(item.start)} – ${fmt(item.end)}` : fmt(item.start);
   panel.appendChild(detailRow('Zeit', document.createTextNode(when)));
+
+  if (item.land) {
+    panel.appendChild(detailRow('Land', document.createTextNode(item.land)));
+  }
 
   if (item.subcategoryIds && item.subcategoryIds.length) {
     const wrap = el('div', 'detail-themes');

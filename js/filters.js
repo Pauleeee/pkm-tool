@@ -11,7 +11,7 @@
 // (_itemPasses/visibleIds) unverändert bleibt. Kategorien OHNE eigene
 // Unterkategorien behalten `offCats` als direkten, unabhängigen Filter.
 
-import { byId, subcatColor, subcatsOf, sortedSources, sourceLabel } from './model.js?v=20';
+import { byId, subcatColor, subcatsOf, sortedSources, sourceLabel, landsInUse } from './model.js?v=20';
 
 export class FilterBar {
   constructor(el, cb) {
@@ -21,6 +21,7 @@ export class FilterBar {
     this.offCats = new Set();
     this.offSubs = new Set();
     this.sourceFilter = '';   // '' = alle Quellen, sonst eine source-id
+    this.landFilter = '';     // '' = alle Länder, sonst ein Ländername (COUNTRIES)
     this.searchQuery = '';
     this.panelOpen = false;
     this._outsideClick = (e) => {
@@ -42,13 +43,24 @@ export class FilterBar {
     this.el.appendChild(sep());
     this.el.appendChild(this._filterTrigger());
 
+    const lands = landsInUse(d);
+    if (lands.length) {
+      this.el.appendChild(sep());
+      const landSel = document.createElement('select');
+      landSel.className = 'filter-select';
+      const opts = [['', '🌍 Alle Länder'], ...lands.map((l) => [l, l])];
+      opts.forEach(([v, t]) => { const o = document.createElement('option'); o.value = v; o.textContent = t; if (v === this.landFilter) o.selected = true; landSel.appendChild(o); });
+      landSel.addEventListener('change', () => { this.landFilter = landSel.value; this.render(); this.cb.onChange(); });
+      this.el.appendChild(landSel);
+    }
+
     // Rechts: „Zurücksetzen" (nur bei aktivem Filter) + Zähler „X / Y sichtbar"
     const meta = el('span', 'filter-meta');
     if (this._anyFilterActive()) {
       const reset = el('button', 'chip filter-reset');
       reset.type = 'button'; reset.textContent = '✕ Zurücksetzen';
       reset.addEventListener('click', () => {
-        this.offCats.clear(); this.offSubs.clear(); this.sourceFilter = '';
+        this.offCats.clear(); this.offSubs.clear(); this.sourceFilter = ''; this.landFilter = '';
         this.render(); this.cb.onChange();
       });
       meta.appendChild(reset);
@@ -162,7 +174,7 @@ export class FilterBar {
   }
 
   _anyFilterActive() {
-    return this.offCats.size > 0 || this.offSubs.size > 0 || !!this.sourceFilter;
+    return this.offCats.size > 0 || this.offSubs.size > 0 || !!this.sourceFilter || !!this.landFilter;
   }
 
   // ---------- Suche ----------
@@ -241,6 +253,9 @@ export class FilterBar {
   _itemPasses(it) {
     if (this.offCats.has(it.categoryId)) return false;
     if (!this._sourcePasses(it)) return false;
+    // Land-Filter: einfacher, direkter Feldvergleich (kein Kaskadieren zu
+    // Kind-/Eltern-Elementen wie bei der Quelle — v1, ein Land pro Eintrag).
+    if (this.landFilter && it.land !== this.landFilter) return false;
     // Unterkategorie-Filter: sobald welche ausgeblendet sind, zeige nur Ereignisse mit
     // mindestens einer sichtbaren Unterkategorie (Ereignisse OHNE Unterkategorie fallen weg).
     if (it.kind === 'event' && this.offSubs.size > 0) {

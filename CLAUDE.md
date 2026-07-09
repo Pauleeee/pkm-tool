@@ -103,6 +103,14 @@ statischen Webserver und ist für GitHub-Pages-Stil-Deployment gedacht.
 - **Container-Konzept:** `personId` ist das **generische Eltern-Feld** — es zeigt auf eine
   **Person ODER ein Ereignis**. `isContainer(item)` = Person oder Ereignis ohne Eltern. Ein
   Container hat eine `lane` und einen **Rahmen** um seine Kind-Ereignisse (`eventsOf(id)`).
+- **`land`** (optional, jedes Item): Ort einer Person/eines Ereignisses, EIN Wert aus der festen
+  Liste `COUNTRIES` (`model.js`, ~150 Länder inkl. einiger historischer Staaten wie „Preußen",
+  „Sowjetunion", „Osmanisches Reich") oder `null`. Auswahl im Eintrags-Dialog (`ui.js`,
+  einfaches Dropdown, keine Selbstverwaltung wie bei Quellen), Anzeige im Detailpanel. Eigenes
+  Filter-Dropdown in der Filterleiste (`landsInUse()` — nur tatsächlich verwendete Länder,
+  Einzelauswahl wie Quelle), bewusst **getrennt** vom Kategorien-Baum-Panel (C3) und mit
+  **direktem** Feldvergleich (kein Kaskadieren zu Kind-/Eltern-Items wie bei Quellen). Mehrfach-
+  Länder pro Eintrag (Umzug etc.) bewusst NICHT in v1 — siehe Backlog D1.
 - **items**, unterschieden über `kind`:
   - **person** — Lebensspanne (`start`+`end`), `categoryId`, **`lane`** (Startwert via
     `assignLanes()`); Personen mit gleicher `lane` teilen sich eine Zeile (unterer Bereich).
