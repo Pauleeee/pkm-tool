@@ -75,7 +75,7 @@ export function openItemModal(data, item, cb) {
 
     const updateColorPreview = () => {
       const draft = { categoryId: category.input.value, subcategoryIds: selectedSubIds };
-      colorSwatch.style.background = getEntryColor(draft, { categories: [], subcategories: [] }, data);
+      colorSwatch.style.background = getEntryColor(draft, data);
       const primary = selectedSubIds[0];
       colorText.textContent = primary ? subcatName(data, primary) : (catName(data, category.input.value) || '—');
     };

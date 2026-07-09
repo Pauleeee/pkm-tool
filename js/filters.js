@@ -182,22 +182,6 @@ export class FilterBar {
     return false;
   }
 
-  // Aktive Filter für die Einfärbung (getEntryColor). Unser Filtermodell ist
-  // „opt-out" (offCats/offSubs = ausgeblendet). Eine Dimension gilt als *aktiv*,
-  // sobald in ihr überhaupt etwas ausgeblendet ist (der Nutzer filtert sie
-  // gerade); aktiv sind dann die noch sichtbaren IDs. Nichts ausgeblendet →
-  // leere Liste → getEntryColor nutzt die Fallback-Farbe.
-  activeFilters() {
-    const d = this.data;
-    const cats = this.offCats.size > 0
-      ? d.categories.filter((c) => !this.offCats.has(c.id)).map((c) => c.id)
-      : [];
-    const subs = this.offSubs.size > 0
-      ? (d.subcategories || []).filter((s) => !this.offSubs.has(s.id)).map((s) => s.id)
-      : [];
-    return { categories: cats, subcategories: subs };
-  }
-
   visibleIds() {
     const d = this.data;
     const set = new Set();

@@ -20,9 +20,14 @@ Punkt: Push nach GitHub, dann hier abhaken.
       oben abgeschnitten) — `js/timeline.js` margin.axis 18→2 + Redraw nach Webfont-Ladung
       (`document.fonts.ready`), verhindert Höhenberechnung mit falschen Fallback-Font-Metriken
       beim ersten Paint
-- [ ] C2 Filter-Bug: Personen-Boxen färben sich beim Umschalten unbeteiligter Hauptkategorien
-      um (lila↔cyan); Unterkategorien bekommen feste, filterunabhängige Farbtöne aus der
-      Farbfamilie ihrer Hauptkategorie — `js/model.js getEntryColor`, `js/filters.js`
+- [x] C2 Filter-Bug: Personen-Boxen färbten sich beim Umschalten unbeteiligter Hauptkategorien
+      um (lila↔cyan) — `getEntryColor` hing vom globalen Filterzustand ab statt nur vom Item
+      selbst. Fix: `getEntryColor(entry, data)` ohne Filterzustand, jede Unterkategorie hat einen
+      festen Farbton (`autoSubcatColor` generiert Schattierung aus Kategorie-Hue, falls keine
+      eigene Farbe gesetzt). `activeFilters`-Durchreichung komplett entfernt (main/timeline/
+      connections/filters.js, war nur für die Einfärbung da). Hinweis: „Unterkategorien-Chips
+      bleiben aktiv trotz ausgeschalteter Hauptkategorie" bewusst NICHT hier gefixt, wird durch
+      das Baum-Panel in C3 gelöst (Hauptkategorie-Checkbox steuert dort direkt die Unterkategorien).
 - [ ] C3 Filterleiste-Redesign: Kategorien/Unterkategorien/Quelle als ein Baum-Dropdown-Panel
       (Hauptkategorie = Sammel-Checkbox, Unterkategorie = eigentliche Filterebene) statt Chip-Reihe
       — `js/filters.js` FilterBar-Umbau

@@ -26,7 +26,6 @@ export class OverlayLayer {
     this.data = null;
     this.visibleIds = new Set();
     this.showConnections = true;
-    this.activeFilters = { categories: [], subcategories: [] };
     this.pointAlignState = {}; // id → { align:'left'|'right', size:'normal'|'small'|'dot' }
 
     const svg = document.createElementNS(SVG_NS, 'svg');
@@ -45,7 +44,6 @@ export class OverlayLayer {
     this.data = data;
     this.visibleIds = visibleIds;
     if (opts.showConnections !== undefined) this.showConnections = opts.showConnections;
-    if (opts.activeFilters) this.activeFilters = opts.activeFilters;
     this.pointAlignState = {};   // voller Render → Ausrichtung frisch neu bestimmen
     this.draw();
   }
@@ -148,7 +146,7 @@ export class OverlayLayer {
       const cy = er.y + er.h / 2;
       const tip = dateX;                          // Spitze auf dem Datum
       const base = right ? dateX + P : dateX - P; // Körper ragt nach außen
-      const color = getEntryColor(ev, this.activeFilters, this.data);
+      const color = getEntryColor(ev, this.data);
 
       const g = document.createElementNS(SVG_NS, 'g');
       g.classList.add('ov');
@@ -189,7 +187,7 @@ export class OverlayLayer {
       const inset = 3;
       const y = Math.min(...rects.map((r) => r.y)) - inset;
       const bottom = Math.max(...rects.map((r) => r.y + r.h)) + inset;
-      const color = getEntryColor(p, this.activeFilters, this.data);
+      const color = getEntryColor(p, this.data);
 
       const g = document.createElementNS(SVG_NS, 'g');
       g.classList.add('ov');

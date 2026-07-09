@@ -113,9 +113,8 @@ async function loadDefaultData() {
 // ---------- Rendern & Speichern ----------
 function render() {
   const visible = filterBar.visibleIds();
-  const activeFilters = filterBar.activeFilters();
-  timelineView.render(data, visible, { showBands: showShading, collapsed, activeFilters });
-  overlay.setData(data, visible, { showConnections, activeFilters });
+  timelineView.render(data, visible, { showBands: showShading, collapsed });
+  overlay.setData(data, visible, { showConnections });
   timelineView.setSelection(selectedItemId ? [selectedItemId] : []);
   renderDetail();
   applyLinkHighlight();

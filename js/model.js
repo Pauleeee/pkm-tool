@@ -151,44 +151,36 @@ export function subcatName(data, id) {
   const s = byId(data.subcategories || [], id);
   return s ? s.name : '';
 }
-// Eigene Farbe der Unterkategorie, sonst die der Oberkategorie.
+// Deterministische, unterscheidbare Farbtöne für Unterkategorien ohne eigene
+// Farbe: gleicher Ton (Hue) wie die Hauptkategorie, Helligkeit je nach
+// Position unter den Geschwistern verschoben. Fest pro Unterkategorie —
+// hängt NICHT vom Filterzustand ab (s. getEntryColor).
+const SHADE_STEPS = [0, -0.16, 0.16, -0.28, 0.28, -0.4, 0.4];
+function autoSubcatColor(baseHex, index) {
+  const hsl = hexToHsl(baseHex);
+  if (!hsl) return baseHex;
+  const delta = SHADE_STEPS[index % SHADE_STEPS.length];
+  const l = Math.min(0.82, Math.max(0.18, hsl.l + delta));
+  return hslToHex(hsl.h, Math.min(1, hsl.s + 0.05), l);
+}
+
+// Eigene Farbe der Unterkategorie, sonst ein fester Schattierungs-Ton aus der
+// Farbfamilie der Oberkategorie (Position unter den Geschwistern bestimmt
+// den Ton, s. autoSubcatColor).
 export function subcatColor(data, id) {
   const s = byId(data.subcategories || [], id);
   if (!s) return NEUTRAL;
-  return s.color || catColor(data, s.categoryId);
+  if (s.color) return s.color;
+  const siblings = subcatsOf(data, s.categoryId);
+  const idx = Math.max(0, siblings.findIndex((x) => x.id === id));
+  return autoSubcatColor(catColor(data, s.categoryId), idx);
 }
 
-// Farbe eines Timeline-Eintrags nach Filter-Zustand — zentrale Prioritätskette.
-// Datenmodell (mit IDs statt Klarnamen):
-//   entry.categoryId        — Kategorie (Klarname-Äquivalent: entry.category)
-//   entry.subcategoryIds[]  — nach Priorität; [0] = primär (Äquiv.: entry.subcategories)
-//   activeFilters.categories/.subcategories — aktive Filter-IDs
-//   data (categories/subcategories mit .color) = COLOR_MAP-Äquivalent
-// Prioritätskette:
-//   1. PRIMÄRE Unterkategorie (subcategoryIds[0]) ist aktiver Unterkat.-Filter → deren Farbe
-//   2. eine SEKUNDÄRE Unterkategorie (subcategoryIds[1..]) ist aktiv → Farbe der ersten passenden
-//   3. Kategorie ist aktiver Kategorie-Filter UND KEIN Unterkat.-Filter aktiv → Kategorie-Farbe
-//   4. FALLBACK (keine Filter aktiv / kein Treffer): primäre Unterkategorie-Farbe, sonst Kategorie
-export function getEntryColor(entry, activeFilters, data) {
-  const subs = entry.subcategoryIds || [];
-  const activeSubs = (activeFilters && activeFilters.subcategories) || [];
-  const activeCats = (activeFilters && activeFilters.categories) || [];
-  const primary = subs[0];
-
-  // 1. PRIMARY SUBCATEGORY ACTIVE
-  if (primary && activeSubs.includes(primary)) return subcatColor(data, primary);
-
-  // 2. SECONDARY SUBCATEGORY ACTIVE
-  for (let i = 1; i < subs.length; i++) {
-    if (activeSubs.includes(subs[i])) return subcatColor(data, subs[i]);
-  }
-
-  // 3. MAIN CATEGORY ACTIVE (nur wenn kein Unterkategorie-Filter aktiv)
-  if (activeSubs.length === 0 && entry.categoryId && activeCats.includes(entry.categoryId)) {
-    return catColor(data, entry.categoryId);
-  }
-
-  // 4. FALLBACK
+// Farbe eines Timeline-Eintrags — bewusst UNABHÄNGIG vom Filterzustand:
+// jede (Unter-)Kategorie hat einen festen Farbton (s. subcatColor/catColor),
+// der sich durchs Filtern nie ändert. Primäre Unterkategorie, sonst Kategorie.
+export function getEntryColor(entry, data) {
+  const primary = (entry.subcategoryIds || [])[0];
   if (primary) return subcatColor(data, primary);
   return catColor(data, entry.categoryId);
 }
@@ -252,6 +244,44 @@ export function hexToRgb(hex) {
 export function rgba(hex, alpha) {
   const c = hexToRgb(hex);
   return c ? `rgba(${c.r},${c.g},${c.b},${alpha})` : hex;
+}
+function hexToHsl(hex) {
+  const c = hexToRgb(hex);
+  if (!c) return null;
+  const r = c.r / 255, g = c.g / 255, b = c.b / 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  let h = 0, s = 0;
+  const l = (max + min) / 2;
+  const d = max - min;
+  if (d !== 0) {
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    if (max === r) h = (g - b) / d + (g < b ? 6 : 0);
+    else if (max === g) h = (b - r) / d + 2;
+    else h = (r - g) / d + 4;
+    h /= 6;
+  }
+  return { h, s, l };
+}
+function hslToHex(h, s, l) {
+  const hue2rgb = (p, q, t) => {
+    if (t < 0) t += 1;
+    if (t > 1) t -= 1;
+    if (t < 1 / 6) return p + (q - p) * 6 * t;
+    if (t < 1 / 2) return q;
+    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+    return p;
+  };
+  let r, g, b;
+  if (s === 0) { r = g = b = l; }
+  else {
+    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    const p = 2 * l - q;
+    r = hue2rgb(p, q, h + 1 / 3);
+    g = hue2rgb(p, q, h);
+    b = hue2rgb(p, q, h - 1 / 3);
+  }
+  const toHex = (v) => Math.round(v * 255).toString(16).padStart(2, '0');
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
 
 // --- Seed-Daten ----------------------------------------------------------

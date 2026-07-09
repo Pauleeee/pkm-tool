@@ -76,13 +76,13 @@ statischen Webserver und ist für GitHub-Pages-Stil-Deployment gedacht.
     + Größen-Klasse) angewandt. Neu bei `changed`/`rangechanged`/`resize`.
   - `js/filters.js` — `FilterBar`: **Kategorie** + **Unterkategorie** als Chips (ausblenden),
     **Quelle** als **Dropdown** (`sourceFilter`, einzeln, sortiert nach Nachname). Liefert
-    `visibleIds()` (Sichtbarkeit) **und** `activeFilters()` = `{categories, subcategories}` für die
-    Einfärbung (`getEntryColor`). Person ausgeblendet → ihre Ereignisse auch.
+    `visibleIds()` (Sichtbarkeit). Person ausgeblendet → ihre Ereignisse auch. Einfärbung ist
+    NICHT vom Filterzustand abhängig (s. u.).
   - `js/ui.js` — Modals (Item/Connection/Category/Source) + Detailpanel (Person: Ereignisliste
     + ▲▼-Sortierung). Reine View-Schicht. Im Eintrags-Dialog (`openItemModal`) sind Unterkategorien
     **geordnete Chips** (erste = **primär · Farbe**, per ▲▼ umsortierbar, ✕ entfernt, „＋"-Chips
     fügen hinzu) — `selectedSubIds` als Array (Reihenfolge = `subcategoryIds`) — plus ein
-    **Live-Farbfeld**, das `getEntryColor(draft, {}, data)` (Standardfarbe ohne Filter) anzeigt.
+    **Live-Farbfeld**, das `getEntryColor(draft, data)` anzeigt.
   - `js/main.js` — hält `data`, verdrahtet alles, `render()` + `persist()` nach jeder Änderung.
 
 ## Datenmodell
@@ -118,24 +118,17 @@ statischen Webserver und ist für GitHub-Pages-Stil-Deployment gedacht.
   Felder je `kind` (Buch→Verlag/ISBN, Paper→Journal/DOI/Vol/Issue, Webseite→URL/abgerufen …).
   Alt-Feld `author` wird in `makeSource` auf Vor-/Nachname migriert. `sourceId` verknüpft Items.
 
-**Farbe der Timeline-Einträge** zentral über `getEntryColor(entry, activeFilters, data)` — eine
-Prioritätskette abhängig vom Filter-Zustand (Textkontrast weiterhin über `readableText()`):
-1. **Primäre Unterkategorie aktiv:** `entry.subcategoryIds[0]` ist ein aktiver Unterkategorie-Filter
-   → Farbe dieser Unterkategorie (`subcatColor`).
-2. **Sekundäre Unterkategorie aktiv:** eine `subcategoryIds[1..n]` ist aktiv → Farbe der ersten
-   passenden.
-3. **Kategorie aktiv (ohne Unterkategorie-Filter):** `entry.categoryId` ist ein aktiver
-   Kategorie-Filter UND es ist **kein** Unterkategorie-Filter aktiv → Kategorie-Farbe (`catColor`).
-4. **Fallback** (keine Filter aktiv / kein Treffer): Farbe der primären Unterkategorie, sonst
-   Kategorie-Farbe.
-
-`activeFilters` (`{categories, subcategories}` = Listen aktiver IDs) kommt aus
-`FilterBar.activeFilters()`. Da unser Filtermodell **opt-out** ist (`offCats`/`offSubs` = versteckt),
-gilt eine Dimension als *aktiv*, sobald in ihr etwas ausgeblendet ist; aktiv sind dann die noch
-sichtbaren IDs. `data` (Kategorien/Unterkategorien mit `.color`) ist das COLOR_MAP-Äquivalent.
+**Farbe der Timeline-Einträge** zentral über `getEntryColor(entry, data)` — bewusst **unabhängig
+vom Filterzustand** (Textkontrast weiterhin über `readableText()`): primäre Unterkategorie
+(`subcategoryIds[0]`) → deren Farbe (`subcatColor`), sonst Kategorie-Farbe (`catColor`). Jede
+Unterkategorie hat einen **festen** Farbton: eigene Farbe falls gesetzt, sonst automatisch ein
+Schattierungs-Ton aus der Farbfamilie der Oberkategorie (`autoSubcatColor` in `model.js`,
+Helligkeit variiert nach Position unter den Geschwister-Unterkategorien) — ändert sich **nie**
+durchs Filtern/Ausblenden von Kategorien (früher ein Bug: Farbe hing vom global aktiven
+Filter-Set ab, unbeteiligte Items färbten sich beim Umschalten fremder Kategorien um).
 Angewendet in `timeline.js` (Lebensbalken + Ereignisse) und `connections.js` (Rahmenfarbe).
-`itemColor(item,data)` (reine Kategorie-Farbe) bleibt nur noch als filter-unabhängige Basisfarbe
-im **Detailpanel** (`ui.js`).
+`itemColor(item,data)` (reine Kategorie-Farbe, ignoriert Unterkategorie) bleibt nur noch als
+Sonderfall im **Detailpanel** (`ui.js`).
 
 ## Konventionen & Stolperfallen
 

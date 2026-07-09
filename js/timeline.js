@@ -8,8 +8,6 @@
 
 import { byId, getEntryColor, readableText, rgba, persons, toDate, fmtDate } from './model.js?v=20';
 
-const NO_FILTERS = { categories: [], subcategories: [] };
-
 const EVENTS_GROUP = '__events';
 
 export class TimelineView {
@@ -218,7 +216,6 @@ export class TimelineView {
   render(data, visibleIds, opts = {}) {
     this.data = data;
     this.showBands = opts.showBands !== false;
-    this.activeFilters = opts.activeFilters || NO_FILTERS;
     const collapsed = opts.collapsed || new Set();
 
     // Welt-Ereignisse (oberste Ebene) in eigene Zeilen oben
@@ -279,7 +276,7 @@ export class TimelineView {
   }
 
   _lifeItem(p, data, lane) {
-    const col = getEntryColor(p, this.activeFilters, data);
+    const col = getEntryColor(p, data);
     const years = `${yr(p.start)}–${yr(p.end)}`;
     return {
       id: p.id,
@@ -298,7 +295,7 @@ export class TimelineView {
   }
 
   _eventItems(ev, data, groupOf, collapsed, rowMap) {
-    const col = getEntryColor(ev, this.activeFilters, data);
+    const col = getEntryColor(ev, data);
     const fg = readableText(col);
     const isTop = !ev.personId;              // oberste Ebene (Welt-Ereignis / Container)
     const isRange = !!ev.end;
