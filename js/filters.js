@@ -1,9 +1,17 @@
-// Filter-/Legendenleiste: Suche, nach Kategorie (Farb-Legende), Unterkategorie
-// (Chips) und Quelle (Dropdown, sortiert nach Autor-Nachnamen).
-// Ausblenden versteckt die zugehörigen Einträge (eine ausgeblendete Person
-// versteckt auch ihre Ereignisse).
+// Filter-/Legendenleiste: Suche, sowie ein Filter-Panel (Baum aus Kategorien
+// → Unterkategorien + Quelle). Ausblenden versteckt die zugehörigen
+// Einträge (eine ausgeblendete Person versteckt auch ihre Ereignisse).
+//
+// Kategorie/Unterkategorie-Modell im Panel: hat eine Kategorie eigene
+// Unterkategorien, ist NUR die Unterkategorie-Ebene der echte Filterzustand
+// (offSubs) — die Hauptkategorie-Checkbox ist ein Sammel-Schalter, der alle
+// zugehörigen Unterkategorien auf einmal umschaltet ("gemischt" bei
+// Teilauswahl); `offCats` wird für sie automatisch nachgeführt
+// (_syncCatFromSubs), damit die bestehende Sichtbarkeits-Logik
+// (_itemPasses/visibleIds) unverändert bleibt. Kategorien OHNE eigene
+// Unterkategorien behalten `offCats` als direkten, unabhängigen Filter.
 
-import { byId, subcatColor, sortedSources, sourceLabel } from './model.js?v=20';
+import { byId, subcatColor, subcatsOf, sortedSources, sourceLabel } from './model.js?v=20';
 
 export class FilterBar {
   constructor(el, cb) {
@@ -14,6 +22,12 @@ export class FilterBar {
     this.offSubs = new Set();
     this.sourceFilter = '';   // '' = alle Quellen, sonst eine source-id
     this.searchQuery = '';
+    this.panelOpen = false;
+    this._outsideClick = (e) => {
+      if (!this.panelOpen) return;
+      if (e.target.closest('.filter-trigger')) return;
+      this.panelOpen = false; this.render();
+    };
   }
 
   setData(data) { this.data = data; this.render(); }
@@ -26,35 +40,7 @@ export class FilterBar {
 
     this.el.appendChild(this._searchBox());
     this.el.appendChild(sep());
-
-    if (d.categories.length) {
-      this.el.appendChild(label('Kategorien'));
-      d.categories.forEach((c) => this.el.appendChild(this._chip({
-        text: c.name, color: c.color, off: this.offCats.has(c.id),
-        onToggle: () => toggle(this.offCats, c.id),
-      })));
-    }
-
-    const subs = d.subcategories || [];
-    if (subs.length) {
-      this.el.appendChild(sep());
-      this.el.appendChild(label('Unterkategorien'));
-      subs.forEach((s) => this.el.appendChild(this._chip({
-        text: s.name, color: subcatColor(d, s.id), off: this.offSubs.has(s.id),
-        onToggle: () => toggle(this.offSubs, s.id),
-      })));
-    }
-
-    if (d.sources.length) {
-      this.el.appendChild(sep());
-      this.el.appendChild(label('Quelle'));
-      const sel = document.createElement('select');
-      sel.className = 'filter-select';
-      const opts = [['', '📖 Alle Quellen'], ...sortedSources(d).map((s) => [s.id, sourceLabel(s)])];
-      opts.forEach(([v, t]) => { const o = document.createElement('option'); o.value = v; o.textContent = t; if (v === this.sourceFilter) o.selected = true; sel.appendChild(o); });
-      sel.addEventListener('change', () => { this.sourceFilter = sel.value; this.render(); this.cb.onChange(); });
-      this.el.appendChild(sel);
-    }
+    this.el.appendChild(this._filterTrigger());
 
     // Rechts: „Zurücksetzen" (nur bei aktivem Filter) + Zähler „X / Y sichtbar"
     const meta = el('span', 'filter-meta');
@@ -69,6 +55,110 @@ export class FilterBar {
     }
     meta.appendChild(elText('span', 'filter-count', `${this.visibleIds().size} sichtbar / ${d.items.length} gesamt`));
     this.el.appendChild(meta);
+
+    document.removeEventListener('mousedown', this._outsideClick);
+    if (this.panelOpen) document.addEventListener('mousedown', this._outsideClick);
+  }
+
+  // ---------- Filter-Panel (Kategorien-Baum + Quelle) ----------
+  _activeFilterCount() {
+    const d = this.data;
+    const soloCats = d.categories.filter((c) => !subcatsOf(d, c.id).length && this.offCats.has(c.id)).length;
+    return soloCats + this.offSubs.size + (this.sourceFilter ? 1 : 0);
+  }
+
+  _filterTrigger() {
+    const wrap = el('span', 'filter-trigger');
+    const btn = el('button', 'chip filter-trigger-btn' + (this.panelOpen ? ' active' : ''));
+    btn.type = 'button';
+    const count = this._activeFilterCount();
+    btn.textContent = count ? `⚑ Filter · ${count}` : '⚑ Filter';
+    btn.addEventListener('click', () => { this.panelOpen = !this.panelOpen; this.render(); if (this.panelOpen) this.el.querySelector('.filter-trigger-btn').focus(); });
+    wrap.appendChild(btn);
+    if (this.panelOpen) wrap.appendChild(this._filterPanel());
+    return wrap;
+  }
+
+  _filterPanel() {
+    const d = this.data;
+    const panel = el('div', 'filter-panel');
+
+    if (d.categories.length) {
+      panel.appendChild(elText('div', 'filter-panel-section-label', 'Kategorien'));
+      d.categories.forEach((c) => panel.appendChild(this._catTree(c)));
+    }
+
+    if (d.sources.length) {
+      panel.appendChild(el('div', 'filter-panel-sep'));
+      panel.appendChild(elText('div', 'filter-panel-section-label', 'Quelle'));
+      const sel = document.createElement('select');
+      sel.className = 'filter-select';
+      const opts = [['', '📖 Alle Quellen'], ...sortedSources(d).map((s) => [s.id, sourceLabel(s)])];
+      opts.forEach(([v, t]) => { const o = document.createElement('option'); o.value = v; o.textContent = t; if (v === this.sourceFilter) o.selected = true; sel.appendChild(o); });
+      sel.addEventListener('change', () => { this.sourceFilter = sel.value; this.render(); this.cb.onChange(); });
+      panel.appendChild(sel);
+    }
+
+    return panel;
+  }
+
+  _catTree(cat) {
+    const d = this.data;
+    const subs = subcatsOf(d, cat.id);
+    const wrap = el('div', 'filter-tree-cat');
+
+    if (!subs.length) {
+      // Keine Unterkategorien: die Hauptkategorie IST der (direkte) Filter.
+      wrap.appendChild(this._treeRow({
+        text: cat.name, color: cat.color, checked: !this.offCats.has(cat.id),
+        onToggle: () => { toggle(this.offCats, cat.id); this.render(); this.cb.onChange(); },
+      }));
+      return wrap;
+    }
+
+    const allOff = subs.every((s) => this.offSubs.has(s.id));
+    const noneOff = subs.every((s) => !this.offSubs.has(s.id));
+    wrap.appendChild(this._treeRow({
+      text: cat.name, color: cat.color, checked: !allOff, indeterminate: !allOff && !noneOff,
+      onToggle: () => {
+        if (allOff) subs.forEach((s) => this.offSubs.delete(s.id));
+        else subs.forEach((s) => this.offSubs.add(s.id));
+        this._syncCatFromSubs(cat.id);
+        this.render(); this.cb.onChange();
+      },
+    }));
+    subs.forEach((s) => wrap.appendChild(this._treeRow({
+      text: s.name, color: subcatColor(d, s.id), checked: !this.offSubs.has(s.id), sub: true,
+      onToggle: () => {
+        toggle(this.offSubs, s.id);
+        this._syncCatFromSubs(cat.id);
+        this.render(); this.cb.onChange();
+      },
+    })));
+    return wrap;
+  }
+
+  _treeRow({ text, color, checked, indeterminate, sub, onToggle }) {
+    const row = el('label', 'filter-tree-row' + (sub ? ' sub' : ''));
+    const box = document.createElement('input');
+    box.type = 'checkbox'; box.checked = checked;
+    if (indeterminate) box.indeterminate = true;
+    box.addEventListener('change', onToggle);
+    row.appendChild(box);
+    if (color) { const sw = el('span', 'swatch'); sw.style.background = color; row.appendChild(sw); }
+    row.appendChild(document.createTextNode(text));
+    return row;
+  }
+
+  // Hält offCats für Kategorien MIT Unterkategorien im Gleichschritt mit
+  // deren Unterkategorien-Zustand (aus = ALLE Unterkategorien aus) — rein
+  // abgeleitet, kein eigener Nutzer-Zustand. _itemPasses bleibt dadurch
+  // unverändert korrekt (liest offCats weiterhin direkt).
+  _syncCatFromSubs(categoryId) {
+    const subs = subcatsOf(this.data, categoryId);
+    if (!subs.length) return;
+    const allOff = subs.every((s) => this.offSubs.has(s.id));
+    if (allOff) this.offCats.add(categoryId); else this.offCats.delete(categoryId);
   }
 
   _anyFilterActive() {
@@ -148,15 +238,6 @@ export class FilterBar {
     return scored.slice(0, 15).map(([, it]) => it);
   }
 
-  _chip({ text, color, off, onToggle }) {
-    const chip = document.createElement('span');
-    chip.className = 'chip' + (off ? ' off' : '');
-    if (color) { const sw = document.createElement('span'); sw.className = 'swatch'; sw.style.background = color; chip.appendChild(sw); }
-    chip.appendChild(document.createTextNode(text));
-    chip.addEventListener('click', () => { onToggle(); this.render(); this.cb.onChange(); });
-    return chip;
-  }
-
   _itemPasses(it) {
     if (this.offCats.has(it.categoryId)) return false;
     if (!this._sourcePasses(it)) return false;
@@ -198,7 +279,6 @@ export class FilterBar {
 }
 
 function toggle(set, key) { set.has(key) ? set.delete(key) : set.add(key); }
-function label(txt) { const s = document.createElement('span'); s.className = 'filter-section-label'; s.textContent = txt; return s; }
 function sep() { const s = document.createElement('span'); s.className = 'filter-sep'; return s; }
 function el(tag, cls) { const e = document.createElement(tag); if (cls) e.className = cls; return e; }
 function elText(tag, cls, txt) { const e = el(tag, cls); e.textContent = txt; return e; }

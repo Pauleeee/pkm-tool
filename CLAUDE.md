@@ -74,10 +74,16 @@ statischen Webserver und ist für GitHub-Pages-Stil-Deployment gedacht.
     (`_scheduleAlign`, `setTimeout` 120 ms, sonst „infinite loop in redraw") über
     `cb.onPointAlign(map)` → `TimelineView.applyPointAlign` (`itemsDS.update`, per-Item `align`
     + Größen-Klasse) angewandt. Neu bei `changed`/`rangechanged`/`resize`.
-  - `js/filters.js` — `FilterBar`: **Kategorie** + **Unterkategorie** als Chips (ausblenden),
-    **Quelle** als **Dropdown** (`sourceFilter`, einzeln, sortiert nach Nachname). Liefert
-    `visibleIds()` (Sichtbarkeit). Person ausgeblendet → ihre Ereignisse auch. Einfärbung ist
-    NICHT vom Filterzustand abhängig (s. u.).
+  - `js/filters.js` — `FilterBar`: ein **Filter-Button** (`⚑ Filter · N`) öffnet ein Popover-
+    **Panel** mit Kategorien-**Baum** (Hauptkategorie = Sammel-Checkbox mit „gemischt"-Zustand
+    (indeterminate) bei Teilauswahl, darunter eingerückt die Unterkategorien einzeln) + **Quelle**
+    als Dropdown (`sourceFilter`, einzeln, sortiert nach Nachname) im selben Panel. Kategorien
+    OHNE eigene Unterkategorien: die Hauptkategorie-Checkbox ist der direkte Filter (`offCats`).
+    Kategorien MIT Unterkategorien: **nur** `offSubs` ist echter Nutzer-Zustand — `offCats` wird
+    automatisch nachgeführt (`_syncCatFromSubs`, aus = alle Unterkategorien aus), die Checkbox
+    ist ein Komfort-Sammelschalter. Liefert `visibleIds()` (Sichtbarkeit, `_itemPasses`
+    unverändert). Person ausgeblendet → ihre Ereignisse auch. Einfärbung ist NICHT vom
+    Filterzustand abhängig (s. u.).
   - `js/ui.js` — Modals (Item/Connection/Category/Source) + Detailpanel (Person: Ereignisliste
     + ▲▼-Sortierung). Reine View-Schicht. Im Eintrags-Dialog (`openItemModal`) sind Unterkategorien
     **geordnete Chips** (erste = **primär · Farbe**, per ▲▼ umsortierbar, ✕ entfernt, „＋"-Chips

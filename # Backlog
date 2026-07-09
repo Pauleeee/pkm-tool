@@ -28,9 +28,11 @@ Punkt: Push nach GitHub, dann hier abhaken.
       connections/filters.js, war nur für die Einfärbung da). Hinweis: „Unterkategorien-Chips
       bleiben aktiv trotz ausgeschalteter Hauptkategorie" bewusst NICHT hier gefixt, wird durch
       das Baum-Panel in C3 gelöst (Hauptkategorie-Checkbox steuert dort direkt die Unterkategorien).
-- [ ] C3 Filterleiste-Redesign: Kategorien/Unterkategorien/Quelle als ein Baum-Dropdown-Panel
-      (Hauptkategorie = Sammel-Checkbox, Unterkategorie = eigentliche Filterebene) statt Chip-Reihe
-      — `js/filters.js` FilterBar-Umbau
+- [x] C3 Filterleiste-Redesign: Kategorien/Unterkategorien/Quelle als ein Baum-Dropdown-Panel
+      (Hauptkategorie = Sammel-Checkbox mit „gemischt"-Zustand, Unterkategorie = eigentliche
+      Filterebene) statt Chip-Reihe — `js/filters.js` FilterBar-Umbau, `_syncCatFromSubs` hält
+      `offCats` automatisch im Gleichschritt mit den Unterkategorien (behebt nebenbei: Chips
+      blieben aktiv trotz ausgeschalteter Hauptkategorie). `_itemPasses`/`visibleIds` unverändert.
 - [ ] C4 Neue Dimension „Land": Einzelauswahl-Feld pro Eintrag, feste Länderliste, eigenes
       Filter-Dropdown wie „Quelle" (bleibt separat von C3) — `js/model.js`, `js/ui.js`,
       `js/filters.js`
