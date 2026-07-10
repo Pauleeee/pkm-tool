@@ -56,8 +56,11 @@ Punkt: Push nach GitHub, dann hier abhaken.
       ursprünglichen C1-Streifens.
 - [ ] C8 Filterleiste: drei getrennte Panels nebeneinander (Kategorien-Baum · Personen/
       Ereignisse (kind-Filter, neu) · Länder) statt eines kombinierten Panels.
-- [ ] TD1 Testdaten: `data/zeitleiste.json` um alle Nachkriegs-Bundeskanzler erweitern +
-      alle bestehenden Einträge auf korrekte Unterkategorie prüfen/korrigieren.
+- [x] TD1 Testdaten: `data/zeitleiste.json` um alle 10 Nachkriegs-Bundeskanzler (Adenauer …
+      Merz) als Personen + Amtszeit-Ereignisse erweitert (Politik/Regierung/Deutschland).
+      Fehlkategorisierungen korrigiert (Barock, 95 Thesen, Papst Leo X: Wissenschaft→Gesellschaft).
+      Neue Unterkategorien Pandemie/Epoche/Religion/Technik/Malerei angelegt und zugewiesen →
+      keine Person mehr ohne Unterkategorie, 0 falsche Unterkat.-Zuordnungen.
 
 - [ ] D1 (später, kein aktueller Scope) Mehrfach-Länder pro Person/Ereignis — v1 von C4 erlaubt
       nur ein Land pro Eintrag (z.B. für Personen, die umgezogen sind, reicht das evtl. nicht)
