@@ -1,6 +1,7 @@
-// Filter-/Legendenleiste: Suche, sowie ein Filter-Panel (Baum aus Kategorien
-// → Unterkategorien + Quelle). Ausblenden versteckt die zugehörigen
-// Einträge (eine ausgeblendete Person versteckt auch ihre Ereignisse).
+// Filter-/Legendenleiste: Suche + DREI getrennte Filter-Panels nebeneinander
+// (C8): Kategorien (Baum + Quelle) · Personen/Ereignisse (kind) · Länder.
+// Ausblenden versteckt die zugehörigen Einträge (eine ausgeblendete Person
+// versteckt auch ihre Ereignisse).
 //
 // Kategorie/Unterkategorie-Modell im Panel: hat eine Kategorie eigene
 // Unterkategorien, ist NUR die Unterkategorie-Ebene der echte Filterzustand
@@ -13,6 +14,8 @@
 
 import { byId, subcatColor, subcatsOf, sortedSources, sourceLabel, landsInUse } from './model.js?v=20';
 
+const KINDS = [['person', '👤 Personen'], ['event', '◆ Ereignisse']];
+
 export class FilterBar {
   constructor(el, cb) {
     this.el = el;
@@ -20,14 +23,15 @@ export class FilterBar {
     this.data = null;
     this.offCats = new Set();
     this.offSubs = new Set();
+    this.offKinds = new Set();   // 'person' und/oder 'event' ausgeblendet
     this.sourceFilter = '';   // '' = alle Quellen, sonst eine source-id
     this.landFilter = '';     // '' = alle Länder, sonst ein Ländername (COUNTRIES)
     this.searchQuery = '';
-    this.panelOpen = false;
+    this.openPanel = null;    // null | 'cat' | 'kind' | 'land'
     this._outsideClick = (e) => {
-      if (!this.panelOpen) return;
+      if (!this.openPanel) return;
       if (e.target.closest('.filter-trigger')) return;
-      this.panelOpen = false; this.render();
+      this.openPanel = null; this.render();
     };
   }
 
@@ -41,17 +45,12 @@ export class FilterBar {
 
     this.el.appendChild(this._searchBox());
     this.el.appendChild(sep());
-    this.el.appendChild(this._filterTrigger());
 
-    const lands = landsInUse(d);
-    if (lands.length) {
-      this.el.appendChild(sep());
-      const landSel = document.createElement('select');
-      landSel.className = 'filter-select';
-      const opts = [['', '🌍 Alle Länder'], ...lands.map((l) => [l, l])];
-      opts.forEach(([v, t]) => { const o = document.createElement('option'); o.value = v; o.textContent = t; if (v === this.landFilter) o.selected = true; landSel.appendChild(o); });
-      landSel.addEventListener('change', () => { this.landFilter = landSel.value; this.render(); this.cb.onChange(); });
-      this.el.appendChild(landSel);
+    // Drei getrennte Panels nebeneinander
+    this.el.appendChild(this._trigger('cat', this._catLabel(), () => this._catPanel()));
+    this.el.appendChild(this._trigger('kind', this._kindLabel(), () => this._kindPanel()));
+    if (landsInUse(d).length) {
+      this.el.appendChild(this._trigger('land', this._landLabel(), () => this._landPanel()));
     }
 
     // Rechts: „Zurücksetzen" (nur bei aktivem Filter) + Zähler „X / Y sichtbar"
@@ -60,7 +59,8 @@ export class FilterBar {
       const reset = el('button', 'chip filter-reset');
       reset.type = 'button'; reset.textContent = '✕ Zurücksetzen';
       reset.addEventListener('click', () => {
-        this.offCats.clear(); this.offSubs.clear(); this.sourceFilter = ''; this.landFilter = '';
+        this.offCats.clear(); this.offSubs.clear(); this.offKinds.clear();
+        this.sourceFilter = ''; this.landFilter = '';
         this.render(); this.cb.onChange();
       });
       meta.appendChild(reset);
@@ -69,37 +69,40 @@ export class FilterBar {
     this.el.appendChild(meta);
 
     document.removeEventListener('mousedown', this._outsideClick);
-    if (this.panelOpen) document.addEventListener('mousedown', this._outsideClick);
+    if (this.openPanel) document.addEventListener('mousedown', this._outsideClick);
   }
 
-  // ---------- Filter-Panel (Kategorien-Baum + Quelle) ----------
-  _activeFilterCount() {
+  // ---------- generischer Trigger-Button + Popover-Panel ----------
+  _trigger(key, label, panelFn) {
+    const wrap = el('span', 'filter-trigger');
+    const btn = el('button', 'chip filter-trigger-btn' + (this.openPanel === key ? ' active' : ''));
+    btn.type = 'button'; btn.dataset.key = key; btn.textContent = label;
+    btn.addEventListener('click', () => {
+      this.openPanel = this.openPanel === key ? null : key;
+      this.render();
+      const b = this.el.querySelector(`.filter-trigger-btn[data-key="${key}"]`);
+      if (b && this.openPanel === key) b.focus();
+    });
+    wrap.appendChild(btn);
+    if (this.openPanel === key) wrap.appendChild(panelFn());
+    return wrap;
+  }
+
+  // ---------- Panel 1: Kategorien (Baum) + Quelle ----------
+  _catCount() {
     const d = this.data;
     const soloCats = d.categories.filter((c) => !subcatsOf(d, c.id).length && this.offCats.has(c.id)).length;
     return soloCats + this.offSubs.size + (this.sourceFilter ? 1 : 0);
   }
+  _catLabel() { const n = this._catCount(); return n ? `⚑ Kategorien · ${n}` : '⚑ Kategorien'; }
 
-  _filterTrigger() {
-    const wrap = el('span', 'filter-trigger');
-    const btn = el('button', 'chip filter-trigger-btn' + (this.panelOpen ? ' active' : ''));
-    btn.type = 'button';
-    const count = this._activeFilterCount();
-    btn.textContent = count ? `⚑ Filter · ${count}` : '⚑ Filter';
-    btn.addEventListener('click', () => { this.panelOpen = !this.panelOpen; this.render(); if (this.panelOpen) this.el.querySelector('.filter-trigger-btn').focus(); });
-    wrap.appendChild(btn);
-    if (this.panelOpen) wrap.appendChild(this._filterPanel());
-    return wrap;
-  }
-
-  _filterPanel() {
+  _catPanel() {
     const d = this.data;
     const panel = el('div', 'filter-panel');
-
     if (d.categories.length) {
       panel.appendChild(elText('div', 'filter-panel-section-label', 'Kategorien'));
       d.categories.forEach((c) => panel.appendChild(this._catTree(c)));
     }
-
     if (d.sources.length) {
       panel.appendChild(el('div', 'filter-panel-sep'));
       panel.appendChild(elText('div', 'filter-panel-section-label', 'Quelle'));
@@ -110,7 +113,36 @@ export class FilterBar {
       sel.addEventListener('change', () => { this.sourceFilter = sel.value; this.render(); this.cb.onChange(); });
       panel.appendChild(sel);
     }
+    return panel;
+  }
 
+  // ---------- Panel 2: Personen / Ereignisse (kind) ----------
+  _kindLabel() { return this.offKinds.size ? `👥 Typ · ${2 - this.offKinds.size}/2` : '👥 Typ'; }
+  _kindPanel() {
+    const panel = el('div', 'filter-panel');
+    panel.appendChild(elText('div', 'filter-panel-section-label', 'Anzeigen'));
+    KINDS.forEach(([k, label]) => panel.appendChild(this._treeRow({
+      text: label, checked: !this.offKinds.has(k),
+      onToggle: () => { toggle(this.offKinds, k); this.render(); this.cb.onChange(); },
+    })));
+    return panel;
+  }
+
+  // ---------- Panel 3: Länder (Einzelauswahl, Radio-Liste) ----------
+  _landLabel() { return this.landFilter ? `🌍 ${this.landFilter}` : '🌍 Länder'; }
+  _landPanel() {
+    const panel = el('div', 'filter-panel');
+    panel.appendChild(elText('div', 'filter-panel-section-label', 'Land'));
+    const opts = ['', ...landsInUse(this.data)];
+    opts.forEach((land) => {
+      const row = el('label', 'filter-tree-row');
+      const radio = document.createElement('input');
+      radio.type = 'radio'; radio.name = 'land-filter'; radio.checked = this.landFilter === land;
+      radio.addEventListener('change', () => { this.landFilter = land; this.render(); this.cb.onChange(); });
+      row.appendChild(radio);
+      row.appendChild(document.createTextNode(land || 'Alle Länder'));
+      panel.appendChild(row);
+    });
     return panel;
   }
 
@@ -174,7 +206,8 @@ export class FilterBar {
   }
 
   _anyFilterActive() {
-    return this.offCats.size > 0 || this.offSubs.size > 0 || !!this.sourceFilter || !!this.landFilter;
+    return this.offCats.size > 0 || this.offSubs.size > 0 || this.offKinds.size > 0
+      || !!this.sourceFilter || !!this.landFilter;
   }
 
   // ---------- Suche ----------
@@ -252,6 +285,7 @@ export class FilterBar {
 
   _itemPasses(it) {
     if (this.offCats.has(it.categoryId)) return false;
+    if (this.offKinds.has(it.kind)) return false;   // Personen/Ereignisse ausgeblendet
     if (!this._sourcePasses(it)) return false;
     // Land-Filter: einfacher, direkter Feldvergleich (kein Kaskadieren zu
     // Kind-/Eltern-Elementen wie bei der Quelle — v1, ein Land pro Eintrag).

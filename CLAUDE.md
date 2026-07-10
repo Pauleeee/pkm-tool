@@ -80,16 +80,17 @@ statischen Webserver und ist für GitHub-Pages-Stil-Deployment gedacht.
     (`_scheduleAlign`, `setTimeout` 120 ms, sonst „infinite loop in redraw") über
     `cb.onPointAlign(map)` → `TimelineView.applyPointAlign` (`itemsDS.update`, per-Item `align`
     + Größen-Klasse) angewandt. Neu bei `changed`/`rangechanged`/`resize`.
-  - `js/filters.js` — `FilterBar`: ein **Filter-Button** (`⚑ Filter · N`) öffnet ein Popover-
-    **Panel** mit Kategorien-**Baum** (Hauptkategorie = Sammel-Checkbox mit „gemischt"-Zustand
-    (indeterminate) bei Teilauswahl, darunter eingerückt die Unterkategorien einzeln) + **Quelle**
-    als Dropdown (`sourceFilter`, einzeln, sortiert nach Nachname) im selben Panel. Kategorien
-    OHNE eigene Unterkategorien: die Hauptkategorie-Checkbox ist der direkte Filter (`offCats`).
-    Kategorien MIT Unterkategorien: **nur** `offSubs` ist echter Nutzer-Zustand — `offCats` wird
-    automatisch nachgeführt (`_syncCatFromSubs`, aus = alle Unterkategorien aus), die Checkbox
-    ist ein Komfort-Sammelschalter. Liefert `visibleIds()` (Sichtbarkeit, `_itemPasses`
-    unverändert). Person ausgeblendet → ihre Ereignisse auch. Einfärbung ist NICHT vom
-    Filterzustand abhängig (s. u.). Separates **Land-Dropdown** (`landFilter`, `landsInUse()`).
+  - `js/filters.js` — `FilterBar`: **drei getrennte Popover-Panels** nebeneinander (C8, generisch
+    über `_trigger(key,…)`, `openPanel` ∈ {null,'cat','kind','land'}):
+    (1) **Kategorien** — Kategorien-**Baum** (Hauptkategorie = Sammel-Checkbox mit „gemischt"-
+    Zustand (indeterminate) bei Teilauswahl, darunter eingerückt die Unterkategorien einzeln) +
+    **Quelle** als Dropdown (`sourceFilter`). Kategorien OHNE eigene Unterkategorien: die
+    Hauptkategorie-Checkbox ist der direkte Filter (`offCats`); MIT Unterkategorien: **nur**
+    `offSubs` ist echter Zustand, `offCats` wird nachgeführt (`_syncCatFromSubs`).
+    (2) **Typ** — Personen/Ereignisse ein-/ausblenden (`offKinds`, Filter über `it.kind`).
+    (3) **Länder** — Einzelauswahl-Radioliste (`landFilter`, nur `landsInUse()`).
+    Liefert `visibleIds()` (Sichtbarkeit, `_itemPasses`). Person ausgeblendet → ihre Ereignisse
+    auch. Einfärbung ist NICHT vom Filterzustand abhängig (s. u.).
   - `js/groupbar.js` — `GroupBar` (C5): Toolbar-Panel „Gruppieren nach" — Modus-Umschalter
     (`kind`/`category`/`land` → `data.meta.groupBy`) + je Sektion ▲▼ (Reihenfolge →
     `data.meta.groupOrder[mode]`) und 👁 (Ein/Ausblenden → `data.meta.groupHidden[mode]`).
