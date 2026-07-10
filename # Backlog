@@ -49,8 +49,11 @@ Punkt: Push nach GitHub, dann hier abhaken.
       `js/connections.js`
 - [x] C7 Default-Datensatz: `loadDefaultData()` lädt jetzt `data/zeitleiste.json` statt des
       nicht existierenden `data/sample.json` (bei leerem localStorage kein Seed-Fallback mehr).
-- [ ] C1b Oberer Balken/Achsen-Panel verdeckt weiterhin teilweise den obersten Eintrag —
-      finale DOM-Diagnose + Fix.
+- [x] C1b Oberer „Balken" verdeckte weiterhin teilweise den obersten Eintrag — echte Ursache:
+      vis-timelines eigene Scroll-Schatten `.vis-shadow.vis-top` (box-shadow rgba(0,0,0,.8) 0 0
+      10px) sitzen an der Oberkante des Inhaltsbereichs. Per CSS abgeschaltet
+      (`.vis-shadow { box-shadow: none !important }`). War vermutlich auch schon Teil des
+      ursprünglichen C1-Streifens.
 - [ ] C8 Filterleiste: drei getrennte Panels nebeneinander (Kategorien-Baum · Personen/
       Ereignisse (kind-Filter, neu) · Länder) statt eines kombinierten Panels.
 - [ ] TD1 Testdaten: `data/zeitleiste.json` um alle Nachkriegs-Bundeskanzler erweitern +

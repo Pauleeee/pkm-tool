@@ -191,6 +191,11 @@ body { display: flex; flex-direction: column; }
 
 /* ---------- vis-timeline Feinschliff ---------- */
 .vis-timeline { border: none; font-family: var(--font); }
+/* vis zeichnet an den Panel-Rändern „Scroll-Schatten" (.vis-shadow) mit einem
+   harten box-shadow (rgba(0,0,0,.8) 0 0 10px). Der obere legt sich als dunkler
+   Streifen über die Oberkante des ersten Eintrags (= „Balken oben"). Passt nicht
+   zum ruhigen Design → komplett abschalten. */
+.vis-shadow { box-shadow: none !important; }
 .vis-time-axis .vis-text { color: var(--muted); font-size: 11px; font-weight: 700; }
 .vis-time-axis .vis-text.vis-major { color: var(--ink-soft); font-weight: 700; }
 .vis-time-axis .vis-grid.vis-minor { border-color: oklch(94% 0.008 75); }
