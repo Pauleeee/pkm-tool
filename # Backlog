@@ -37,10 +37,13 @@ Punkt: Push nach GitHub, dann hier abhaken.
       in model.js), Dropdown im Eintrags-Dialog + Detailpanel, eigenes Filter-Dropdown
       (`landsInUse()` — nur verwendete Länder, direkter Feldvergleich, bleibt separat vom
       Kategorien-Baum aus C3) — `js/model.js`, `js/ui.js`, `js/filters.js`
-- [ ] C5 Gruppierungsmodus „Gruppieren nach" (Person/Ereignis · Kategorie · Land): Sektionen
-      generisch statt fix verdrahtet, als Block per Drag umsortierbar (auch im Standard-Modus),
-      einzeln ein-/ausblendbar, Reihenfolge/Sichtbarkeit dauerhaft gespeichert — `js/timeline.js`,
-      `js/main.js`, `data.meta`
+- [x] C5 Gruppierungsmodus „Gruppieren nach" (Person/Ereignis · Kategorie · Land): Toolbar-
+      Panel (`js/groupbar.js`), Sektionen generisch (`_renderSectionedMode` in timeline.js),
+      pro Sektion ▲▼-Umsortieren + 👁-Ein/Ausblenden, Reihenfolge/Sichtbarkeit dauerhaft in
+      `data.meta.groupBy/groupOrder/groupHidden`. Standard-Modus (kind) unverändert inkl.
+      Item-Drag; im Kategorie-/Land-Modus ist Item-Drag deaktiviert (Umsortieren über das Panel).
+      HINWEIS Abweichung vom Plan: Sektions-Umsortieren läuft über ▲▼ im Panel statt per Block-
+      Drag auf dem Rail-Label — deutlich robuster und konsistent mit den bestehenden ▲▼-Mustern.
 - [ ] C6 Neuer Verbindungstyp „Aktion": gerade, datumsverankerte Pfeil-Verbindung (Gegenstück zu
       „Beziehung") — `js/model.js makeConnection`, `js/ui.js openConnectionModal`,
       `js/connections.js`

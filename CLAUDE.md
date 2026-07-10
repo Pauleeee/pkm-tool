@@ -21,9 +21,15 @@ statischen Webserver und ist für GitHub-Pages-Stil-Deployment gedacht.
     (`authorName`, `sourceLabel` = „Nachname, Vorname – Titel", `sortedSources`), Datums-Helfer
     (`toDate(s,edge)` Teil-Datum→Date, `fmtDate`), `persons/worldEvents/eventsOf`,
     `assignLanes()` (Start-Packing), `seedData()`.
-  - `js/timeline.js` — `TimelineView`: oben **Welt-Ereignis-Zeilen** (Gruppen `elane_<v>`,
+  - `js/timeline.js` — `TimelineView`: **zwei Render-Modi** (opt.`groupBy`, s. GroupBar / C5).
+    **Standard (`kind`, `_renderKindMode`):** oben **Welt-Ereignis-Zeilen** (Gruppen `elane_<v>`,
     Klasse `grp-events`, negativer `order`), darunter **Personen-Zeilen** (`lane_<v>`,
-    `grp-lane`). Beide gruppieren nach dem `lane`-Feld des Items (gleiche `lane` = gleiche Zeile);
+    `grp-lane`); Items per Maus vertikal ziehbar (Gap-Drag). **Sektioniert (`category`/`land`,
+    `_renderSectionedMode`):** eine Sektion je Kategorie-/Land-Wert (Reihenfolge/Sichtbarkeit aus
+    `data.meta.groupOrder/groupHidden`, Gruppen-IDs `s<key>_lane_<v>`/`s<key>_elane_<v>`,
+    `order`-Band `secIdx*200000`), je Sektion weiter die zwei Unterblöcke Ereignisse/Personen;
+    Item-Drag hier deaktiviert (Umsortieren über GroupBar-▲▼). Beide gruppieren nach dem
+    `lane`-Feld des Items (gleiche `lane` = gleiche Zeile);
     Start-Werte via `assignLanes()`. Person-Lebensspanne = `range`
     (auswählbar, `id-<personId>`), Ereignisse = `box`/`range`, Welt-Intervalle zusätzlich als
     ganzhohes `background`-Kontextband. Innerhalb einer Zeile: Lebensbalken (subgroup `life`,
@@ -83,7 +89,12 @@ statischen Webserver und ist für GitHub-Pages-Stil-Deployment gedacht.
     automatisch nachgeführt (`_syncCatFromSubs`, aus = alle Unterkategorien aus), die Checkbox
     ist ein Komfort-Sammelschalter. Liefert `visibleIds()` (Sichtbarkeit, `_itemPasses`
     unverändert). Person ausgeblendet → ihre Ereignisse auch. Einfärbung ist NICHT vom
-    Filterzustand abhängig (s. u.).
+    Filterzustand abhängig (s. u.). Separates **Land-Dropdown** (`landFilter`, `landsInUse()`).
+  - `js/groupbar.js` — `GroupBar` (C5): Toolbar-Panel „Gruppieren nach" — Modus-Umschalter
+    (`kind`/`category`/`land` → `data.meta.groupBy`) + je Sektion ▲▼ (Reihenfolge →
+    `data.meta.groupOrder[mode]`) und 👁 (Ein/Ausblenden → `data.meta.groupHidden[mode]`).
+    Sektions-Helfer in `model.js`: `sectionKeyOf`/`sectionLabel`/`sectionKeysInUse`/
+    `effectiveSectionOrder`. `onChange` → `render()`+`persist()` in main.js.
   - `js/ui.js` — Modals (Item/Connection/Category/Source) + Detailpanel (Person: Ereignisliste
     + ▲▼-Sortierung). Reine View-Schicht. Im Eintrags-Dialog (`openItemModal`) sind Unterkategorien
     **geordnete Chips** (erste = **primär · Farbe**, per ▲▼ umsortierbar, ✕ entfernt, „＋"-Chips

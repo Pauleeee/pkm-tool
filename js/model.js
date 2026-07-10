@@ -60,7 +60,15 @@ export function nextId(prefix = 'id') {
 
 // --- Leere Datenstruktur -------------------------------------------------
 export function emptyData() {
-  return { items: [], categories: [], subcategories: [], connections: [], sources: [], meta: { version: 5, updated: null } };
+  return {
+    items: [], categories: [], subcategories: [], connections: [], sources: [],
+    meta: {
+      version: 5, updated: null,
+      groupBy: 'kind',                            // 'kind' | 'category' | 'land'
+      groupOrder: { kind: [], category: [], land: [] },   // Sektions-Reihenfolge je Modus
+      groupHidden: { kind: [], category: [], land: [] },  // ausgeblendete Sektionen je Modus
+    },
+  };
 }
 
 // --- Factories -----------------------------------------------------------
@@ -174,6 +182,38 @@ export function isContainer(item) {
   return item.kind === 'person' || (item.kind === 'event' && !item.personId);
 }
 export function parentOf(data, item) { return item.personId ? byId(data.items, item.personId) : null; }
+
+// --- Gruppierungsmodus (C5): "Gruppieren nach" Person/Ereignis · Kategorie · Land ----------
+// Nur Container (Personen + oberste Welt-Ereignisse) haben eine Sektion — Kind-Ereignisse
+// folgen immer der Sektion ihres Containers (bleiben im selben Rahmen).
+export function sectionKeyOf(mode, item) {
+  if (mode === 'category') return item.categoryId || '__none';
+  if (mode === 'land') return item.land || '__none';
+  return item.kind === 'person' ? 'persons' : 'events';   // 'kind' (Standard)
+}
+export function sectionLabel(mode, key, data) {
+  if (mode === 'category') return key === '__none' ? 'Ohne Kategorie' : catName(data, key);
+  if (mode === 'land') return key === '__none' ? 'Ohne Land' : key;
+  return key === 'events' ? 'Ereignisse' : 'Personen';
+}
+// Alle Sektions-Schlüssel, die im Datensatz überhaupt vorkommen (unabhängig vom
+// aktuellen Sichtbarkeits-/Ausblend-Zustand — damit eine ausgeblendete Sektion
+// im Gruppierungs-Panel weiterhin auftaucht und wieder einblendbar bleibt).
+export function sectionKeysInUse(mode, data) {
+  if (mode === 'kind') return ['events', 'persons'];
+  const top = data.items.filter((it) => isContainer(it));
+  return [...new Set(top.map((it) => sectionKeyOf(mode, it)))];
+}
+// Persistierte Reihenfolge (data.meta.groupOrder[mode]), gefiltert auf noch
+// existierende Schlüssel, neue Schlüssel alphabetisch angehängt.
+export function effectiveSectionOrder(mode, data) {
+  const keys = sectionKeysInUse(mode, data);
+  const persisted = (data.meta.groupOrder && data.meta.groupOrder[mode]) || [];
+  const known = persisted.filter((k) => keys.includes(k));
+  const extra = keys.filter((k) => !known.includes(k))
+    .sort((a, b) => sectionLabel(mode, a, data).localeCompare(sectionLabel(mode, b, data), 'de'));
+  return [...known, ...extra];
+}
 
 export function catColor(data, categoryId) {
   const c = byId(data.categories, categoryId);

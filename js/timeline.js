@@ -6,7 +6,7 @@
 //   ein-/ausgeklappt werden.
 // Zeitliche Änderungen NUR über den Bearbeiten-Dialog (kein Drag).
 
-import { byId, getEntryColor, readableText, rgba, persons, toDate, fmtDate } from './model.js?v=20';
+import { byId, getEntryColor, readableText, rgba, persons, toDate, fmtDate, sectionKeyOf, sectionLabel } from './model.js?v=20';
 
 const EVENTS_GROUP = '__events';
 
@@ -217,7 +217,14 @@ export class TimelineView {
     this.data = data;
     this.showBands = opts.showBands !== false;
     const collapsed = opts.collapsed || new Set();
+    const groupBy = opts.groupBy || 'kind';
+    if (groupBy === 'kind') this._renderKindMode(data, visibleIds, collapsed);
+    else this._renderSectionedMode(data, visibleIds, collapsed, groupBy, opts.sectionOrder || [], opts.hiddenSections || new Set());
+  }
 
+  // Standard-Modus (heutiges Verhalten, unverändert): zwei feste Bereiche,
+  // Personen per Maus ziehbar (handlePersonDrag in main.js parst `lane_`/`elane_`).
+  _renderKindMode(data, visibleIds, collapsed) {
     // Welt-Ereignisse (oberste Ebene) in eigene Zeilen oben
     const visWorld = data.items.filter((i) => i.kind === 'event' && !i.personId && visibleIds.has(i.id));
     const eLaneVals = [...new Set(visWorld.map((e) => e.lane || 0))].sort((a, b) => a - b);
@@ -251,9 +258,79 @@ export class TimelineView {
     this.groupsDS.clear();
     this.groupsDS.add(groups);
 
-    // Unterzeilen je Container kompaktieren (row-Werte → 0..n, Lücken schließen):
-    // sonst bleibt z. B. bei row=1 ohne row=0 eine leere Unterzeile zwischen
-    // Container-Balken und Ereignis → Loch im Rahmen, Rahmen unnötig hoch.
+    const rowMap = this._buildRowMap(data, visibleIds);
+    const out = [];
+    for (const it of data.items) {
+      if (!visibleIds.has(it.id)) continue;
+      if (it.kind === 'person') out.push(this._lifeItem(it, data, 'lane_' + (it.lane || 0), true));
+      else out.push(...this._eventItems(it, data, groupOf, collapsed, rowMap, true));
+    }
+    this.itemsDS.clear();
+    this.itemsDS.add(out);
+  }
+
+  // Gruppierung nach Kategorie/Land (C5): eine Sektion je Kategorie-/Land-Wert
+  // (Reihenfolge/Sichtbarkeit aus data.meta.groupOrder/groupHidden, s. main.js),
+  // je Sektion weiterhin die gewohnten zwei Unterblöcke „Ereignisse"/„Personen".
+  // Einzelnes Ziehen von Items ist hier bewusst deaktiviert (keine Namenskonvention
+  // in handlePersonDrag dafür) — Umsortieren/Ausblenden läuft über das neue
+  // „Gruppieren nach"-Panel (GroupBar), nicht per Item-Drag.
+  _renderSectionedMode(data, visibleIds, collapsed, mode, sectionOrder, hiddenSections) {
+    const keyOf = (it) => sectionKeyOf(mode, it);
+    const visibleOrder = sectionOrder.filter((k) => !hiddenSections.has(k));
+
+    this._laneVals = []; this._eLaneVals = []; this._gapsArea = null; // Gap-Drag hier ungenutzt
+
+    const groupOf = {};
+    const groups = [];
+    const subOrder = (a, b) => (a.sgorder || 0) - (b.sgorder || 0);
+    const SEC_SPAN = 200000;
+
+    visibleOrder.forEach((secKey, secIdx) => {
+      const secLabel = sectionLabel(mode, secKey, data);
+      const idSafe = 's' + String(secKey).replace(/[^a-zA-Z0-9_]/g, '_');
+      const base = secIdx * SEC_SPAN;
+
+      const visWorld = data.items.filter((i) => i.kind === 'event' && !i.personId && visibleIds.has(i.id) && keyOf(i) === secKey);
+      const eLaneVals = [...new Set(visWorld.map((e) => e.lane || 0))].sort((a, b) => a - b);
+      const visPersons = persons(data).filter((p) => visibleIds.has(p.id) && keyOf(p) === secKey);
+      const laneVals = [...new Set(visPersons.map((p) => p.lane || 0))].sort((a, b) => a - b);
+
+      visPersons.forEach((p) => { groupOf[p.id] = `${idSafe}_lane_` + (p.lane || 0); });
+      visWorld.forEach((e) => { groupOf[e.id] = `${idSafe}_elane_` + (e.lane || 0); });
+
+      eLaneVals.forEach((v, i) => groups.push({
+        id: `${idSafe}_elane_${v}`, order: base - 100000 + v, className: 'grp-events' + (i === 0 ? ' grp-first' : ''),
+        content: i === 0 ? `◆ ${secLabel} · Ereignisse` : '', subgroupStack: true, subgroupOrder: subOrder,
+      }));
+      laneVals.forEach((v, i) => groups.push({
+        id: `${idSafe}_lane_${v}`, order: base + v, className: 'grp-lane',
+        content: i === 0 ? `● ${secLabel} · Personen` : '', subgroupStack: true, subgroupOrder: subOrder,
+      }));
+    });
+
+    this.groupOf = groupOf;
+    this.groupsDS.clear();
+    this.groupsDS.add(groups);
+
+    const rowMap = this._buildRowMap(data, visibleIds);
+    const out = [];
+    for (const it of data.items) {
+      if (!visibleIds.has(it.id)) continue;
+      const topId = it.kind === 'person' ? it.id : (it.personId || it.id);
+      const topGroup = groupOf[topId];
+      if (!topGroup) continue;   // Container-Sektion ausgeblendet/unbekannt
+      if (it.kind === 'person') out.push(this._lifeItem(it, data, groupOf[it.id], false));
+      else out.push(...this._eventItems(it, data, groupOf, collapsed, rowMap, false));
+    }
+    this.itemsDS.clear();
+    this.itemsDS.add(out);
+  }
+
+  // Unterzeilen je Container kompaktieren (row-Werte → 0..n, Lücken schließen):
+  // sonst bleibt z. B. bei row=1 ohne row=0 eine leere Unterzeile zwischen
+  // Container-Balken und Ereignis → Loch im Rahmen, Rahmen unnötig hoch.
+  _buildRowMap(data, visibleIds) {
     const rowMap = {};
     for (const it of data.items) {
       if (it.kind === 'event' && it.personId && visibleIds.has(it.id)) {
@@ -264,23 +341,15 @@ export class TimelineView {
       const sorted = [...rowMap[k]].sort((a, b) => a - b);
       rowMap[k] = {}; sorted.forEach((v, i) => { rowMap[k][v] = i; });
     }
-
-    const out = [];
-    for (const it of data.items) {
-      if (!visibleIds.has(it.id)) continue;
-      if (it.kind === 'person') out.push(this._lifeItem(it, data, it.lane || 0));
-      else out.push(...this._eventItems(it, data, groupOf, collapsed, rowMap));
-    }
-    this.itemsDS.clear();
-    this.itemsDS.add(out);
+    return rowMap;
   }
 
-  _lifeItem(p, data, lane) {
+  _lifeItem(p, data, groupId, draggable) {
     const col = getEntryColor(p, data);
     const years = `${yr(p.start)}–${yr(p.end)}`;
     return {
       id: p.id,
-      group: 'lane_' + (lane || 0),
+      group: groupId,
       subgroup: 'life', sgorder: 0,
       content: `${escapeHtml(p.title)}  ·  ${years}`,
       start: toDate(p.start, 'start'),
@@ -290,11 +359,11 @@ export class TimelineView {
       style: `background:${rgba(col, 0.16)}; color:oklch(30% 0.02 265); border:1px solid ${col};`,
       // Hover: Titel immer zeigen (Label im Balken kann gekappt sein), plus Beschreibung
       title: [`${p.title} · ${years}`, p.description].filter(Boolean).join('\n'),
-      editable: { updateTime: false, updateGroup: true, remove: false }, // Person vertikal ziehbar
+      editable: draggable ? { updateTime: false, updateGroup: true, remove: false } : false,
     };
   }
 
-  _eventItems(ev, data, groupOf, collapsed, rowMap) {
+  _eventItems(ev, data, groupOf, collapsed, rowMap, draggable) {
     const col = getEntryColor(ev, data);
     const fg = readableText(col);
     const isTop = !ev.personId;              // oberste Ebene (Welt-Ereignis / Container)
@@ -320,8 +389,8 @@ export class TimelineView {
       className: `pkm-item pkm-event ${isRange ? 'pkm-ev-range' : 'pkm-ev-point'}${isTop ? ' pkm-top' : ''} id-${ev.id}`,
       style: `background:${col}; border-color:${rgba(col, 0)}; color:${fg};`,
       title: this._tooltip(ev, data),
-      // Welt-Ereignisse (oberste Ebene) vertikal ziehbar; Kind-Ereignisse über ▲▼
-      editable: isTop ? { updateTime: false, updateGroup: true, remove: false } : false,
+      // Welt-Ereignisse (oberste Ebene) vertikal ziehbar (nur im Standard-Modus); Kind-Ereignisse über ▲▼
+      editable: (isTop && draggable) ? { updateTime: false, updateGroup: true, remove: false } : false,
     };
     if (isTop) { evItem.subgroup = 'life'; evItem.sgorder = 0; }        // Haupt-Balken oben
     else {

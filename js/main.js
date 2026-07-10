@@ -6,6 +6,7 @@ import * as model from './model.js?v=20';
 import { TimelineView } from './timeline.js?v=20';
 import { OverlayLayer } from './connections.js?v=20';
 import { FilterBar } from './filters.js?v=20';
+import { GroupBar } from './groupbar.js?v=20';
 import * as ui from './ui.js?v=20';
 
 const store = new LocalStorageStore();
@@ -16,7 +17,7 @@ let showShading = true;
 let showConnections = true;
 const collapsed = new Set();   // Person-IDs mit eingeklappten Ereignissen
 const linkMode = { active: false, fromId: null };
-let timelineView, overlay, filterBar, detailPanel;
+let timelineView, overlay, filterBar, groupBar, detailPanel;
 
 init();
 
@@ -43,10 +44,14 @@ async function init() {
     onChange: render,
     onSearchSelect: focusSearchResult,
   });
+  groupBar = new GroupBar(document.getElementById('group-bar'), {
+    onChange: () => { render(); persist(); },
+  });
 
   wireToolbar();
   wireShortcuts();
   filterBar.setData(data);
+  groupBar.setData(data);
   render();
   timelineView.fit();
   if (!loaded || repaired) persist();
@@ -113,7 +118,10 @@ async function loadDefaultData() {
 // ---------- Rendern & Speichern ----------
 function render() {
   const visible = filterBar.visibleIds();
-  timelineView.render(data, visible, { showBands: showShading, collapsed });
+  const groupBy = data.meta.groupBy || 'kind';
+  const sectionOrder = model.effectiveSectionOrder(groupBy, data);
+  const hiddenSections = new Set((data.meta.groupHidden && data.meta.groupHidden[groupBy]) || []);
+  timelineView.render(data, visible, { showBands: showShading, collapsed, groupBy, sectionOrder, hiddenSections });
   overlay.setData(data, visible, { showConnections });
   timelineView.setSelection(selectedItemId ? [selectedItemId] : []);
   renderDetail();
@@ -421,6 +429,8 @@ function normalize(d) {
     subcategories: Array.isArray(d.subcategories) ? d.subcategories.map((s) => model.makeSubcategory(s)) : [],
     connections: Array.isArray(d.connections) ? d.connections.map((c) => model.makeConnection(c)) : [],
     sources: Array.isArray(d.sources) ? d.sources.map((s) => model.makeSource(s)) : [],
-    meta: d.meta || base.meta,
+    // Merge statt Ersetzen: Altdaten (nur {version,updated}) bekommen neue Felder
+    // (groupBy/groupOrder/groupHidden) automatisch aus den Defaults nachgezogen.
+    meta: { ...base.meta, ...(d.meta || {}) },
   };
 }
