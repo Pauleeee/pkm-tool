@@ -47,6 +47,15 @@ Punkt: Push nach GitHub, dann hier abhaken.
 - [ ] C6 Neuer Verbindungstyp „Aktion": gerade, datumsverankerte Pfeil-Verbindung (Gegenstück zu
       „Beziehung") — `js/model.js makeConnection`, `js/ui.js openConnectionModal`,
       `js/connections.js`
+- [x] C7 Default-Datensatz: `loadDefaultData()` lädt jetzt `data/zeitleiste.json` statt des
+      nicht existierenden `data/sample.json` (bei leerem localStorage kein Seed-Fallback mehr).
+- [ ] C1b Oberer Balken/Achsen-Panel verdeckt weiterhin teilweise den obersten Eintrag —
+      finale DOM-Diagnose + Fix.
+- [ ] C8 Filterleiste: drei getrennte Panels nebeneinander (Kategorien-Baum · Personen/
+      Ereignisse (kind-Filter, neu) · Länder) statt eines kombinierten Panels.
+- [ ] TD1 Testdaten: `data/zeitleiste.json` um alle Nachkriegs-Bundeskanzler erweitern +
+      alle bestehenden Einträge auf korrekte Unterkategorie prüfen/korrigieren.
+
 - [ ] D1 (später, kein aktueller Scope) Mehrfach-Länder pro Person/Ereignis — v1 von C4 erlaubt
       nur ein Land pro Eintrag (z.B. für Personen, die umgezogen sind, reicht das evtl. nicht)
 

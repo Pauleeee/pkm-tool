@@ -104,7 +104,8 @@ statischen Webserver und ist für GitHub-Pages-Stil-Deployment gedacht.
 
 ## Datenmodell
 
-`{ items, categories, connections, sources, meta }` (siehe `data/sample.json`).
+`{ items, categories, subcategories, connections, sources, meta }` (kuratierter
+Default-Datensatz: `data/zeitleiste.json`, geladen von `loadDefaultData()` in main.js).
 
 - **categories**: `{id,name,color}` — vom Nutzer verwaltbar (hinzufügen/Farbe ändern/löschen).
   Färbt **sowohl** Personen **als auch** Ereignisse. EINE gemeinsame Liste für beide.

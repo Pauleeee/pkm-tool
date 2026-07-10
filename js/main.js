@@ -102,15 +102,15 @@ function wireShortcuts() {
   });
 }
 
-// Default-Daten: erst data/sample.json versuchen, sonst eingebaute Seed-Daten
-// (Fallback z. B. bei file://-Aufruf ohne Server).
+// Default-Daten: den kuratierten Datensatz data/zeitleiste.json laden, sonst
+// eingebaute Seed-Daten (Fallback z. B. bei file://-Aufruf ohne Server).
 async function loadDefaultData() {
   try {
-    const res = await fetch('data/sample.json', { cache: 'no-cache' });
+    const res = await fetch('data/zeitleiste.json', { cache: 'no-cache' });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return await res.json();
   } catch (err) {
-    console.warn('data/sample.json nicht ladbar, nutze Seed-Daten:', err);
+    console.warn('data/zeitleiste.json nicht ladbar, nutze Seed-Daten:', err);
     return model.seedData();
   }
 }
