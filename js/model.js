@@ -162,7 +162,15 @@ export function landsInUse(data) {
 }
 
 export function makeConnection(p = {}) {
-  return { id: p.id || nextId('cn'), fromId: p.fromId, toId: p.toId, label: p.label || '', relation: p.relation || 'verbunden' };
+  // type: 'relation' = andauernde/diffuse Verbindung (gebogen, box-zu-box);
+  //       'aktion'   = punktueller Akt an einem Datum (gerade, datumsverankert).
+  // date (nur 'aktion'): Teil-Datum "YYYY[-MM[-DD]]" — Anker auf der Zeitachse.
+  return {
+    id: p.id || nextId('cn'), fromId: p.fromId, toId: p.toId,
+    label: p.label || '', relation: p.relation || 'verbunden',
+    type: p.type === 'aktion' ? 'aktion' : 'relation',
+    date: p.date || null,
+  };
 }
 
 // --- Nachschlage- & Farb-Helfer -----------------------------------------

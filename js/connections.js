@@ -7,7 +7,7 @@
 //      wählt eine Layout-Stufe: normal → kleinere Schrift → nur Markierung
 //      (Tooltip zeigt das Ereignis), jeweils links- oder rechtsbündig am Datum.
 
-import { persons, worldEvents, eventsOf, getEntryColor, rgba } from './model.js?v=20';
+import { persons, worldEvents, eventsOf, getEntryColor, rgba, byId, toDate } from './model.js?v=20';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
@@ -34,7 +34,10 @@ export class OverlayLayer {
     defs.innerHTML =
       '<marker id="arrow" viewBox="0 0 10 10" refX="8.5" refY="5" ' +
       'markerWidth="7" markerHeight="7" orient="auto-start-reverse">' +
-      '<path d="M0,0 L10,5 L0,10 z" fill="var(--conn)"></path></marker>';
+      '<path d="M0,0 L10,5 L0,10 z" fill="var(--conn)"></path></marker>' +
+      '<marker id="arrow-aktion" viewBox="0 0 10 10" refX="8.5" refY="5" ' +
+      'markerWidth="7" markerHeight="7" orient="auto-start-reverse">' +
+      '<path d="M0,0 L10,5 L0,10 z" fill="var(--accent)"></path></marker>';
     svg.appendChild(defs);
     this.svg = svg;
     wrapEl.appendChild(svg);
@@ -210,37 +213,88 @@ export class OverlayLayer {
       const ra = this._rect(conn.fromId, overlay);
       const rb = this._rect(conn.toId, overlay);
       if (!ra || !rb) continue;
-
-      const aC = ra.x + ra.w / 2, bC = rb.x + rb.w / 2;
-      const toRight = bC >= aC;
-      const ax = toRight ? ra.x + ra.w : ra.x;
-      const bx = toRight ? rb.x : rb.x + rb.w;
-      const ay = ra.y + ra.h / 2;
-      const by = rb.y + rb.h / 2;
-      const dx = Math.max(26, Math.abs(bx - ax) / 2);
-      const c1 = toRight ? ax + dx : ax - dx;
-      const c2 = toRight ? bx - dx : bx + dx;
-
-      const g = document.createElementNS(SVG_NS, 'g');
-      g.classList.add('ov');
-      const path = document.createElementNS(SVG_NS, 'path');
-      path.setAttribute('d', `M ${ax} ${ay} C ${c1} ${ay}, ${c2} ${by}, ${bx} ${by}`);
-      path.setAttribute('class', 'conn-path');
-      path.setAttribute('marker-end', 'url(#arrow)');
-      path.addEventListener('click', (e) => { e.stopPropagation(); this.cb.onConnClick(conn.id); });
-      g.appendChild(path);
-
-      const text = this._label(conn);
-      if (text) {
-        const mx = (ax + bx) / 2, my = (ay + by) / 2 - 6;
-        const t = document.createElementNS(SVG_NS, 'text');
-        t.setAttribute('x', mx); t.setAttribute('y', my);
-        t.setAttribute('text-anchor', 'middle'); t.setAttribute('class', 'conn-label');
-        t.textContent = text;
-        g.appendChild(t);
-      }
-      this.svg.appendChild(g);
+      if (conn.type === 'aktion') this._drawAktion(conn, ra, rb, overlay);
+      else this._drawRelation(conn, ra, rb);
     }
+  }
+
+  // „Beziehung": gebogener Pfad von Boxkante zu Boxkante (Bézier).
+  _drawRelation(conn, ra, rb) {
+    const aC = ra.x + ra.w / 2, bC = rb.x + rb.w / 2;
+    const toRight = bC >= aC;
+    const ax = toRight ? ra.x + ra.w : ra.x;
+    const bx = toRight ? rb.x : rb.x + rb.w;
+    const ay = ra.y + ra.h / 2;
+    const by = rb.y + rb.h / 2;
+    const dx = Math.max(26, Math.abs(bx - ax) / 2);
+    const c1 = toRight ? ax + dx : ax - dx;
+    const c2 = toRight ? bx - dx : bx + dx;
+
+    const g = document.createElementNS(SVG_NS, 'g');
+    g.classList.add('ov');
+    const path = document.createElementNS(SVG_NS, 'path');
+    path.setAttribute('d', `M ${ax} ${ay} C ${c1} ${ay}, ${c2} ${by}, ${bx} ${by}`);
+    path.setAttribute('class', 'conn-path');
+    path.setAttribute('marker-end', 'url(#arrow)');
+    path.addEventListener('click', (e) => { e.stopPropagation(); this.cb.onConnClick(conn.id); });
+    g.appendChild(path);
+    this._connLabel(g, conn, (ax + bx) / 2, (ay + by) / 2 - 6);
+    this.svg.appendChild(g);
+  }
+
+  // „Aktion": gerade, an einem festen Datum verankerte Linie von der Zeile des
+  // Quell-Elements zur Zeile des Ziel-Elements (Pfeil zeigt auf das Ziel). Das
+  // Datum kommt aus conn.date oder — falls ein Endpunkt ein punktuelles Ereignis
+  // ist — aus dessen Startdatum. Ohne auflösbares Datum: Mittelpunkt als Fallback.
+  _drawAktion(conn, ra, rb, overlay) {
+    const dateStr = this._aktionDate(conn);
+    let x = dateStr ? this._dateToX(toDate(dateStr, 'start'), overlay) : null;
+    if (x == null) x = (ra.x + ra.w / 2 + rb.x + rb.w / 2) / 2;
+    const ay = ra.y + ra.h / 2;
+    const by = rb.y + rb.h / 2;
+
+    const g = document.createElementNS(SVG_NS, 'g');
+    g.classList.add('ov');
+    const path = document.createElementNS(SVG_NS, 'path');
+    path.setAttribute('d', `M ${x} ${ay} L ${x} ${by}`);
+    path.setAttribute('class', 'conn-path conn-aktion');
+    path.setAttribute('marker-end', 'url(#arrow-aktion)');
+    path.addEventListener('click', (e) => { e.stopPropagation(); this.cb.onConnClick(conn.id); });
+    g.appendChild(path);
+    this._connLabel(g, conn, x, (ay + by) / 2, true);
+    this.svg.appendChild(g);
+  }
+
+  _aktionDate(conn) {
+    if (conn.date) return conn.date;
+    const from = byId(this.data.items, conn.fromId);
+    const to = byId(this.data.items, conn.toId);
+    const pt = [to, from].find((it) => it && it.kind === 'event' && !it.end && it.start);
+    return pt ? pt.start : null;
+  }
+
+  // Datum → x-Pixel im Overlay-Koordinatensystem (via aktuelles Zeitfenster +
+  // Breite des vis-Center-Panels). Braucht cb.getWindow() (aus main.js).
+  _dateToX(date, overlay) {
+    if (!this.cb.getWindow) return null;
+    const center = this.tlContainer.querySelector('.vis-center');
+    if (!center) return null;
+    const w = this.cb.getWindow();
+    const span = w.end.getTime() - w.start.getTime();
+    if (!span) return null;
+    const cr = center.getBoundingClientRect();
+    const frac = (date.getTime() - w.start.getTime()) / span;
+    return cr.left + frac * cr.width - overlay.left;
+  }
+
+  _connLabel(g, conn, mx, my, above) {
+    const text = this._label(conn);
+    if (!text) return;
+    const t = document.createElementNS(SVG_NS, 'text');
+    t.setAttribute('x', mx); t.setAttribute('y', above ? my - 4 : my);
+    t.setAttribute('text-anchor', 'middle'); t.setAttribute('class', 'conn-label');
+    t.textContent = text;
+    g.appendChild(t);
   }
 
   _label(conn) {

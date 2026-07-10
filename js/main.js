@@ -39,6 +39,7 @@ async function init() {
   overlay = new OverlayLayer(document.querySelector('.timeline-wrap'), document.getElementById('timeline'), {
     onConnClick: editConnection,
     onPointAlign: (map) => timelineView.applyPointAlign(map),
+    getWindow: () => timelineView.timeline.getWindow(),   // für datumsverankerte „Aktion"-Verbindungen
   });
   filterBar = new FilterBar(document.getElementById('filter-bar'), {
     onChange: render,

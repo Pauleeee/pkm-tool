@@ -44,9 +44,11 @@ Punkt: Push nach GitHub, dann hier abhaken.
       Item-Drag; im Kategorie-/Land-Modus ist Item-Drag deaktiviert (Umsortieren über das Panel).
       HINWEIS Abweichung vom Plan: Sektions-Umsortieren läuft über ▲▼ im Panel statt per Block-
       Drag auf dem Rail-Label — deutlich robuster und konsistent mit den bestehenden ▲▼-Mustern.
-- [ ] C6 Neuer Verbindungstyp „Aktion": gerade, datumsverankerte Pfeil-Verbindung (Gegenstück zu
-      „Beziehung") — `js/model.js makeConnection`, `js/ui.js openConnectionModal`,
-      `js/connections.js`
+- [x] C6 Neuer Verbindungstyp „Aktion": gerade, datumsverankerte Pfeil-Verbindung (Gegenstück zu
+      „Beziehung"). `makeConnection` um `type`/`date` erweitert (Migration auf `relation`),
+      `openConnectionModal` mit Typ-Auswahl + bedingtem Datumsfeld (Auto-Datum, wenn ein Endpunkt
+      ein punktuelles Ereignis ist), `_drawAktion`/`_dateToX` in connections.js (x aus Datum via
+      `cb.getWindow()` + `.vis-center`-Breite), eigener Akzent-Marker + CSS `.conn-aktion`.
 - [x] C7 Default-Datensatz: `loadDefaultData()` lädt jetzt `data/zeitleiste.json` statt des
       nicht existierenden `data/sample.json` (bei leerem localStorage kein Seed-Fallback mehr).
 - [x] C1b Oberer „Balken" verdeckte weiterhin teilweise den obersten Eintrag — echte Ursache:

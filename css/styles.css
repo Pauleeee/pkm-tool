@@ -187,6 +187,10 @@ body { display: flex; flex-direction: column; }
 .pkm-ev-marker { paint-order: stroke; stroke: var(--surface); stroke-width: .75px; }
 .conn-path { fill: none; stroke: var(--conn); stroke-width: 1.8; pointer-events: stroke; cursor: pointer; }
 .conn-path:hover { stroke: var(--accent); stroke-width: 2.6; }
+/* „Aktion": gerade, datumsverankerte Verbindung — in Akzentfarbe, damit sie sich
+   von der gebogenen „Beziehung" abhebt. */
+.conn-path.conn-aktion { stroke: var(--accent); stroke-width: 2; }
+.conn-path.conn-aktion:hover { stroke: var(--accent-ink); stroke-width: 3; }
 .conn-label { font-size: 10px; font-weight: 600; fill: var(--ink-soft); paint-order: stroke; stroke: var(--surface); stroke-width: 3px; }
 
 /* ---------- vis-timeline Feinschliff ---------- */

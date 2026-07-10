@@ -66,8 +66,12 @@ statischen Webserver und ist für GitHub-Pages-Stil-Deployment gedacht.
     (Kategorie-Farbe): horizontal **exakt so breit wie der Container-Balken** (Lebensbalken bzw.
     Ereignis-Balken, NICHT die Kinder — die werden in den Rahmen gezwungen, s. u.), vertikal eng
     um den gesamten Inhalt (`inset` 3px) → zentriert.
-    (2) **Verbindungspfeile** direkt von Kästchen zu Kästchen (Seiten-Anker + Bézier),
-    abschaltbar über `setData(.., { showConnections })`.
+    (2) **Verbindungen** (`conn.type`), abschaltbar über `setData(.., { showConnections })`:
+    **„relation"** (`_drawRelation`) = gebogener Bézier von Boxkante zu Boxkante (andauernd);
+    **„aktion"** (`_drawAktion`) = **gerade, an einem Datum verankerte** Linie zwischen den
+    Zeilen von Quelle/Ziel (x aus `conn.date` bzw. dem Startdatum eines punktuellen
+    Endpunkt-Ereignisses, via `_dateToX` = aktuelles Zeitfenster `cb.getWindow()` +
+    Breite des `.vis-center`-Panels; Akzentfarbe, Marker `#arrow-aktion`).
     (3) **Datums-Pfeil** je Zeitpunkt-Ereignis (`_drawArrows`, Spitze auf dem Datum, ragt heraus,
     Ereignisfarbe) **und** die **Platz-Messung** (`_computePointLayout`): je Kind-Zeitpunkt wird
     Ausrichtung + Größenstufe bestimmt, sodass es den Rahmen **nie überschreitet** — der Reihe

@@ -245,15 +245,44 @@ export function openConnectionModal(data, conn, prefill, cb) {
     const opts = data.items.map((i) => [i.id, (i.kind === 'person' ? '👤 ' : '◆ ') + i.title]);
     const from = selectField('Von', opts, conn?.fromId || prefill?.fromId || (opts[0] && opts[0][0]));
     const to = selectField('Nach', opts, conn?.toId || prefill?.toId || (opts[1] && opts[1][0]));
+    // Typ: „Beziehung" (gebogen, box-zu-box) vs. „Aktion" (gerade, an einem Datum).
+    const type = selectField('Typ', [['relation', 'Beziehung (andauernd)'], ['aktion', 'Aktion (an einem Datum)']], conn?.type || 'relation');
     const relation = selectField('Beziehung',
       ['verbunden', 'führt zu', 'verursacht', 'beeinflusst', 'trägt bei', 'gerichtet an', 'Kontext', 'widerspricht'].map((r) => [r, r]),
       conn?.relation || 'verbunden');
+    const dateF = partialDateField('Datum der Aktion', conn?.date || '');
+    const dateHint = elText('div', 'md-hint', '');
+    dateF.wrap.appendChild(dateHint);
     const labelF = textField('Notiz (optional)', conn?.label || '');
-    frag.appendChild(from.wrap); frag.appendChild(to.wrap); frag.appendChild(relation.wrap); frag.appendChild(labelF.wrap);
+    frag.appendChild(from.wrap); frag.appendChild(to.wrap); frag.appendChild(type.wrap);
+    frag.appendChild(relation.wrap); frag.appendChild(dateF.wrap); frag.appendChild(labelF.wrap);
+
+    // Punktuelles Ereignis (Startdatum, kein Ende) als Endpunkt → dessen Datum ist
+    // automatisch der Anker; das freie Datumsfeld ist dann nur optionale Übersteuerung.
+    const pointDateOf = (id) => { const it = byId(data.items, id); return (it && it.kind === 'event' && !it.end && it.start) ? it.start : null; };
+    const syncType = () => {
+      const isAktion = type.input.value === 'aktion';
+      dateF.wrap.style.display = isAktion ? '' : 'none';
+      const auto = pointDateOf(from.input.value) || pointDateOf(to.input.value);
+      dateHint.textContent = auto
+        ? `Ohne Eingabe wird das Datum des punktuellen Ereignisses genutzt (${fmtDate(auto)}).`
+        : 'Datum, an dem die Aktion stattfindet (z. B. der Zeitpunkt innerhalb beider Zeiträume).';
+    };
+    type.input.addEventListener('change', syncType);
+    from.input.addEventListener('change', syncType);
+    to.input.addEventListener('change', syncType);
+    syncType();
+
     const err = el('div', 'form-error'); err.hidden = true;
     const save = () => {
       if (from.input.value === to.input.value) { err.textContent = 'Von und Nach müssen verschieden sein.'; err.hidden = false; return; }
-      cb.onSave({ id: conn?.id, fromId: from.input.value, toId: to.input.value, relation: relation.input.value, label: labelF.input.value.trim() });
+      const isAktion = type.input.value === 'aktion';
+      cb.onSave({
+        id: conn?.id, fromId: from.input.value, toId: to.input.value,
+        relation: relation.input.value, label: labelF.input.value.trim(),
+        type: type.input.value,
+        date: isAktion ? (dateF.getValue() || null) : null,
+      });
       close();
     };
     frag.appendChild(err);
