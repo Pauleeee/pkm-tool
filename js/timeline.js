@@ -253,19 +253,21 @@ export class TimelineView {
     const subOrder = (a, b) => (a.sgorder || 0) - (b.sgorder || 0);
     const groups = [];
     const eVals = eLaneVals.length ? eLaneVals : [0];
-    eVals.forEach((v, i) => groups.push({
-      id: 'elane_' + v, order: -100000 + v, className: 'grp-events' + (i === 0 ? ' grp-first' : ''),
-      content: i === 0 ? '◆ Ereignisse' : '', subgroupStack: true, subgroupOrder: subOrder,
+    groups.push(this._headerGroup('hdr_events', -100001, '◆ Ereignisse'));
+    eVals.forEach((v) => groups.push({
+      id: 'elane_' + v, order: -100000 + v, className: 'grp-events',
+      content: '', subgroupStack: true, subgroupOrder: subOrder,
     }));
-    laneVals.forEach((v, i) => groups.push({
+    groups.push(this._headerGroup('hdr_persons', -1, '● Personen'));
+    laneVals.forEach((v) => groups.push({
       id: 'lane_' + v, order: v, className: 'grp-lane',
-      content: i === 0 ? '● Personen' : '', subgroupStack: true, subgroupOrder: subOrder,
+      content: '', subgroupStack: true, subgroupOrder: subOrder,
     }));
     this.groupsDS.clear();
     this.groupsDS.add(groups);
 
     const rowMap = this._buildRowMap(data, visibleIds);
-    const out = [];
+    const out = [this._headerSpacer('hdr_events'), this._headerSpacer('hdr_persons')];
     for (const it of data.items) {
       if (!visibleIds.has(it.id)) continue;
       if (it.kind === 'person') out.push(this._lifeItem(it, data, 'lane_' + (it.lane || 0), true));
@@ -273,6 +275,24 @@ export class TimelineView {
     }
     this.itemsDS.clear();
     this.itemsDS.add(out);
+  }
+
+  // Sektions-Kopfzeile (P: Root-Cause-Fix des „grauen Balken"-Bugs, s. Backlog C1/C1b):
+  // eigene, von den Swimlanes komplett unabhängige Zeile statt Text in die erste
+  // Datenzeile hineinrotiert. Feste, kleine Höhe über den Platzhalter-Spacer unten
+  // (Muster wie pkm-gap-spacer) statt Kopplung an zufällige Item-Höhe.
+  _headerGroup(id, order, label) {
+    return { id, order, className: 'grp-header', content: label, subgroupStack: false };
+  }
+  _headerSpacer(groupId) {
+    // Muss jeden Pan/Zoom innerhalb von zoomMax (~100.000 Jahre) abdecken, aber NICHT die
+    // absoluten Date-Grenzen von JS ausreizen — das hat „Einpassen" (fit-to-data) kaputt
+    // gemacht (min/max über alle Items inkl. Spacer ergab eine unsinnige Gesamtspanne).
+    return {
+      id: 'hdrspacer_' + groupId, group: groupId,
+      start: new Date(-60000, 0, 1), end: new Date(60000, 0, 1),
+      type: 'range', content: '', className: 'pkm-header-spacer', editable: false, selectable: false,
+    };
   }
 
   // Gruppierung nach Kategorie/Land (C5): eine Sektion je Kategorie-/Land-Wert
@@ -289,6 +309,7 @@ export class TimelineView {
 
     const groupOf = {};
     const groups = [];
+    const headerGroupIds = [];
     const subOrder = (a, b) => (a.sgorder || 0) - (b.sgorder || 0);
     const SEC_SPAN = 200000;
 
@@ -305,14 +326,17 @@ export class TimelineView {
       visPersons.forEach((p) => { groupOf[p.id] = `${idSafe}_lane_` + (p.lane || 0); });
       visWorld.forEach((e) => { groupOf[e.id] = `${idSafe}_elane_` + (e.lane || 0); });
 
-      eLaneVals.forEach((v, i) => groups.push({
-        id: `${idSafe}_elane_${v}`, order: base - 100000 + v, className: 'grp-events' + (i === 0 ? ' grp-first' : ''),
-        content: i === 0 ? `◆ ${secLabel} · Ereignisse` : '', subgroupStack: true, subgroupOrder: subOrder,
+      groups.push(this._headerGroup(`${idSafe}_hdr_events`, base - 100001, `◆ ${secLabel} · Ereignisse`));
+      eLaneVals.forEach((v) => groups.push({
+        id: `${idSafe}_elane_${v}`, order: base - 100000 + v, className: 'grp-events',
+        content: '', subgroupStack: true, subgroupOrder: subOrder,
       }));
-      laneVals.forEach((v, i) => groups.push({
+      groups.push(this._headerGroup(`${idSafe}_hdr_persons`, base - 1, `● ${secLabel} · Personen`));
+      laneVals.forEach((v) => groups.push({
         id: `${idSafe}_lane_${v}`, order: base + v, className: 'grp-lane',
-        content: i === 0 ? `● ${secLabel} · Personen` : '', subgroupStack: true, subgroupOrder: subOrder,
+        content: '', subgroupStack: true, subgroupOrder: subOrder,
       }));
+      headerGroupIds.push(`${idSafe}_hdr_events`, `${idSafe}_hdr_persons`);
     });
 
     this.groupOf = groupOf;
@@ -320,7 +344,7 @@ export class TimelineView {
     this.groupsDS.add(groups);
 
     const rowMap = this._buildRowMap(data, visibleIds);
-    const out = [];
+    const out = headerGroupIds.map((id) => this._headerSpacer(id));
     for (const it of data.items) {
       if (!visibleIds.has(it.id)) continue;
       const topId = it.kind === 'person' ? it.id : (it.personId || it.id);
@@ -430,7 +454,20 @@ export class TimelineView {
   }
 
   setSelection(ids) { this.timeline.setSelection(ids); }
-  fit() { this.timeline.fit(); }
+  // vis' eigenes fit() würde auch die permanenten Kopfzeilen-Spacer (pkm-header-spacer,
+  // riesige Zeitspanne für „deckt jeden Pan/Zoom ab") einbeziehen und auf die falsche
+  // Gesamtspanne einpassen → Bereich selbst aus den echten Daten berechnen.
+  fit() {
+    const real = this.itemsDS.get().filter((it) => it.className !== 'pkm-header-spacer' && it.className !== 'pkm-gap-spacer');
+    if (!real.length) { this.timeline.fit(); return; }
+    let min = Infinity, max = -Infinity;
+    real.forEach((it) => {
+      const s = +new Date(it.start); if (s < min) min = s;
+      const e = +new Date(it.end || it.start); if (e > max) max = e;
+    });
+    const pad = (max - min) * 0.03 || 1000 * 60 * 60 * 24 * 365;
+    this.timeline.setWindow(min - pad, max + pad);
+  }
   redraw() { this.timeline.redraw(); }   // nach display:none→sichtbar (Tab-Wechsel) nötig
 
   // Vertikaler Zoom: skaliert die vertikalen Item-Paddings über die CSS-Var --vzoom

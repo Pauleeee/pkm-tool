@@ -129,7 +129,7 @@ export function openItemModal(data, item, cb) {
     const owner = selectFieldGrouped('Gehört zu (Person oder Ereignis)',
       parentOptions(data, item?.id), item?.personId || '', ['', '🌍 Nichts – eigenständiges Ereignis']);
 
-    // Quellen-Referenzen: mehrere je Eintrag, mit Seiten + optionalem Zitat
+    // Quellen-Referenzen: mehrere je Eintrag, mit Fundstelle + optionaler Notiz
     let refs = (item?.refs || []).map((r) => ({ ...r }));
     const refsWrap = el('div', 'field');
     refsWrap.appendChild(elText('label', '', 'Quellen'));
@@ -139,7 +139,7 @@ export function openItemModal(data, item, cb) {
     addRef.addEventListener('click', () => {
       const first = sortedSources(data)[0];
       if (!first) return;
-      refs.push({ sourceId: first.id, pages: '', quote: '' });
+      refs.push({ sourceId: first.id, pages: '', note: '' });
       renderRefs();
     });
     refsWrap.appendChild(addRef);
@@ -166,12 +166,13 @@ export function openItemModal(data, item, cb) {
         row1.appendChild(rm);
         box.appendChild(row1);
         const row2 = el('div', 'ref-row');
-        const pages = document.createElement('input'); pages.type = 'text'; pages.placeholder = 'Seite(n), z. B. 12–14'; pages.value = r.pages || ''; pages.className = 'ref-pages';
+        const pages = document.createElement('input'); pages.type = 'text'; pages.placeholder = 'Seite(n) oder Kapitel, z. B. 12–14 oder Kap. 3'; pages.value = r.pages || ''; pages.className = 'ref-pages';
         pages.addEventListener('input', () => { r.pages = pages.value; });
-        const quote = document.createElement('input'); quote.type = 'text'; quote.placeholder = 'Zitat (optional)'; quote.value = r.quote || '';
-        quote.addEventListener('input', () => { r.quote = quote.value; });
-        row2.appendChild(pages); row2.appendChild(quote);
+        row2.appendChild(pages);
         box.appendChild(row2);
+        const note = document.createElement('textarea'); note.placeholder = 'Notiz / Gedanke zu dieser Stelle (Markdown möglich)…'; note.value = r.note || ''; note.className = 'ref-note-input';
+        note.addEventListener('input', () => { r.note = note.value; });
+        box.appendChild(note);
         refsList.appendChild(box);
       });
     };
@@ -220,7 +221,7 @@ export function openItemModal(data, item, cb) {
         subcategoryIds: selectedSubIds.filter((id) => subcatsOf(data, category.input.value).some((s) => s.id === id)),
         personId: k === 'event' ? (owner.input.value || null) : null,
         land: land.input.value || null,
-        refs: refs.filter((r) => r.sourceId).map((r) => ({ sourceId: r.sourceId, pages: (r.pages || '').trim(), quote: (r.quote || '').trim() })),
+        refs: refs.filter((r) => r.sourceId).map((r) => ({ sourceId: r.sourceId, pages: (r.pages || '').trim(), note: (r.note || '').trim() })),
         description: desc.input.value.trim(),
       });
       close();
@@ -517,17 +518,17 @@ export function renderDetail(panel, item, data, cb) {
       else if (src.kind === 'Artikel') parts.push(src.journal);
       const line = parts.filter(Boolean).join(' · ');
       if (line) box.appendChild(elText('div', 'muted', line));
-      const pages = r.pages || src.page;   // Seiten am Eintrag, sonst Fundstelle der Quelle
-      if (pages) box.appendChild(elText('div', 'muted', 'S. ' + pages));
+      const pages = r.pages || src.page;   // Seite/Kapitel am Eintrag, sonst Fundstelle der Quelle
+      if (pages) box.appendChild(elText('div', 'muted', 'S./Kap. ' + pages));
       if (src.isbn) box.appendChild(elText('div', 'muted', 'ISBN ' + src.isbn));
       if (src.url) {
         const a = document.createElement('a'); a.href = src.url; a.target = '_blank'; a.rel = 'noopener';
         a.textContent = 'Link öffnen' + (src.accessed ? ` (abgerufen ${src.accessed})` : '');
         box.appendChild(a);
       }
-      if (r.quote) {
-        const q = el('blockquote', 'ref-quote');
-        q.textContent = `„${r.quote}"`;
+      if (r.note) {
+        const q = el('blockquote', 'ref-note');
+        q.innerHTML = mdLite(r.note);
         box.appendChild(q);
       }
       wrap.appendChild(box);

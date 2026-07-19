@@ -218,16 +218,24 @@ body { display: flex; flex-direction: column; }
 .vis-time-axis .vis-grid.vis-major { border-color: var(--line); }
 .vis-panel.vis-left { border-right: 1px solid var(--line); background: var(--surface); }
 .vis-labelset .vis-label { color: var(--muted); }
-/* „Ereignisse"- und „Personen"-Feld: gedrehtes Großbuchstaben-Label am linken
-   Rand (wie die linke Leiste im Design); nur die jeweils erste Zeile trägt Text */
-.vis-labelset .vis-label.grp-events, .vis-labelset .vis-label.grp-lane { overflow: visible; }
-.vis-label.grp-events .vis-inner, .vis-label.grp-lane .vis-inner {
+/* Datenzeilen (grp-events/grp-lane) tragen selbst keinen Text mehr — das übernimmt die
+   eigene Kopfzeile (.grp-header, s.u.). Nur noch schmale, leere linke Spalte. */
+.vis-label.grp-events .vis-inner, .vis-label.grp-lane .vis-inner { min-width: 34px; }
+/* Sektions-Kopfzeile („◆ Ereignisse" / „● Personen"): eigene, feste Zeile statt Text in
+   die erste Datenzeile hineinrotiert (Root-Cause-Fix des wiederkehrenden „grauen
+   Streifen"-Bugs — der Text war vorher an eine zufällige, datenabhängige Zeilenhöhe
+   gekoppelt und lief bei kurzen Zeilen oben/unten heraus). Horizontal, feste kleine
+   Höhe über .pkm-header-spacer, unabhängig von den Swimlanes darunter. */
+.vis-group.grp-header { background: var(--surface-2); }
+.vis-label.grp-header .vis-inner {
   font-size: 10px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
-  padding: 6px 12px; color: var(--accent-ink); min-width: 34px;
-  writing-mode: vertical-rl; transform: rotate(180deg);
-  display: flex; align-items: center; justify-content: center;
-  white-space: nowrap; overflow: visible;
+  padding: 4px 12px; color: var(--accent-ink);
+  display: flex; align-items: center; white-space: nowrap; overflow: hidden;
 }
+.vis-item.pkm-header-spacer {
+  height: 16px; background: transparent; border: none; box-shadow: none; pointer-events: none;
+}
+.vis-item.pkm-header-spacer .vis-item-content { padding: 0; font-size: 0; }
 /* Personen-Zeilen: links nur ein Farb-Punkt als Ziehgriff (Name steht im Balken) */
 .vis-label.grp-person { cursor: grab; }
 .vis-label.grp-person:active { cursor: grabbing; }
@@ -392,7 +400,11 @@ a { color: var(--accent-ink); }
 .ref-row + .ref-row { margin-top: 6px; }
 .ref-row select { flex: 1; min-width: 0; font: inherit; font-size: 13px; padding: 6px 8px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); }
 .ref-row input { flex: 1; min-width: 0; font: inherit; font-size: 13px; padding: 6px 8px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); }
-.ref-row .ref-pages { flex: 0 0 130px; }
+.ref-note-input {
+  display: block; width: 100%; margin-top: 6px; resize: vertical; min-height: 52px;
+  font: inherit; font-size: 13px; padding: 6px 8px; border: 1px solid var(--line);
+  border-radius: var(--radius-sm); background: var(--surface);
+}
 
 /* Markdown-light (Notizen im Detailpanel) */
 .md ul { margin: 4px 0; padding-left: 20px; }
@@ -405,8 +417,8 @@ a { color: var(--accent-ink); }
 
 /* Quellen im Detailpanel */
 .ref-detail + .ref-detail { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); }
-.ref-quote {
-  margin: 8px 0 0; padding: 8px 12px; font-style: italic; color: var(--ink-soft);
+.ref-note {
+  margin: 8px 0 0; padding: 8px 12px; color: var(--ink-soft);
   border-left: 3px solid var(--accent); background: var(--accent-soft); border-radius: 0;
   font-size: 13px; font-family: var(--font-serif);
 }
@@ -528,8 +540,11 @@ body.view-sources .timeline-only { display: none !important; }
 }
 .sources-notes:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
 .sources-notes-preview { margin-top: 10px; font-size: 13px; line-height: 1.55; color: var(--ink-soft); }
-.sources-links { display: flex; flex-direction: column; gap: 4px; }
+.sources-links { display: flex; flex-direction: column; gap: 10px; }
+.sources-link-item + .sources-link-item { padding-top: 10px; border-top: 1px solid var(--line); }
 .sources-link-row { display: flex; align-items: center; gap: 8px; }
+.sources-link-detail { margin-top: 4px; padding-left: 2px; }
+.sources-link-detail .ref-note { margin: 4px 0 0; font-size: 12.5px; }
 .sources-bind-row { display: flex; gap: 8px; align-items: center; }
 .sources-bind-select { flex: 1; font: inherit; font-size: 13px; padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); color: var(--ink); }
 
@@ -550,3 +565,4 @@ body.view-sources .timeline-only { display: none !important; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; }
 }
+/* MARKER_1784497742 */

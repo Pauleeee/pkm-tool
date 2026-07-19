@@ -127,6 +127,7 @@ export class SourcesView {
     if (!items.length) { box.appendChild(elText('div', 'muted', 'Noch keinem Eintrag zugeordnet.')); return box; }
     const ul = el('div', 'sources-links');
     items.forEach((it) => {
+      const item = el('div', 'sources-link-item');
       const row = el('div', 'sources-link-row');
       const jump = el('button', 'link-btn');
       jump.type = 'button'; jump.textContent = (it.kind === 'person' ? '👤 ' : '◆ ') + it.title;
@@ -140,7 +141,20 @@ export class SourcesView {
         this.cb.onChange();
       });
       row.appendChild(rm);
-      ul.appendChild(row);
+      item.appendChild(row);
+      // Fundstelle + Notiz dieser konkreten Verknüpfung (nicht die allgemeine Quellen-Notiz oben)
+      const ref = (it.refs || []).find((r) => r.sourceId === src.id);
+      if (ref && (ref.pages || ref.note)) {
+        const detail = el('div', 'sources-link-detail');
+        if (ref.pages) detail.appendChild(elText('div', 'muted', 'S./Kap. ' + ref.pages));
+        if (ref.note) {
+          const note = el('div', 'ref-note md-body');
+          note.innerHTML = mdLite(ref.note);
+          detail.appendChild(note);
+        }
+        item.appendChild(detail);
+      }
+      ul.appendChild(item);
     });
     box.appendChild(ul);
     return box;
