@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,500&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="css/styles.css?v=20" />
+  <link rel="stylesheet" href="css/styles.css?v=21" />
 </head>
 <body>
   <header class="toolbar">
@@ -23,7 +23,12 @@
       <span class="brand-text">Zeitleiste<small>Buchnotizen</small></span>
     </div>
 
-    <div class="toolbar-group">
+    <div class="view-tabs" role="tablist">
+      <button id="tab-timeline" class="view-tab active" type="button" role="tab">Zeitleiste</button>
+      <button id="tab-sources" class="view-tab" type="button" role="tab">Quellen</button>
+    </div>
+
+    <div class="toolbar-group timeline-only">
       <button id="btn-add-item" class="btn btn-primary" title="Neuer Eintrag">＋ Eintrag</button>
       <button id="btn-link-mode" class="btn" title="Verknüpfungsmodus">🔗 Verknüpfen</button>
       <button id="btn-connections" class="btn active" title="Verbindungen ein-/ausblenden">↔ Verbindungen</button>
@@ -35,7 +40,9 @@
     <div class="toolbar-group toolbar-right">
       <button id="btn-categories" class="btn" title="Kategorien verwalten">🎨 Kategorien</button>
       <button id="btn-sources" class="btn" title="Quellen verwalten">📖 Quellen</button>
-      <button id="btn-fit" class="btn" title="Alles einpassen">⤢ Einpassen</button>
+      <button id="btn-vzoom-out" class="btn btn-icon timeline-only" title="Zeilen niedriger (Alt/⌥ + Mausrad)">⇕−</button>
+      <button id="btn-vzoom-in" class="btn btn-icon timeline-only" title="Zeilen höher (Alt/⌥ + Mausrad)">⇕+</button>
+      <button id="btn-fit" class="btn timeline-only" title="Alles einpassen">⤢ Einpassen</button>
       <button id="btn-export" class="btn" title="Als JSON sichern">⬇ Export</button>
       <button id="btn-import" class="btn" title="JSON laden">⬆ Import</button>
       <button id="btn-help" class="btn btn-icon" title="Hilfe &amp; Tastenkürzel">?</button>
@@ -43,8 +50,8 @@
     </div>
   </header>
 
-  <!-- Filter-/Legendenleiste -->
-  <div id="filter-bar" class="filter-bar"></div>
+  <!-- Filter-/Legendenleiste (nur im Zeitleisten-Tab) -->
+  <div id="filter-bar" class="filter-bar timeline-only"></div>
 
   <!-- Hinweisleiste (z. B. Verknüpfungsmodus) -->
   <div id="hint-bar" class="hint-bar" hidden></div>
@@ -55,6 +62,9 @@
       <!-- SVG-Overlay für Verbindungen wird hier per JS eingehängt -->
     </section>
 
+    <!-- Griff zum Ein-/Ausklappen der Detailleiste (bleibt auch eingeklappt erreichbar) -->
+    <button id="btn-detail-toggle" class="detail-toggle timeline-only" type="button" title="Detailleiste ausblenden">›</button>
+
     <aside id="detail-panel" class="detail-panel">
       <div class="detail-empty">
         <p>Klicke einen Eintrag an, um Details zu sehen.</p>
@@ -63,9 +73,12 @@
     </aside>
   </main>
 
+  <!-- Quellen-Tab: quellenzentrierter Arbeitsbereich (per JS gefüllt) -->
+  <main class="sources-layout" id="sources-view" hidden></main>
+
   <!-- Modal-Container -->
   <div id="modal-root"></div>
 
-  <script type="module" src="js/main.js?v=20"></script>
+  <script type="module" src="js/main.js?v=21"></script>
 </body>
 </html>

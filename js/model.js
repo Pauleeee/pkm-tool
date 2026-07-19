@@ -65,8 +65,10 @@ export function emptyData() {
     meta: {
       version: 5, updated: null,
       groupBy: 'kind',                            // 'kind' | 'category' | 'land'
-      groupOrder: { kind: [], category: [], land: [] },   // Sektions-Reihenfolge je Modus
+      groupOrder: { kind: [], category: [], land: [] },   // Sektions-Reihenfolge je Modus (bei 'manual')
       groupHidden: { kind: [], category: [], land: [] },  // ausgeblendete Sektionen je Modus
+      // Sektions-Sortierkriterium je Modus: by = 'manual'|'label'|'count'|'earliest', dir = 1|-1
+      groupSort: { kind: { by: 'manual', dir: 1 }, category: { by: 'manual', dir: 1 }, land: { by: 'manual', dir: 1 } },
     },
   };
 }
@@ -134,6 +136,10 @@ export function makeSource(p = {}) {
     // Webseite
     url: p.url || '',
     accessed: p.accessed || '',
+    // Quellen-Tab: freie Notizen (Markdown-light, via mdLite gerendert)
+    notes: p.notes || '',
+    // reserviert für später (Screenshots/Bilder je Quelle) — noch ungenutzt, s. Plan Phase 6e
+    images: Array.isArray(p.images) ? p.images : [],
   };
 }
 
@@ -152,6 +158,12 @@ export function sourceLabel(src) {
 export function sortedSources(data) {
   return [...data.sources].sort((a, b) =>
     (a.authorLast || a.title).localeCompare(b.authorLast || b.title, 'de', { sensitivity: 'base' }));
+}
+// Alle Einträge, die eine Quelle referenzieren (refs[].sourceId) — Basis für Backlinks
+// im Quellen-Tab und den Verwendungszähler. Migrations-tolerant (Alt-Feld sourceId).
+export function itemsUsingSource(data, sourceId) {
+  return data.items.filter((it) =>
+    (it.refs || []).some((r) => r.sourceId === sourceId) || it.sourceId === sourceId);
 }
 
 // Länder, die tatsächlich mindestens einem Eintrag zugewiesen sind (für das
@@ -212,10 +224,33 @@ export function sectionKeysInUse(mode, data) {
   const top = data.items.filter((it) => isContainer(it));
   return [...new Set(top.map((it) => sectionKeyOf(mode, it)))];
 }
-// Persistierte Reihenfolge (data.meta.groupOrder[mode]), gefiltert auf noch
-// existierende Schlüssel, neue Schlüssel alphabetisch angehängt.
+// Container (Personen + oberste Welt-Ereignisse) einer Sektion — Basis für Anzahl/Datum-Sortierung.
+function sectionMembers(mode, data, key) {
+  return data.items.filter((it) => isContainer(it) && sectionKeyOf(mode, it) === key);
+}
+// Vergleichsfunktion für ein Auto-Sortierkriterium (aufsteigend; Richtung setzt der Aufrufer).
+export function sectionComparator(mode, data, by) {
+  if (by === 'count') return (a, b) => sectionMembers(mode, data, a).length - sectionMembers(mode, data, b).length;
+  if (by === 'earliest') {
+    const earliest = (k) => {
+      const m = sectionMembers(mode, data, k);
+      return m.length ? Math.min(...m.map((it) => +toDate(it.start, 'start'))) : Infinity;
+    };
+    return (a, b) => earliest(a) - earliest(b);
+  }
+  // 'label' (Default): alphabetisch nach Sektions-Beschriftung
+  return (a, b) => sectionLabel(mode, a, data).localeCompare(sectionLabel(mode, b, data), 'de');
+}
+// Effektive Sektions-Reihenfolge. Bei Auto-Kriterium (groupSort[mode].by ≠ 'manual') nach dem
+// Kriterium + Richtung sortiert; bei 'manual' die persistierte Reihenfolge (groupOrder[mode]),
+// neue Schlüssel alphabetisch angehängt.
 export function effectiveSectionOrder(mode, data) {
   const keys = sectionKeysInUse(mode, data);
+  const sort = (data.meta.groupSort && data.meta.groupSort[mode]) || { by: 'manual', dir: 1 };
+  if (sort.by && sort.by !== 'manual') {
+    const cmp = sectionComparator(mode, data, sort.by);
+    return [...keys].sort((a, b) => cmp(a, b) * (sort.dir || 1));
+  }
   const persisted = (data.meta.groupOrder && data.meta.groupOrder[mode]) || [];
   const known = persisted.filter((k) => keys.includes(k));
   const extra = keys.filter((k) => !known.includes(k))

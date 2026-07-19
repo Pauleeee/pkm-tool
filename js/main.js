@@ -1,13 +1,14 @@
 // Bootstrap & Steuerung: hält den App-Zustand, verdrahtet Toolbar, Timeline,
 // Overlay (Verbindungen), Filter und Modals; speichert nach jeder Änderung.
 
-import { LocalStorageStore, exportJson, importJson } from './store.js?v=20';
-import * as model from './model.js?v=20';
-import { TimelineView } from './timeline.js?v=20';
-import { OverlayLayer } from './connections.js?v=20';
-import { FilterBar } from './filters.js?v=20';
-import { GroupBar } from './groupbar.js?v=20';
-import * as ui from './ui.js?v=20';
+import { LocalStorageStore, exportJson, importJson } from './store.js?v=21';
+import * as model from './model.js?v=21';
+import { TimelineView } from './timeline.js?v=21';
+import { OverlayLayer } from './connections.js?v=21';
+import { FilterBar } from './filters.js?v=21';
+import { GroupBar } from './groupbar.js?v=21';
+import { SourcesView } from './sourcesview.js?v=21';
+import * as ui from './ui.js?v=21';
 
 const store = new LocalStorageStore();
 
@@ -17,7 +18,9 @@ let showShading = true;
 let showConnections = true;
 const collapsed = new Set();   // Person-IDs mit eingeklappten Ereignissen
 const linkMode = { active: false, fromId: null };
-let timelineView, overlay, filterBar, groupBar, detailPanel;
+let timelineView, overlay, filterBar, groupBar, detailPanel, sourcesView;
+let currentView = 'timeline';   // 'timeline' | 'sources'
+let detailCollapsed = false;    // Detailleiste rechts eingeklappt (UI-Präferenz in localStorage)
 
 init();
 
@@ -32,7 +35,7 @@ async function init() {
     onItemClick: handleItemClick,
     onEditItem: editItem,
     onAddAt: addItemAt,
-    onChanged: () => overlay.draw(),
+    onChanged: () => overlay.requestDraw(),
     onToggleCollapse: toggleCollapsePerson,   // Doppelklick auf Person
     onMovePersonDrag: handlePersonDrag,       // Person per Maus in andere Zeile ziehen
   });
@@ -48,8 +51,17 @@ async function init() {
   groupBar = new GroupBar(document.getElementById('group-bar'), {
     onChange: () => { render(); persist(); },
   });
+  sourcesView = new SourcesView(document.getElementById('sources-view'), {
+    onChange: () => { persist(); filterBar.setData(data); sourcesView.setData(data); },
+    onFocusItem: (id) => { setView('timeline'); focusSearchResult(id); },
+    onEditSource: editSource,
+  });
+
+  detailCollapsed = safeGet('pkm.detailCollapsed') === '1';
+  applyDetailCollapsed();
 
   wireToolbar();
+  wireTabs();
   wireShortcuts();
   filterBar.setData(data);
   groupBar.setData(data);
@@ -99,6 +111,9 @@ function wireShortcuts() {
     } else if (e.key === '/') {
       e.preventDefault();
       filterBar.focusSearch();
+    } else if (e.key === 'd') {
+      e.preventDefault();
+      toggleDetail();
     }
   });
 }
@@ -394,6 +409,9 @@ function wireToolbar() {
   document.getElementById('btn-categories').addEventListener('click', () => ui.openCategoryManager(data, { onChange: refreshAll, onSnapshot: snapshot }));
   document.getElementById('btn-sources').addEventListener('click', () => ui.openSourceManager(data, { onChange: refreshAll, onSnapshot: snapshot }));
   document.getElementById('btn-fit').addEventListener('click', () => timelineView.fit());
+  document.getElementById('btn-vzoom-in').addEventListener('click', () => timelineView.zoomVertical(1));
+  document.getElementById('btn-vzoom-out').addEventListener('click', () => timelineView.zoomVertical(-1));
+  document.getElementById('btn-detail-toggle').addEventListener('click', toggleDetail);
   document.getElementById('btn-help').addEventListener('click', () => ui.openHelp());
   document.getElementById('btn-export').addEventListener('click', () => exportJson(data));
   const fileInput = document.getElementById('import-file');
@@ -411,6 +429,55 @@ function wireToolbar() {
     fileInput.value = '';
   });
 }
+
+// ---------- Tabs / Ansichten (Zeitleiste ↔ Quellen) ----------
+function wireTabs() {
+  document.getElementById('tab-timeline').addEventListener('click', () => setView('timeline'));
+  document.getElementById('tab-sources').addEventListener('click', () => setView('sources'));
+}
+function setView(view) {
+  if (view === currentView) return;
+  currentView = view;
+  const isSrc = view === 'sources';
+  document.body.classList.toggle('view-sources', isSrc);
+  document.getElementById('tab-timeline').classList.toggle('active', !isSrc);
+  document.getElementById('tab-sources').classList.toggle('active', isSrc);
+  document.querySelector('.layout').hidden = isSrc;
+  document.getElementById('sources-view').hidden = !isSrc;
+  if (isSrc) {
+    sourcesView.setData(data);
+  } else {
+    // vis misst bei display:none falsch → nach dem Einblenden neu zeichnen
+    timelineView.redraw();
+    overlay.requestDraw();
+  }
+}
+// Quelle anlegen/bearbeiten aus dem Quellen-Tab (nutzt das bestehende Formular-Modal)
+function editSource(src) {
+  const s = src || model.makeSource();
+  if (!src) { data.sources.push(s); persist(); }
+  ui.openSourceForm(
+    data, s,
+    { onChange: () => { persist(); filterBar.setData(data); sourcesView.setData(data); }, onSnapshot: snapshot },
+    () => sourcesView.select(s.id),
+  );
+}
+
+// ---------- Detailleiste ein-/ausklappen ----------
+function applyDetailCollapsed() {
+  document.body.classList.toggle('detail-collapsed', detailCollapsed);
+  const btn = document.getElementById('btn-detail-toggle');
+  if (btn) { btn.textContent = detailCollapsed ? '‹' : '›'; btn.title = detailCollapsed ? 'Detailleiste einblenden' : 'Detailleiste ausblenden'; }
+}
+function toggleDetail() {
+  detailCollapsed = !detailCollapsed;
+  safeSet('pkm.detailCollapsed', detailCollapsed ? '1' : '0');
+  applyDetailCollapsed();
+  // Zeitleiste wächst/schrumpft mit → nach der Breiten-Transition neu vermessen (sonst SVG-Overlay versetzt)
+  setTimeout(() => { timelineView.redraw(); overlay.requestDraw(); }, 220);
+}
+function safeGet(k) { try { return localStorage.getItem(k); } catch { return null; } }
+function safeSet(k, v) { try { localStorage.setItem(k, v); } catch { /* ignore */ } }
 
 // ---------- Hint ----------
 function setHint(text) { const b = document.getElementById('hint-bar'); b.textContent = text; b.hidden = false; }

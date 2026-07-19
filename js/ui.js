@@ -4,7 +4,7 @@ import {
   byId, persons, makeSource, makeCategory, makeSubcategory, itemColor, catName,
   subcatsOf, subcatName, subcatColor, getEntryColor, CATEGORY_PALETTE, COUNTRIES,
   SOURCE_KINDS, authorName, sourceLabel, sortedSources, fmtDate,
-} from './model.js?v=20';
+} from './model.js?v=21';
 
 // ---------- Toast (kurze Meldung unten, optional mit Aktion z. B. „Rückgängig") ----------
 let toastTimer = null;
@@ -406,7 +406,7 @@ export function openSourceManager(data, cb) {
     return frag;
   });
 }
-function openSourceForm(data, s, cb, after) {
+export function openSourceForm(data, s, cb, after) {
   openModal((close) => {
     const frag = el('form');
     frag.appendChild(h3('Quelle bearbeiten'));

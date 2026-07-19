@@ -7,7 +7,7 @@
 //      wählt eine Layout-Stufe: normal → kleinere Schrift → nur Markierung
 //      (Tooltip zeigt das Ereignis), jeweils links- oder rechtsbündig am Datum.
 
-import { persons, worldEvents, eventsOf, getEntryColor, rgba, byId, toDate } from './model.js?v=20';
+import { persons, worldEvents, eventsOf, getEntryColor, rgba, byId, toDate } from './model.js?v=21';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
@@ -27,6 +27,7 @@ export class OverlayLayer {
     this.visibleIds = new Set();
     this.showConnections = true;
     this.pointAlignState = {}; // id → { align:'left'|'right', size:'normal'|'small'|'dot' }
+    this._rafPending = false;  // sammelt viele Redraw-Anfragen zu einem Zeichnen je Frame
 
     const svg = document.createElementNS(SVG_NS, 'svg');
     svg.classList.add('conn-overlay');
@@ -48,7 +49,16 @@ export class OverlayLayer {
     this.visibleIds = visibleIds;
     if (opts.showConnections !== undefined) this.showConnections = opts.showConnections;
     this.pointAlignState = {};   // voller Render → Ausrichtung frisch neu bestimmen
-    this.draw();
+    this.requestDraw();
+  }
+
+  // Redraw entprellt: vis feuert beim Pan/Zoom viele changed/rangechanged-Events pro Frame.
+  // Statt bei jedem synchron das ganze SVG neu aufzubauen (getBoundingClientRect-Thrashing),
+  // wird höchstens EINMAL pro Frame gezeichnet. Bild identisch, nur weniger Arbeit/Sekunde.
+  requestDraw() {
+    if (this._rafPending) return;
+    this._rafPending = true;
+    requestAnimationFrame(() => { this._rafPending = false; this.draw(); });
   }
 
   draw() {

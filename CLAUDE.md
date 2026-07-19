@@ -105,7 +105,17 @@ statischen Webserver und ist für GitHub-Pages-Stil-Deployment gedacht.
     **geordnete Chips** (erste = **primär · Farbe**, per ▲▼ umsortierbar, ✕ entfernt, „＋"-Chips
     fügen hinzu) — `selectedSubIds` als Array (Reihenfolge = `subcategoryIds`) — plus ein
     **Live-Farbfeld**, das `getEntryColor(draft, data)` anzeigt.
+  - `js/sourcesview.js` — `SourcesView` (Quellen-Tab, Plan Phase 6): quellenzentrierter
+    Arbeitsbereich. Links durchsuchbare Quellenliste (mit Verwendungszähler), rechts zur
+    gewählten Quelle: **Notizen** (Markdown-light via `mdLite`), **„Verwendet in"** (Backlinks
+    aus `itemsUsingSource`, Klick → Sprung in die Zeitleiste), **„Ereignis binden"** (hängt einem
+    bestehenden Eintrag einen `ref` auf diese Quelle an). Metadaten-Bearbeiten öffnet das
+    bestehende `openSourceForm`-Modal (jetzt aus `ui.js` exportiert).
   - `js/main.js` — hält `data`, verdrahtet alles, `render()` + `persist()` nach jeder Änderung.
+    **View-Router** (`currentView`, `setView`/`wireTabs`): zwei Tabs **Zeitleiste ↔ Quellen**
+    blenden `.layout` bzw. `#sources-view` ein/aus (`.timeline-only`-Elemente per
+    `body.view-sources` versteckt). Rückwechsel zur Zeitleiste ruft `timelineView.redraw()` +
+    `overlay.requestDraw()` (vis misst bei `display:none` falsch).
 
 ## Datenmodell
 
@@ -163,12 +173,25 @@ Sonderfall im **Detailpanel** (`ui.js`).
 
 ## Konventionen & Stolperfallen
 
+- **Look-&-Feel-Roadmap (P1–P6, 2026-07):** Overlay-Redraw gebündelt per `requestDraw()`
+  (rAF, `connections.js`); **vertikaler Zoom** via CSS-Var `--vzoom` (skaliert NUR vertikale
+  Item-Paddings — Font/horizontal bleibt wegen der `pkm-ev-point`-Messung; `TimelineView._setVZoom`,
+  Alt/⌥+Rad + ⇕-Buttons); **Sektions-Sortierkriterium** `data.meta.groupSort[mode]`
+  (`effectiveSectionOrder`/`sectionComparator`); **Micro-Motion** über `--dur-*`/`--ease` +
+  `prefers-reduced-motion`; **Detailleiste einklappbar** (`body.detail-collapsed`, Griff
+  `#btn-detail-toggle`, Shortcut `d`, Zustand in `localStorage`); **Quellen-Tab** (View-Router,
+  `sourcesview.js`). Shortcuts gesamt: `n` neuer Eintrag · `f` einpassen · `/` Suche · `d`
+  Detailleiste · Cmd/Ctrl+Z Undo.
+- **Flexbox-`min-width`-Falle:** ein Flex-Item mit `width:0` schrumpft NICHT auf 0, solange
+  `min-width:auto` (= Inhaltsbreite) gilt → beim Einklappen der Detailleiste zusätzlich `min-width:0`.
+- **`[hidden]` vs. `display`:** `.layout`/`.sources-layout` haben `display:flex`, das das
+  `hidden`-Attribut überschreibt → explizite Regel `.layout[hidden]{display:none}` nötig (View-Router).
 - **Design „Bronze & Papier"** (Referenz: `design_handoff_zeitleiste/`): alle Farbtokens als
   oklch-Werte in `css/styles.css` (`--accent`, `--accent-soft`, `--accent-ink`, `--surface(-2)`,
   `--line`, `--ink(-soft)`, `--muted` …), Radius bewusst fast eckig (`--radius: 1px` überall),
   Schriften **Source Serif 4** (Brand-Titel, Detail-`h2`, Modal-`h3`, `--font-serif`) +
-  **Manrope** (Rest, `--font`) via Google Fonts in `index.html`. Übergänge bewusst instant
-  (keine Transitions). Die Rail-Labels „◆ Ereignisse" / „● Personen" sind **gedrehte
+  **Manrope** (Rest, `--font`) via Google Fonts in `index.html`. Übergänge jetzt **dezente
+  Micro-Motion** (P4, `--dur-*`/`--ease`; früher bewusst instant). Die Rail-Labels „◆ Ereignisse" / „● Personen" sind **gedrehte
   vis-Gruppenlabels** (`writing-mode:vertical-rl` + `rotate(180deg)` auf `.grp-events`/`.grp-lane
   .vis-inner`; Text nur in der jeweils ersten Zeile, `overflow:visible` nötig).
 - **⚠️ NIE `position` auf `.vis-item` setzen!** vis positioniert Items mit `position:absolute`

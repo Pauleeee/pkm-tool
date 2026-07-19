@@ -6,7 +6,7 @@
 //   ein-/ausgeklappt werden.
 // Zeitliche Änderungen NUR über den Bearbeiten-Dialog (kein Drag).
 
-import { byId, getEntryColor, readableText, rgba, persons, toDate, fmtDate, sectionKeyOf, sectionLabel } from './model.js?v=20';
+import { byId, getEntryColor, readableText, rgba, persons, toDate, fmtDate, sectionKeyOf, sectionLabel } from './model.js?v=21';
 
 const EVENTS_GROUP = '__events';
 
@@ -47,6 +47,7 @@ export class TimelineView {
 
     this.timeline = new vis.Timeline(container, this.itemsDS, this.groupsDS, options);
     this.zoomLimits = { min: options.zoomMin, max: options.zoomMax };
+    this.vzoom = 1;   // vertikaler Zoom (Zeilenhöhe); skaliert --vzoom im CSS
     this.timeline.on('select', (props) => this.cb.onSelect(props.items || []));
     this.timeline.on('click', (props) => this.cb.onItemClick(props));
     this.timeline.on('doubleClick', (props) => {
@@ -186,6 +187,11 @@ export class TimelineView {
         const frac = pointerFrac(e.clientX);
         const anchor = w.start.getTime() + frac * interval;
         zoomTo(interval * scale, anchor, frac);
+      } else if (e.altKey) {
+        // Alt/⌥ + Rad → vertikal zoomen (Zeilenhöhe), Zeitachse bleibt unverändert
+        e.preventDefault();
+        const d = e.deltaY || e.deltaX;
+        this._setVZoom(this.vzoom * Math.exp(-Math.max(-30, Math.min(30, d)) * 0.0025));
       } else if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
         // Zwei Finger links/rechts → Zeitfenster verschieben
         e.preventDefault();
@@ -425,6 +431,18 @@ export class TimelineView {
 
   setSelection(ids) { this.timeline.setSelection(ids); }
   fit() { this.timeline.fit(); }
+  redraw() { this.timeline.redraw(); }   // nach display:none→sichtbar (Tab-Wechsel) nötig
+
+  // Vertikaler Zoom: skaliert die vertikalen Item-Paddings über die CSS-Var --vzoom
+  // (Font-Größen & horizontale Paddings bleiben → pkm-ev-point-Messung in connections.js
+  // unberührt). vis misst die Item-Höhen bei redraw() neu → Zeilen wachsen/schrumpfen.
+  _setVZoom(f) {
+    this.vzoom = Math.max(0.6, Math.min(2.2, f));
+    this.container.style.setProperty('--vzoom', this.vzoom.toFixed(3));
+    this.timeline.redraw();
+    this.cb.onChanged();   // Overlay (Rahmen/Verbindungen) folgt
+  }
+  zoomVertical(dir) { this._setVZoom(this.vzoom * (dir > 0 ? 1.15 : 1 / 1.15)); }   // ⇕-Buttons
 
   // Zum Eintrag springen (Suche): zentrieren ohne Zoom-Änderung. false, wenn
   // das Item gerade nicht gerendert ist (z. B. weggefiltert).

@@ -3,6 +3,48 @@
 Entwicklungs-Protokoll der Zeitleiste-App (rekonstruiert aus der Entwicklungs-Session,
 neueste Änderungen oben). Datumsangaben grob; die App ist noch in aktiver Entwicklung.
 
+## Look-&-Feel-Roadmap (2026-07-19, laufend)
+Siehe Plan `~/.claude/plans/composed-stirring-sonnet.md` und `# Backlog` → „🎨 Look & Feel".
+- **P1 Interaktions-Flüssigkeit:** SVG-Verbindungs-Overlay (`js/connections.js`) zeichnet nicht mehr
+  synchron bei jedem vis-`changed`/`rangechanged`-Event, sondern gebündelt **einmal pro Frame**
+  über `requestAnimationFrame` (neue Methode `requestDraw()`, Flag `_rafPending`). Reduziert das
+  `getBoundingClientRect`-Layout-Thrashing beim Pannen/Zoomen. `js/main.js` reicht
+  `onChanged: () => overlay.requestDraw()` durch. Rein verhaltensneutral (gleiche Zeichnung).
+- **P2 Vertikales Zoomen:** die Personen-/Ereignis-Achse (Zeilenhöhe) ist jetzt zoombar —
+  CSS-Var `--vzoom` skaliert die **vertikalen** Item-Paddings (Font-Größen & horizontale Paddings
+  bleiben, damit die `pkm-ev-point`-Breitenmessung in `connections.js` intakt bleibt).
+  `TimelineView._setVZoom()` setzt die Var + `timeline.redraw()` (vis misst Höhen neu) + Overlay.
+  Auslöser: **Alt/⌥ + Mausrad** (Erweiterung von `_bindWheel`) und Toolbar-Buttons ⇕−/⇕+
+  (`zoomVertical`, geklemmt 0.6–2.2). Horizontaler Zoom unverändert.
+- **P3 Schnelle Gruppierung:** das „Gruppieren nach"-Panel (`js/groupbar.js`) hat jetzt ein
+  **Sektions-Sortierkriterium** — „Manuell (▲▼) · Alphabetisch · Anzahl Einträge · Frühestes
+  Datum" + Richtungsschalter ↑/↓, persistent in `data.meta.groupSort[mode]`. Neue Logik in
+  `model.js`: `effectiveSectionOrder` respektiert das Kriterium, `sectionComparator` liefert die
+  Vergleichsfunktion (Anzahl/Datum aus den Sektions-Containern). ▲▼ nur noch im Manuell-Modus.
+  (Sortierung *innerhalb* einer Sektion → Backlog P3b, zurückgestellt.)
+- **P4 Optik & Micro-Motion:** Bewegungs-Tokens in `:root` (`--dur-fast: 120ms`, `--dur-base: 180ms`,
+  `--ease`); dezente Transitions auf Buttons/Chips/Tabs/Filter-Rows/Suchfeld; Popover-Panels
+  (`.group-panel`/`.filter-panel`) blenden per `@keyframes panelIn` ein; vis-Items überblenden nur
+  die Auswahl (`box-shadow`, kein `transform` → Pan/Zoom bleibt flott). `@media
+  (prefers-reduced-motion: reduce)` schaltet alles ab. Der dokumentierte „bewusst instant"-Grundsatz
+  ist damit bewusst aufgehoben.
+- **P5 Detailleiste einklappbar:** rechte Detailleiste lässt sich über einen Griff `‹/›` (oder
+  Shortcut `d`) ein-/ausklappen — Breite 360→0 animiert. Zustand in `localStorage`
+  (`pkm.detailCollapsed`). Nach der Breiten-Transition `timelineView.redraw()` +
+  `overlay.requestDraw()` (sonst SVG-Overlay versetzt). **Flexbox-Falle:** `width:0` allein reicht
+  nicht — Flex-Items haben `min-width:auto` (Inhaltsbreite), daher zusätzlich `min-width:0`.
+- **P6 Quellen-Tab:** eigener Tab **Zeitleiste ↔ Quellen** (View-Router in `js/main.js`).
+  Neues Modul `js/sourcesview.js` (`SourcesView`): links durchsuchbare Quellenliste mit
+  Verwendungszähler, rechts **Notizen** je Quelle (Markdown-light, neues Feld `notes` in
+  `makeSource`, gerendert via `mdLite`), **Backlinks** „Verwendet in" (neuer Helfer
+  `itemsUsingSource` in `model.js`, Klick springt in die Zeitleiste), **„Ereignis binden"**
+  (hängt bestehenden Einträgen einen `ref` auf die Quelle an) und **Lösen** je Backlink.
+  Metadaten-Bearbeiten über das bestehende `openSourceForm` (jetzt aus `ui.js` exportiert).
+  Kein eigener Import/Export — der JSON-Export sichert Quellen inkl. Notizen/Bindungen mit.
+  Bild-Feld `images: []` in `makeSource` reserviert (Screenshots später, s. Plan Phase 6e).
+  Stolperfalle behoben: `.layout`/`.sources-layout` haben `display:flex` → explizite Regel
+  `.layout[hidden]{display:none}`, sonst überschreibt `display` das `hidden`-Attribut.
+
 ## Redesign „Bronze & Papier" nach Design-Handoff (2026-07-08)
 - **Neues visuelles System** gemäß `design_handoff_zeitleiste/README.md` umgesetzt —
   komplettes Re-Theming, keine Funktionsänderungen:

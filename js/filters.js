@@ -12,7 +12,7 @@
 // (_itemPasses/visibleIds) unverändert bleibt. Kategorien OHNE eigene
 // Unterkategorien behalten `offCats` als direkten, unabhängigen Filter.
 
-import { byId, subcatColor, subcatsOf, sortedSources, sourceLabel, landsInUse } from './model.js?v=20';
+import { byId, subcatColor, subcatsOf, sortedSources, sourceLabel, landsInUse } from './model.js?v=21';
 
 const KINDS = [['person', '👤 Personen'], ['event', '◆ Ereignisse']];
 

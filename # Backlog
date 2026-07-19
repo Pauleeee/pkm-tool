@@ -1,5 +1,35 @@
 # Backlog
 
+## 🎨 Look & Feel (Roadmap, in Arbeit)
+Plan: `/Users/aph-admin/.claude/plans/composed-stirring-sonnet.md`
+- [x] P1 Interaktions-Flüssigkeit: Overlay-Redraw (`connections.js`) per `requestAnimationFrame`
+      gebündelt (`requestDraw`), statt synchron je vis-`changed`/`rangechanged`-Event → weniger
+      Layout-Thrashing beim Pannen/Zoomen. `main.js` onChanged → `overlay.requestDraw()`.
+- [x] P2 Vertikales Zoomen (Personen-/Ereignis-Achse): `--vzoom` skaliert die vertikalen
+      Item-Paddings (Font/horizontal bleibt → pkm-ev-point-Messung unberührt), `TimelineView._setVZoom`
+      + `redraw()`. Auslöser: **Alt/⌥ + Mausrad** (`_bindWheel`) und Toolbar-Buttons ⇕−/⇕+.
+- [x] P3 Schnelle Gruppierung: Sektions-Sortierkriterium im GroupBar-Panel — „Manuell (▲▼) ·
+      Alphabetisch · Anzahl Einträge · Frühestes Datum" + Richtung ↑/↓, persistent in
+      `data.meta.groupSort[mode]`. `effectiveSectionOrder` + `sectionComparator` in `model.js`;
+      ▲▼ nur im Manuell-Modus. *(Sortierung INNERHALB der Sektion zurückgestellt — s. unten.)*
+  - [ ] P3b Sortierung innerhalb einer Sektion (nach Datum/Titel), v.a. für Kategorie-/Land-Modus,
+        wo Item-Drag deaktiviert ist. Greift in die Lane-/Item-Reihenfolge in `timeline.js` ein.
+- [x] P4 Optik & Micro-Motion: Bewegungs-Tokens (`--dur-fast/-base`, `--ease`), Transitions auf
+      Buttons/Chips/Tabs/Rows, Panel-Einblendung (`@keyframes panelIn`), `prefers-reduced-motion`
+      aus. Kopfkommentar „bewusst instant" ersetzt.
+- [x] P5 Detailleiste rechts einklappbar: Griff `‹/›`, Breite 360→0 (mit `min-width:0` gegen die
+      Flex-min-width-Falle), Zustand in `localStorage`, Shortcut `d`, Reflow-Nachlauf
+      (`redraw`+`requestDraw`). `#btn-detail-toggle`, `toggleDetail`/`applyDetailCollapsed` in main.js.
+- [x] P6 Quellen-Tab: eigener Tab (View-Router), `js/sourcesview.js` — Notizen je Quelle
+      (`mdLite`, Feld `notes`), Backlinks „Verwendet in" (`itemsUsingSource`), Ereignisse binden
+      (`ref` anhängen) + Lösen. Kein BibTeX (JSON-Export deckt ab). Bild-Feld `images` reserviert.
+
+### 🐞 Bugs
+- [ ] **Erstes Ereignis in der obersten Zeile wird überdeckt**: über dem ersten Range-Ereignis
+      (z. B. „NS-Herrschaft") liegt ein grau/gestreifter Streifen. NICHT die Schattierung
+      (`pkm-band`) — bleibt auch mit Schattierung *aus*. Kein zweites DOM-Item / kein Overlay-Element
+      gefunden. Ursache noch offen (evtl. vis-Achse / Höhe der ersten Gruppe). Zurückgestellt.
+
 ## 🆕 Neu (diese Woche)
 
 - [x] A1 Suche: Suchfeld in der Filterleiste (Titel/Notiz/Quelle), Trefferliste, Klick/Enter springt zum Eintrag; ausgefilterte Treffer ausgegraut
